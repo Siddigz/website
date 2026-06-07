@@ -103,7 +103,6 @@ body::before {
     radial-gradient(ellipse 34% 34% at 22% 82%, var(--glow-violet), transparent 66%),
     radial-gradient(ellipse 30% 28% at 50% 45%, var(--glow-accent), transparent 75%);
   filter: blur(80px);
-  will-change: transform;
   animation: aurora-drift 28s ease-in-out infinite alternate;
 }
 
@@ -179,7 +178,6 @@ p {
 
   body::before {
     animation: none;
-    will-change: auto;
   }
 }
 
@@ -870,6 +868,33 @@ html.reveal-enabled .reveal.is-visible {
 /* --------------------------------------------------------------------------
    Responsive
    -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  html {
+    scrollbar-gutter: auto;
+  }
+
+  body::before {
+    animation: none;
+    filter: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    background:
+      radial-gradient(ellipse 90% 70% at 15% 10%, var(--glow-accent), transparent 65%),
+      radial-gradient(ellipse 80% 60% at 90% 15%, var(--glow-blue), transparent 60%),
+      radial-gradient(ellipse 85% 65% at 75% 85%, var(--glow-teal), transparent 65%),
+      radial-gradient(ellipse 75% 55% at 20% 80%, var(--glow-violet), transparent 60%);
+  }
+
+  .site-header {
+    background-color: var(--bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
 
 @media (max-width: 640px) {
   :root,
