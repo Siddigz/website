@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Siddig Ahmed — Software Engineering Student focused on systems programming, Linux internals, and C/C++.">
+  <title>Siddig Ahmed | Portfolio</title>
+
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f8f9fa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="app.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
+    <symbol id="icon-github" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+    </symbol>
+    <symbol id="icon-linkedin" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2 2 0 1 1 0-4.001 2 2 0 0 1 0 4.001zM7.119 20.452H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </symbol>
+    <symbol id="icon-email" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m22 8-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 8"/>
+    </symbol>
+    <symbol id="icon-message" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="#" class="site-logo">Siddig Ahmed</a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#experience">Experience</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="Toggle dark mode"
+          aria-pressed="false"
+        >
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section id="about" class="hero section">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-content">
+            <p class="hero-label">About</p>
+            <h1 class="hero-title">Siddig Ahmed.</h1>
+            <p class="hero-role">Software Engineering Student &amp; Systems Intern</p>
+            <p class="hero-tagline">
+              I'm passionate about low-level systems programming, infrastructure, and the boundary
+              where hardware meets software. I spend most of my time working close to the metal —
+              C/C++, Linux internals, and the kind of problems that reward patience and precision.
+              I'm drawn to building reliable systems that are fast, understandable, and built to last.
+            </p>
+          </div>
+
+          <aside class="hero-aside">
+            <div class="hero-avatar">
+              <img
+                src="assets/images/profile.png"
+                alt="Professional headshot of Siddig Ahmed"
+                width="260"
+                height="260"
+                loading="eager"
+                decoding="async"
+              >
+            </div>
+            <div class="hero-actions">
+              <a href="https://github.com/Siddigz" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                View GitHub
+              </a>
+              <a href="#contact" class="btn">
+                <svg class="icon" aria-hidden="true"><use href="#icon-message"></use></svg>
+                Let's Connect
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience" class="section">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Experience</h2>
+          <p class="section-subtitle">Roles where I've applied systems thinking in industry and academia.</p>
+        </header>
+
+        <ul class="experience-timeline">
+          <li class="experience-entry">
+            <article class="experience-card">
+              <time class="experience-date" datetime="2024">2024 — Present</time>
+              <h3 class="experience-role">Software Engineer Intern</h3>
+              <p class="experience-company">Ciena</p>
+              <p class="experience-team">// ADC Analog Layout</p>
+              <p class="experience-desc">
+                Work within the ADC analog layout team connecting existing tools using Cadence SKILL
+                and csh (cshell) to streamline internal layout workflows across the team's toolchain.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <time class="experience-date" datetime="2023">2023 — Present</time>
+              <h3 class="experience-role">Computer Science Teaching Assistant</h3>
+              <p class="experience-company">Carleton University</p>
+              <p class="experience-desc">
+                Lead tutorials, grade assignments, and guide students through foundational programming
+                logic and procedural structures.
+              </p>
+            </article>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Featured Projects</h2>
+          <p class="section-subtitle">A selection of engineering work I'm proud of.</p>
+        </header>
+
+        <div class="project-grid">
+          <a href="https://github.com/Siddigz/CPU-Cache-Benchmark" class="project-card-link" target="_blank" rel="noopener noreferrer">
+            <article class="project-card">
+              <header class="project-header">
+                <h3 class="project-title">CPU Cache Benchmarker</h3>
+                <time class="project-date" datetime="2024">2024</time>
+              </header>
+              <p class="project-desc">
+                A C/C++ tool for analyzing cache line sizes, hit/miss latencies, and memory
+                hierarchy performance across modern CPU architectures.
+              </p>
+              <div class="project-tags">
+                <span class="project-tag">C</span>
+                <span class="project-tag">C++</span>
+                <span class="project-tag">Architecture</span>
+              </div>
+            </article>
+          </a>
+
+          <a href="https://github.com/Siddigz/curate" class="project-card-link" target="_blank" rel="noopener noreferrer">
+            <article class="project-card">
+              <header class="project-header">
+                <h3 class="project-title">Terminal Text Editor</h3>
+                <time class="project-date" datetime="2024">2024</time>
+              </header>
+              <p class="project-desc">
+                A lightweight, minimalist text editor built entirely from scratch in C, utilizing
+                low-level Linux terminal API manipulation via termios.
+              </p>
+              <div class="project-tags">
+                <span class="project-tag">C</span>
+                <span class="project-tag">Linux</span>
+                <span class="project-tag">termios</span>
+              </div>
+            </article>
+          </a>
+
+          <a href="https://github.com/Siddigz/EcoCart" class="project-card-link" target="_blank" rel="noopener noreferrer">
+            <article class="project-card">
+              <header class="project-header">
+                <h3 class="project-title">AI Climate Impact Solution</h3>
+                <time class="project-date" datetime="2024">2024</time>
+              </header>
+              <p class="project-desc">
+                An award-winning AI project built during a hackathon, focused on tracking and
+                surfacing environmental impact data for smarter consumer decisions.
+              </p>
+              <div class="project-tags">
+                <span class="project-tag">AI</span>
+                <span class="project-tag">JavaScript</span>
+                <span class="project-tag">Hackathon</span>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Skills</h2>
+          <p class="section-subtitle">Systems programming, tooling, and infrastructure.</p>
+        </header>
+
+        <div class="skills-categories">
+          <div class="skill-category">
+            <h3 class="skill-category-title">Systems &amp; Languages</h3>
+            <ul class="skill-badges">
+              <li><span class="skill-badge">C</span></li>
+              <li><span class="skill-badge">C++</span></li>
+              <li><span class="skill-badge">Assembly</span></li>
+              <li><span class="skill-badge">Python</span></li>
+              <li><span class="skill-badge">Cadence SKILL</span></li>
+              <li><span class="skill-badge">csh/bash</span></li>
+            </ul>
+          </div>
+
+          <div class="skill-category">
+            <h3 class="skill-category-title">Tools &amp; Infrastructure</h3>
+            <ul class="skill-badges">
+              <li><span class="skill-badge">Linux / Kernel</span></li>
+              <li><span class="skill-badge">Git</span></li>
+              <li><span class="skill-badge">VS Code</span></li>
+              <li><span class="skill-badge">CI/CD</span></li>
+              <li><span class="skill-badge">Cursor</span></li>
+              <li><span class="skill-badge">Claude Code</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <div class="container">
+      <div class="contact-footer">
+        <div class="contact-footer-left">
+          <p class="contact-name">Siddig Ahmed</p>
+          <a href="mailto:siddigz@hotmail.com" class="contact-email">siddigz@hotmail.com</a>
+        </div>
+
+        <nav class="contact-social" aria-label="Social links">
+          <a href="https://github.com/Siddigz" class="contact-social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+            <span class="contact-social-label">GitHub</span>
+          </a>
+          <a href="https://linkedin.com/in/siddigz" class="contact-social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg class="icon" aria-hidden="true"><use href="#icon-linkedin"></use></svg>
+            <span class="contact-social-label">LinkedIn</span>
+          </a>
+        </nav>
+      </div>
+
+      <p class="footer-copyright">&copy; 2026 Siddig Ahmed. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
