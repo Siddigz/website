@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Siddig Ahmed — Software Engineering Student focused on systems programming, Linux internals, and C/C++.">
+  <meta name="description" content="Siddig Ahmed, Software Engineering Student focused on systems programming, Linux internals, and C/C++.">
   <title>Siddig Ahmed | Portfolio</title>
 
   <meta name="color-scheme" content="light dark">
@@ -45,6 +45,7 @@
         <ul class="nav-links">
           <li><a href="#about">About</a></li>
           <li><a href="#experience">Experience</a></li>
+          <li><a href="#involvement">Involvement</a></li>
           <li><a href="#projects">Projects</a></li>
           <li><a href="#skills">Skills</a></li>
           <li><a href="#contact">Contact</a></li>
@@ -84,12 +85,14 @@
           <div class="hero-content">
             <p class="hero-label">About</p>
             <h1 class="hero-title">Siddig Ahmed.</h1>
-            <p class="hero-role">Software Engineering Student &amp; Systems Intern</p>
+            <p class="hero-role">Computer Science Student &amp; Systems Intern</p>
             <p class="hero-tagline">
-              I'm passionate about low-level systems programming, infrastructure, and the boundary
-              where hardware meets software. I spend most of my time working close to the metal —
-              C/C++, Linux internals, and the kind of problems that reward patience and precision.
-              I'm drawn to building reliable systems that are fast, understandable, and built to last.
+              I'm a second-year Bachelor of Computer Science (Honours) student at Carleton University,
+              specializing in the Software Engineering stream with a minor in Mathematics. I'm passionate
+              about low-level systems programming, infrastructure, and the boundary where hardware meets
+              software. I spend most of my time working close to the metal with C/C++, Linux internals, and
+              the kind of problems that reward patience and precision. I'm drawn to building reliable
+              systems that are fast, understandable, and built to last.
             </p>
           </div>
 
@@ -105,13 +108,17 @@
               >
             </div>
             <div class="hero-actions">
-              <a href="https://github.com/Siddigz" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              <a href="https://linkedin.com/in/siddigz" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-linkedin"></use></svg>
+                View LinkedIn
+              </a>
+              <a href="https://github.com/Siddigz" class="btn" target="_blank" rel="noopener noreferrer">
                 <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
                 View GitHub
               </a>
-              <a href="#contact" class="btn">
-                <svg class="icon" aria-hidden="true"><use href="#icon-message"></use></svg>
-                Let's Connect
+              <a href="mailto:siddigz@hotmail.com" class="btn">
+                <svg class="icon" aria-hidden="true"><use href="#icon-email"></use></svg>
+                Email Me
               </a>
             </div>
           </aside>
@@ -129,10 +136,17 @@
         <ul class="experience-timeline">
           <li class="experience-entry">
             <article class="experience-card">
-              <time class="experience-date" datetime="2024">2024 — Present</time>
-              <h3 class="experience-role">Software Engineer Intern</h3>
-              <p class="experience-company">Ciena</p>
-              <p class="experience-team">// ADC Analog Layout</p>
+              <div class="experience-card-top">
+                <div class="experience-logo">
+                  <img src="assets/logos/ciena.svg" alt="" width="72" height="72">
+                </div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2026-01">January 2026 — Present</time>
+                  <h3 class="experience-role">Software Engineer Intern</h3>
+                  <p class="experience-company">Ciena</p>
+                  <p class="experience-team">// ADC Analog Layout</p>
+                </div>
+              </div>
               <p class="experience-desc">
                 Work within the ADC analog layout team connecting existing tools using Cadence SKILL
                 and csh (cshell) to streamline internal layout workflows across the team's toolchain.
@@ -141,12 +155,158 @@
           </li>
           <li class="experience-entry">
             <article class="experience-card">
-              <time class="experience-date" datetime="2023">2023 — Present</time>
-              <h3 class="experience-role">Computer Science Teaching Assistant</h3>
-              <p class="experience-company">Carleton University</p>
+              <div class="experience-card-top">
+                <div class="experience-logo experience-logo--theme">
+                  <img class="experience-logo-light" src="assets/logos/carleton-light.svg" alt="" width="72" height="72">
+                  <img class="experience-logo-dark" src="assets/logos/carleton-dark.svg" alt="" width="72" height="72">
+                </div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2025-09">September 2025 — December 2025</time>
+                  <h3 class="experience-role">Computer Science Teaching Assistant</h3>
+                  <p class="experience-company">Carleton University</p>
+                  <p class="experience-team">// COMP 1405 - Python Procedural Programming</p>
+                </div>
+              </div>
               <p class="experience-desc">
                 Lead tutorials, grade assignments, and guide students through foundational programming
                 logic and procedural structures.
+              </p>
+            </article>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="involvement" class="section">
+      <div class="container">
+        <header class="section-header">
+          <h2 class="section-title">Involvement</h2>
+          <p class="section-subtitle">Engineering teams, hackathons, and leadership beyond the classroom.</p>
+        </header>
+
+        <ul class="experience-timeline">
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo">
+                  <img src="assets/logos/biocare-dark.png" alt="" width="72" height="72">
+                </div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2024">2024 — Present</time>
+                  <h3 class="experience-role">Firmware Engineer</h3>
+                  <p class="experience-company">Carleton Biocare</p>
+                  <p class="experience-team">// Software</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Developing firmware for a prosthetic arm to compete in national and international
+                design competitions, including CYBATHLON 2028.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo experience-logo--theme">
+                  <img class="experience-logo-light" src="assets/logos/carleton-light.svg" alt="" width="72" height="72">
+                  <img class="experience-logo-dark" src="assets/logos/carleton-dark.svg" alt="" width="72" height="72">
+                </div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2024">2024</time>
+                  <h3 class="experience-role">Academic Excellence</h3>
+                  <p class="experience-company">Carleton University</p>
+                  <p class="experience-team">// Honours · Mathematics Minor</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Recognized on the Deans' Honour List and awarded a $16,000 entrance scholarship for
+                academic achievement in Computer Science (Honours).
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo" aria-hidden="true">HH</div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2026-09">September 2026</time>
+                  <h3 class="experience-role">Partnerships Team</h3>
+                  <p class="experience-company">Hack the Hill 2026</p>
+                  <p class="experience-team">// Software</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Organizing uOttawa's upcoming hackathon to provide a platform for software
+                engineering students to build innovative projects.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo" aria-hidden="true">AV</div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2025-09">Sep 2025</time>
+                  <h3 class="experience-role">Hackathon Winner</h3>
+                  <p class="experience-company">AGI Ventures Canada</p>
+                  <p class="experience-team">// AI · Environmental Impact</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Won Best AI for Environmental Impact at Hackathon 3.0 (Build to Convert) for
+                EcoCart, a browser extension that analyzes product pages and recommends greener
+                shopping alternatives in real time.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo" aria-hidden="true">HK</div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2024">2024 — Present</time>
+                  <h3 class="experience-role">Hackathon Participant</h3>
+                  <p class="experience-company">uOttaHack · cuHacking</p>
+                  <p class="experience-team">// Software</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Competed in intensive weekend hackathons, building software solutions under tight
+                deadlines alongside cross-functional teams.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo" aria-hidden="true">PM</div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2023">2023 — Present</time>
+                  <h3 class="experience-role">Volunteer Notetaker</h3>
+                  <p class="experience-company">Paul Menton Centre · Carleton SCS</p>
+                  <p class="experience-team">// Community</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Supported peers by providing comprehensive notes for COMP 1006, 1405, 1406, 1805,
+                2401, and MATH 1007.
+              </p>
+            </article>
+          </li>
+          <li class="experience-entry">
+            <article class="experience-card">
+              <div class="experience-card-top">
+                <div class="experience-logo" aria-hidden="true">TC</div>
+                <div class="experience-card-body">
+                  <time class="experience-date" datetime="2024">2024 — 2025</time>
+                  <h3 class="experience-role">VP Finance</h3>
+                  <p class="experience-company">Carleton Tennis Club</p>
+                  <p class="experience-team">// Leadership</p>
+                </div>
+              </div>
+              <p class="experience-desc">
+                Served a full-year term and secured a partnership with Rockcliffe Tennis Club,
+                ensuring free, inclusive access to activities for all members.
               </p>
             </article>
           </li>
@@ -162,59 +322,195 @@
         </header>
 
         <div class="project-grid">
-          <a href="https://github.com/Siddigz/CPU-Cache-Benchmark" class="project-card-link" target="_blank" rel="noopener noreferrer">
-            <article class="project-card">
-              <header class="project-header">
-                <h3 class="project-title">CPU Cache Benchmarker</h3>
-                <time class="project-date" datetime="2024">2024</time>
-              </header>
-              <p class="project-desc">
-                A C/C++ tool for analyzing cache line sizes, hit/miss latencies, and memory
-                hierarchy performance across modern CPU architectures.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">C</span>
-                <span class="project-tag">C++</span>
-                <span class="project-tag">Architecture</span>
-              </div>
-            </article>
-          </a>
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">EcoCart</h3>
+            </header>
+            <p class="project-desc">
+              Browser extension that scores product sustainability and surfaces greener shopping alternatives in real time.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript</span>
+              <span class="project-tag">Python</span>
+              <span class="project-tag">Flask</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/EcoCart" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+              <a href="https://youtu.be/w-SaoFrLJkc" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                Demo
+              </a>
+            </footer>
+          </article>
 
-          <a href="https://github.com/Siddigz/curate" class="project-card-link" target="_blank" rel="noopener noreferrer">
-            <article class="project-card">
-              <header class="project-header">
-                <h3 class="project-title">Terminal Text Editor</h3>
-                <time class="project-date" datetime="2024">2024</time>
-              </header>
-              <p class="project-desc">
-                A lightweight, minimalist text editor built entirely from scratch in C, utilizing
-                low-level Linux terminal API manipulation via termios.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">C</span>
-                <span class="project-tag">Linux</span>
-                <span class="project-tag">termios</span>
-              </div>
-            </article>
-          </a>
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">CPU Cache Benchmarker</h3>
+            </header>
+            <p class="project-desc">
+              Benchmarks sequential, strided, and pointer-chasing memory access patterns, then visualizes where cache latency jumps appear.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">C</span>
+              <span class="project-tag">Python</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/CPU-Cache-Benchmark" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
 
-          <a href="https://github.com/Siddigz/EcoCart" class="project-card-link" target="_blank" rel="noopener noreferrer">
-            <article class="project-card">
-              <header class="project-header">
-                <h3 class="project-title">AI Climate Impact Solution</h3>
-                <time class="project-date" datetime="2024">2024</time>
-              </header>
-              <p class="project-desc">
-                An award-winning AI project built during a hackathon, focused on tracking and
-                surfacing environmental impact data for smarter consumer decisions.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">AI</span>
-                <span class="project-tag">JavaScript</span>
-                <span class="project-tag">Hackathon</span>
-              </div>
-            </article>
-          </a>
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Schedule Scoop</h3>
+            </header>
+            <p class="project-desc">
+              Chrome extension that exports Carleton Central timetables to Google Calendar, Outlook, or ICS.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">JavaScript</span>
+              <span class="project-tag">CSS</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/schedule-scoop" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+              <a href="https://chromewebstore.google.com/detail/schedulescoop/fhloginfacgjcacojgicnfbbgiejfego" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                Chrome Store
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Curate</h3>
+            </header>
+            <p class="project-desc">
+              From-scratch terminal editor in C with full-screen rendering, raw key handling, and live resize support.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">C</span>
+              <span class="project-tag">Linux</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/curate" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Relational Algebra Query Processor</h3>
+            </header>
+            <p class="project-desc">
+              Command-line engine that runs selection, projection, joins, and set operations over loaded relations.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Python</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/Relational-Algebra-Query-Processor" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Student Management System</h3>
+            </header>
+            <p class="project-desc">
+              PostgreSQL-backed CLI for listing, adding, updating, and deleting student records.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Python</span>
+              <span class="project-tag">PostgreSQL</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/Student-Management-System-SMS" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Markit</h3>
+            </header>
+            <p class="project-desc">
+              Modular C++ autograder that parses student submissions and evaluates test cases across assignment types.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">C++</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/Markit" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">North Star</h3>
+            </header>
+            <p class="project-desc">
+              Pygame Arctic route planner that finds Pareto-optimal ship paths balancing speed, fuel use, and ice risk.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Python</span>
+              <span class="project-tag">Pygame</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/North-Star" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">PDF Merger</h3>
+            </header>
+            <p class="project-desc">
+              Web app for dragging, reordering, and merging multiple PDFs into one downloadable file.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Python</span>
+              <span class="project-tag">JavaScript</span>
+            </div>
+            <footer class="project-footer">
+              <a href="https://github.com/Siddigz/PDF-merger" class="btn project-source" target="_blank" rel="noopener noreferrer">
+                <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+                Source
+              </a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <header class="project-header">
+              <h3 class="project-title">Home Server</h3>
+            </header>
+            <p class="project-desc">
+              Always-on Debian box hosting game servers, shared storage, backups, and network-wide PiHole ad blocking.
+            </p>
+            <div class="project-tags">
+              <span class="project-tag">Debian</span>
+              <span class="project-tag">SSH</span>
+              <span class="project-tag">PiHole</span>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -223,31 +519,74 @@
       <div class="container">
         <header class="section-header">
           <h2 class="section-title">Skills</h2>
-          <p class="section-subtitle">Systems programming, tooling, and infrastructure.</p>
         </header>
 
         <div class="skills-categories">
           <div class="skill-category">
-            <h3 class="skill-category-title">Systems &amp; Languages</h3>
+            <h3 class="skill-category-title">Languages</h3>
             <ul class="skill-badges">
+              <li><span class="skill-badge">Python</span></li>
               <li><span class="skill-badge">C</span></li>
               <li><span class="skill-badge">C++</span></li>
-              <li><span class="skill-badge">Assembly</span></li>
-              <li><span class="skill-badge">Python</span></li>
+              <li><span class="skill-badge">Java</span></li>
+              <li><span class="skill-badge">JavaScript</span></li>
+              <li><span class="skill-badge">SQL</span></li>
+              <li><span class="skill-badge">HTML</span></li>
+              <li><span class="skill-badge">CSS</span></li>
               <li><span class="skill-badge">Cadence SKILL</span></li>
-              <li><span class="skill-badge">csh/bash</span></li>
             </ul>
           </div>
 
           <div class="skill-category">
-            <h3 class="skill-category-title">Tools &amp; Infrastructure</h3>
+            <h3 class="skill-category-title">Frameworks &amp; Libraries</h3>
             <ul class="skill-badges">
-              <li><span class="skill-badge">Linux / Kernel</span></li>
+              <li><span class="skill-badge">React</span></li>
+              <li><span class="skill-badge">Flask</span></li>
+              <li><span class="skill-badge">BeautifulSoup</span></li>
+              <li><span class="skill-badge">Matplotlib</span></li>
+              <li><span class="skill-badge">NumPy</span></li>
+              <li><span class="skill-badge">Pygame</span></li>
+            </ul>
+          </div>
+
+          <div class="skill-category">
+            <h3 class="skill-category-title">Databases</h3>
+            <ul class="skill-badges">
+              <li><span class="skill-badge">PostgreSQL</span></li>
+              <li><span class="skill-badge">pgAdmin4</span></li>
+              <li><span class="skill-badge">MongoDB</span></li>
+              <li><span class="skill-badge">Neo4j</span></li>
+            </ul>
+          </div>
+
+          <div class="skill-category">
+            <h3 class="skill-category-title">Developer Tools</h3>
+            <ul class="skill-badges">
               <li><span class="skill-badge">Git</span></li>
+              <li><span class="skill-badge">Bash</span></li>
+              <li><span class="skill-badge">C Shell (csh)</span></li>
+              <li><span class="skill-badge">CMake</span></li>
               <li><span class="skill-badge">VS Code</span></li>
-              <li><span class="skill-badge">CI/CD</span></li>
-              <li><span class="skill-badge">Cursor</span></li>
-              <li><span class="skill-badge">Claude Code</span></li>
+              <li><span class="skill-badge">PyCharm</span></li>
+              <li><span class="skill-badge">OpenSSH</span></li>
+              <li><span class="skill-badge">Visual Studio</span></li>
+              <li><span class="skill-badge">IntelliJ</span></li>
+              <li><span class="skill-badge">Eclipse</span></li>
+              <li><span class="skill-badge">Pterodactyl Panel</span></li>
+            </ul>
+          </div>
+
+          <div class="skill-category">
+            <h3 class="skill-category-title">OS &amp; Platforms</h3>
+            <ul class="skill-badges">
+              <li><span class="skill-badge">Linux (Debian, Ubuntu, Linux Mint, Kali, Arch)</span></li>
+              <li><span class="skill-badge">QNX</span></li>
+              <li><span class="skill-badge">OpenStack</span></li>
+              <li><span class="skill-badge">QEMU</span></li>
+              <li><span class="skill-badge">VirtualBox</span></li>
+              <li><span class="skill-badge">Raspberry Pi</span></li>
+              <li><span class="skill-badge">WineHQ</span></li>
+              <li><span class="skill-badge">Cygwin64</span></li>
             </ul>
           </div>
         </div>
@@ -265,13 +604,13 @@
         </div>
 
         <nav class="contact-social" aria-label="Social links">
-          <a href="https://github.com/Siddigz" class="contact-social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
-            <span class="contact-social-label">GitHub</span>
-          </a>
-          <a href="https://linkedin.com/in/siddigz" class="contact-social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <a href="https://linkedin.com/in/siddigz" class="btn btn-primary contact-social-btn" target="_blank" rel="noopener noreferrer">
             <svg class="icon" aria-hidden="true"><use href="#icon-linkedin"></use></svg>
-            <span class="contact-social-label">LinkedIn</span>
+            View LinkedIn
+          </a>
+          <a href="https://github.com/Siddigz" class="btn contact-social-btn" target="_blank" rel="noopener noreferrer">
+            <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+            View GitHub
           </a>
         </nav>
       </div>

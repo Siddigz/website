@@ -13,7 +13,7 @@
         return stored;
       }
     } catch (err) {
-      /* localStorage unavailable — fall back to default */
+      /* localStorage unavailable; fall back to default */
     }
     return DEFAULT_THEME;
   }
@@ -82,7 +82,7 @@
       '.hero-aside > *',
       '.section-header',
       '.experience-entry',
-      '.project-card-link',
+      '.project-card',
       '.skill-category',
       '.contact-footer',
       '.footer-copyright'
