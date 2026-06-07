@@ -587,6 +587,16 @@ section[id],
   margin-bottom: 0.25rem;
 }
 
+.experience-company a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.experience-company a:hover {
+  color: var(--accent-muted);
+}
+
 .experience-team {
   font-size: 0.8125rem;
   color: var(--text-muted);
