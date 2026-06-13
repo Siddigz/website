@@ -28,6 +28,10 @@
     <symbol id="icon-linkedin" viewBox="0 0 24 24">
       <path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2 2 0 1 1 0-4.001 2 2 0 0 1 0 4.001zM7.119 20.452H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
     </symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle fill="none" stroke="currentColor" stroke-width="2" cx="12" cy="12" r="3"/>
+    </symbol>
     <symbol id="icon-email" viewBox="0 0 24 24">
       <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
       <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m22 8-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 8"/>
@@ -99,7 +103,7 @@
           <aside class="hero-aside">
             <div class="hero-avatar">
               <img
-                src="assets/images/profile.png"
+                src="assets/images/profile.jpg"
                 alt="Siddig Ahmed"
                 width="260"
                 height="260"
@@ -116,10 +120,10 @@
                 <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
                 View GitHub
               </a>
-              <a href="mailto:siddigz@hotmail.com" class="btn">
-                <svg class="icon" aria-hidden="true"><use href="#icon-email"></use></svg>
-                Email Me
-              </a>
+              <button type="button" class="btn js-email-reveal" data-email-context="hero" aria-label="Show email address">
+                <svg class="icon js-email-reveal-icon" aria-hidden="true"><use href="#icon-eye"></use></svg>
+                <span class="js-email-reveal-label">Email Me</span>
+              </button>
             </div>
           </aside>
         </div>
@@ -600,7 +604,10 @@
       <div class="contact-footer">
         <div class="contact-footer-left">
           <p class="contact-name">Siddig Ahmed</p>
-          <a href="mailto:siddigz@hotmail.com" class="contact-email">siddigz@hotmail.com</a>
+          <button type="button" class="contact-email js-email-reveal" data-email-context="footer" aria-label="Show email address">
+            <svg class="icon js-email-reveal-icon" aria-hidden="true"><use href="#icon-eye"></use></svg>
+            <span class="js-email-reveal-label">Show email</span>
+          </button>
         </div>
 
         <nav class="contact-social" aria-label="Social links">

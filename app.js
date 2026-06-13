@@ -74,6 +74,52 @@
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  function getContactEmail() {
+    var user = 'siddig' + 'z';
+    var host = String.fromCharCode(104, 111, 116, 109, 97, 105, 108);
+    return user + '@' + host + '.com';
+  }
+
+  function initEmailReveal() {
+    var buttons = document.querySelectorAll('.js-email-reveal');
+    if (!buttons.length) return;
+
+    var email = null;
+
+    function assembleEmail() {
+      if (!email) {
+        email = getContactEmail();
+      }
+      return email;
+    }
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var address = assembleEmail();
+
+        if (btn.getAttribute('data-revealed') === 'true') {
+          window.location.href = 'mailto:' + address;
+          return;
+        }
+
+        btn.setAttribute('data-revealed', 'true');
+        btn.classList.add('is-revealed');
+        btn.setAttribute('aria-label', 'Send email to ' + address);
+
+        var label = btn.querySelector('.js-email-reveal-label');
+        var iconUse = btn.querySelector('.js-email-reveal-icon use');
+
+        if (iconUse) {
+          iconUse.setAttribute('href', '#icon-email');
+        }
+
+        if (btn.getAttribute('data-email-context') === 'footer' && label) {
+          label.textContent = address;
+        }
+      });
+    });
+  }
+
   function initScrollReveal() {
     if (prefersReducedMotion()) return;
 
@@ -140,6 +186,7 @@
 
   function init() {
     initThemeToggle();
+    initEmailReveal();
     initScrollReveal();
   }
 

@@ -822,9 +822,30 @@ section[id],
   transition: color var(--transition), background-size 0.2s ease;
 }
 
+button.contact-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.contact-email .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
 .contact-email:hover {
   color: var(--accent);
   background-size: 100% 1px;
+}
+
+.js-email-reveal.is-revealed {
+  color: var(--accent);
 }
 
 .contact-social {
