@@ -80,6 +80,31 @@
     return user + '@' + host + '.com';
   }
 
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise(function (resolve, reject) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        resolve();
+      } catch (err) {
+        document.body.removeChild(textarea);
+        reject(err);
+      }
+    });
+  }
+
   function initEmailReveal() {
     var buttons = document.querySelectorAll('.js-email-reveal');
     if (!buttons.length) return;
@@ -93,12 +118,83 @@
       return email;
     }
 
+    function replaceFooterWithEmailLink(btn, address) {
+      var revealed = document.createElement('div');
+      revealed.className = 'contact-email-revealed';
+
+      var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('class', 'icon');
+      icon.setAttribute('aria-hidden', 'true');
+      var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+      use.setAttribute('href', '#icon-email');
+      icon.appendChild(use);
+
+      var link = document.createElement('a');
+      link.href = 'mailto:' + address;
+      link.className = 'contact-email';
+      link.textContent = address;
+      link.setAttribute('aria-label', 'Send email to ' + address);
+      link.addEventListener('click', function (e) {
+        var selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+          e.preventDefault();
+        }
+      });
+
+      var copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'contact-email-copy';
+      copyBtn.setAttribute('aria-label', 'Copy email address');
+
+      var copyIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      copyIcon.setAttribute('class', 'icon');
+      copyIcon.setAttribute('aria-hidden', 'true');
+      var copyUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+      copyUse.setAttribute('href', '#icon-copy');
+      copyIcon.appendChild(copyUse);
+      copyBtn.appendChild(copyIcon);
+
+      var copyResetTimer = null;
+      copyBtn.addEventListener('click', function () {
+        copyToClipboard(address).then(function () {
+          if (copyResetTimer) {
+            clearTimeout(copyResetTimer);
+          }
+
+          copyBtn.classList.add('is-copied');
+          copyBtn.setAttribute('aria-label', 'Copied');
+          copyUse.setAttribute('href', '#icon-check');
+
+          copyResetTimer = setTimeout(function () {
+            copyBtn.classList.remove('is-copied');
+            copyBtn.setAttribute('aria-label', 'Copy email address');
+            copyUse.setAttribute('href', '#icon-copy');
+            copyResetTimer = null;
+          }, 2000);
+        });
+      });
+
+      revealed.appendChild(icon);
+      revealed.appendChild(link);
+      revealed.appendChild(copyBtn);
+      btn.replaceWith(revealed);
+    }
+
     buttons.forEach(function (btn) {
       btn.addEventListener('click', function () {
         var address = assembleEmail();
 
         if (btn.getAttribute('data-revealed') === 'true') {
+          var selection = window.getSelection();
+          if (selection && selection.toString().length > 0) {
+            return;
+          }
           window.location.href = 'mailto:' + address;
+          return;
+        }
+
+        if (btn.getAttribute('data-email-context') === 'footer') {
+          replaceFooterWithEmailLink(btn, address);
           return;
         }
 
@@ -106,15 +202,9 @@
         btn.classList.add('is-revealed');
         btn.setAttribute('aria-label', 'Send email to ' + address);
 
-        var label = btn.querySelector('.js-email-reveal-label');
         var iconUse = btn.querySelector('.js-email-reveal-icon use');
-
         if (iconUse) {
           iconUse.setAttribute('href', '#icon-email');
-        }
-
-        if (btn.getAttribute('data-email-context') === 'footer' && label) {
-          label.textContent = address;
         }
       });
     });
