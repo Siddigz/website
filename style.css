@@ -6,7 +6,37 @@
    CSS Variables
    -------------------------------------------------------------------------- */
 
-:root,
+:root {
+  --bg: #f8f9fa;
+  --text: #1a1a1a;
+  --text-muted: #5c5c5c;
+  --accent: #009e82;
+  --accent-muted: #007a66;
+  --border: #e2e4e8;
+  --surface: #ffffff;
+
+  --badge-bg: var(--surface);
+  --badge-text: var(--text);
+  --badge-border: var(--border);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  --container-max: 1100px;
+  --section-gap: 5rem;
+  --header-offset: 4.5rem;
+  --radius: 4px;
+  --transition: 0.2s ease;
+  --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-duration: 0.55s;
+  --reveal-distance: 1.25rem;
+
+  --glow-accent: rgba(0, 158, 130, 0.09);
+  --glow-teal: rgba(0, 122, 102, 0.07);
+  --glow-mint: rgba(32, 176, 132, 0.06);
+  --glow-deep: rgba(0, 108, 88, 0.05);
+}
+
 [data-theme="dark"] {
   --bg: #0b0b0c;
   --text: #f5f5f5;
@@ -20,40 +50,23 @@
   --badge-text: var(--text);
   --badge-border: var(--border);
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
-
-  --container-max: 1100px;
-  --section-gap: 5rem;
-  --header-offset: 4.5rem;
-  --radius: 4px;
-  --transition: 0.2s ease;
-  --ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-  --reveal-duration: 0.9s;
-
-  --glow-accent: rgba(0, 212, 170, 0.22);
-  --glow-teal: rgba(0, 168, 136, 0.16);
-  --glow-blue: rgba(56, 130, 255, 0.14);
-  --glow-violet: rgba(120, 90, 220, 0.1);
+  --glow-accent: rgba(0, 212, 170, 0.11);
+  --glow-teal: rgba(0, 168, 136, 0.09);
+  --glow-mint: rgba(48, 200, 160, 0.07);
+  --glow-deep: rgba(0, 140, 110, 0.06);
 }
 
-[data-theme="light"] {
-  --bg: #f8f9fa;
-  --text: #1a1a1a;
-  --text-muted: #5c5c5c;
-  --accent: #009e82;
-  --accent-muted: #007a66;
-  --border: #e2e4e8;
-  --surface: #ffffff;
+html.theme-loading *,
+html.theme-loading *::before,
+html.theme-loading *::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+}
 
-  --badge-bg: var(--surface);
-  --badge-text: var(--text);
-  --badge-border: var(--border);
-
-  --glow-accent: rgba(0, 158, 130, 0.14);
-  --glow-teal: rgba(0, 122, 102, 0.1);
-  --glow-blue: rgba(56, 130, 255, 0.08);
-  --glow-violet: rgba(100, 80, 200, 0.06);
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -67,14 +80,18 @@
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: clip;
   scrollbar-gutter: stable;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   position: relative;
-  isolation: isolate;
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-sans);
@@ -82,38 +99,12 @@ body {
   line-height: 1.6;
   color: var(--text);
   background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 70% 55% at 8% 0%, var(--glow-accent), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 100% 8%, var(--glow-mint), transparent 50%),
+    radial-gradient(ellipse 65% 50% at 85% 100%, var(--glow-teal), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 15% 90%, var(--glow-deep), transparent 50%);
   transition: background-color var(--transition), color var(--transition);
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: -1;
-  width: 160vmax;
-  height: 160vmax;
-  pointer-events: none;
-  backface-visibility: hidden;
-  transform: translate3d(-50%, -50%, 0);
-  background:
-    radial-gradient(ellipse 42% 36% at 12% 18%, var(--glow-accent), transparent 72%),
-    radial-gradient(ellipse 38% 32% at 88% 12%, var(--glow-blue), transparent 68%),
-    radial-gradient(ellipse 48% 40% at 72% 78%, var(--glow-teal), transparent 70%),
-    radial-gradient(ellipse 34% 34% at 22% 82%, var(--glow-violet), transparent 66%),
-    radial-gradient(ellipse 30% 28% at 50% 45%, var(--glow-accent), transparent 75%);
-  filter: blur(80px);
-  animation: aurora-drift 28s ease-in-out infinite alternate;
-}
-
-@keyframes aurora-drift {
-  0% {
-    transform: translate3d(-50%, -50%, 0);
-  }
-
-  100% {
-    transform: translate3d(calc(-50% + 1.5vw), calc(-50% - 1vh), 0);
-  }
 }
 
 img,
@@ -176,8 +167,8 @@ p {
     transform: none;
   }
 
-  body::before {
-    animation: none;
+  .theme-liquid-overlay {
+    display: none;
   }
 }
 
@@ -229,11 +220,18 @@ section[id],
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
-  transition: background-color var(--transition), border-color var(--transition);
+  transition: background-color 0.15s ease, border-color var(--transition),
+    backdrop-filter 0.15s ease, -webkit-backdrop-filter 0.15s ease;
+}
+
+html.is-scrolling .site-header {
+  background-color: var(--bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .site-header .container {
@@ -290,20 +288,15 @@ section[id],
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
-  color: var(--text);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: border-color var(--transition), color var(--transition),
-    transform 0.25s var(--ease-out-smooth);
+  transition: border-color var(--transition), color var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .theme-toggle:hover {
   border-color: var(--accent);
   color: var(--accent);
-  transform: translateY(-2px);
-}
-
-.theme-toggle:active {
-  transform: translateY(0);
 }
 
 .theme-toggle:focus-visible {
@@ -311,22 +304,134 @@ section[id],
   outline-offset: 2px;
 }
 
-.theme-toggle svg {
+.theme-toggle-icon {
   width: 1.125rem;
   height: 1.125rem;
-}
-
-.theme-toggle .icon-sun,
-.theme-toggle .icon-moon {
   display: none;
 }
 
-[data-theme="light"] .theme-toggle .icon-moon {
+[data-theme="light"] .theme-toggle-icon--moon {
   display: block;
 }
 
-[data-theme="dark"] .theme-toggle .icon-sun {
+[data-theme="dark"] .theme-toggle-icon--sun {
   display: block;
+}
+
+.theme-toggle.is-liquidating {
+  animation: toggle-liquid-jiggle 0.8s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.theme-liquid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.theme-liquid-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.theme-liquid-blob {
+  position: absolute;
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 42% 58% 68% 32% / 42% 48% 52% 58%;
+  opacity: 0.92;
+  will-change: transform, border-radius, opacity;
+}
+
+.theme-liquid-blob--echo {
+  opacity: 0.55;
+  animation-delay: 0.06s;
+}
+
+.theme-liquid-overlay.is-active .theme-liquid-blob {
+  animation: liquid-burst 0.95s cubic-bezier(0.22, 1.1, 0.36, 1) forwards;
+}
+
+.theme-liquid-overlay.is-active .theme-liquid-blob--echo {
+  animation: liquid-burst-echo 0.95s cubic-bezier(0.22, 1.1, 0.36, 1) forwards;
+}
+
+.theme-liquid-overlay.to-light .theme-liquid-blob {
+  background: radial-gradient(circle at 35% 35%, #fff8e0, #f0d060 55%, #e8a820 100%);
+}
+
+.theme-liquid-overlay.to-dark .theme-liquid-blob {
+  background: radial-gradient(circle at 35% 35%, #3dffd4, #00c49a 50%, #007a66 100%);
+}
+
+@keyframes toggle-liquid-jiggle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    border-radius: var(--radius);
+  }
+
+  25% {
+    transform: scale(0.9) rotate(-5deg);
+    border-radius: 40% 60% 55% 45% / 50% 45% 55% 50%;
+  }
+
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    border-radius: 55% 45% 50% 50% / 45% 55% 45% 55%;
+  }
+
+  75% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+}
+
+@keyframes liquid-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    opacity: 0.95;
+  }
+
+  35% {
+    transform: translate(-50%, -50%) scale(28);
+    border-radius: 38% 62% 58% 42% / 52% 38% 62% 48%;
+    opacity: 0.88;
+  }
+
+  65% {
+    transform: translate(-50%, -50%) scale(42);
+    border-radius: 62% 38% 42% 58% / 48% 62% 38% 52%;
+    opacity: 0.75;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(55);
+    border-radius: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes liquid-burst-echo {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+    opacity: 0.6;
+  }
+
+  40% {
+    transform: translate(-50%, -50%) scale(22);
+    border-radius: 45% 55% 65% 35% / 55% 45% 55% 45%;
+    opacity: 0.45;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(48);
+    border-radius: 50%;
+    opacity: 0;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -928,7 +1033,10 @@ button.contact-email {
 
 html.reveal-enabled .reveal {
   opacity: 0;
-  transform: translateY(2.5rem);
+  transform: translate3d(0, var(--reveal-distance), 0);
+}
+
+html.reveal-enabled .reveal.is-animating {
   transition:
     opacity var(--reveal-duration) var(--ease-out-smooth),
     transform var(--reveal-duration) var(--ease-out-smooth);
@@ -938,7 +1046,7 @@ html.reveal-enabled .reveal {
 
 html.reveal-enabled .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* --------------------------------------------------------------------------
@@ -950,21 +1058,6 @@ html.reveal-enabled .reveal.is-visible {
     scrollbar-gutter: auto;
   }
 
-  body::before {
-    animation: none;
-    filter: none;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transform: none;
-    background:
-      radial-gradient(ellipse 90% 70% at 15% 10%, var(--glow-accent), transparent 65%),
-      radial-gradient(ellipse 80% 60% at 90% 15%, var(--glow-blue), transparent 60%),
-      radial-gradient(ellipse 85% 65% at 75% 85%, var(--glow-teal), transparent 65%),
-      radial-gradient(ellipse 75% 55% at 20% 80%, var(--glow-violet), transparent 60%);
-  }
-
   .site-header {
     background-color: var(--bg);
     backdrop-filter: none;
@@ -973,8 +1066,7 @@ html.reveal-enabled .reveal.is-visible {
 }
 
 @media (max-width: 640px) {
-  :root,
-  [data-theme="dark"] {
+  :root {
     --header-offset: 6.5rem;
   }
 
