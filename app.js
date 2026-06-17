@@ -47,18 +47,81 @@
     if (!toggle) return;
 
     var isDark = theme === 'dark';
-    toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    toggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
     toggle.setAttribute(
       'aria-label',
       isDark ? 'Switch to light mode' : 'Switch to dark mode'
     );
   }
 
-  function toggleTheme() {
-    var current = document.documentElement.getAttribute('data-theme') || DEFAULT_THEME;
-    var next = current === 'dark' ? 'light' : 'dark';
+  function clearThemeTransitionGuard(className) {
+    var root = document.documentElement;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        root.classList.remove(className);
+      });
+    });
+  }
+
+  function applyThemeSwitch(next) {
+    var root = document.documentElement;
+    root.classList.add('theme-switching');
     persistTheme(next);
     applyTheme(next);
+    clearThemeTransitionGuard('theme-switching');
+  }
+
+  function playLiquidThemeSwitch(toggle, next) {
+    var root = document.documentElement;
+    var overlay = document.getElementById('theme-liquid-overlay');
+    if (!overlay || !toggle) {
+      applyThemeSwitch(next);
+      return;
+    }
+
+    var blobs = overlay.querySelectorAll('.theme-liquid-blob');
+    var rect = toggle.getBoundingClientRect();
+    var x = rect.left + rect.width / 2;
+    var y = rect.top + rect.height / 2;
+    var liquidDuration = 950;
+    var switchAt = 320;
+
+    overlay.classList.remove('to-light', 'to-dark');
+    overlay.classList.add(next === 'dark' ? 'to-dark' : 'to-light');
+
+    blobs.forEach(function (blob) {
+      blob.style.left = x + 'px';
+      blob.style.top = y + 'px';
+      blob.style.animation = 'none';
+      void blob.offsetWidth;
+      blob.style.animation = '';
+    });
+
+    toggle.classList.add('is-liquidating');
+    overlay.classList.add('is-active');
+
+    setTimeout(function () {
+      applyThemeSwitch(next);
+    }, switchAt);
+
+    setTimeout(function () {
+      overlay.classList.remove('is-active', 'to-light', 'to-dark');
+      toggle.classList.remove('is-liquidating');
+    }, liquidDuration);
+  }
+
+  function toggleTheme() {
+    var toggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var current = root.getAttribute('data-theme') || DEFAULT_THEME;
+    var next = current === 'dark' ? 'light' : 'dark';
+
+    if (prefersReducedMotion()) {
+      applyThemeSwitch(next);
+      return;
+    }
+
+    playLiquidThemeSwitch(toggle, next);
   }
 
   function initThemeToggle() {
@@ -210,6 +273,87 @@
     });
   }
 
+  function initScrollPerformance() {
+    if (prefersReducedMotion()) return;
+
+    var root = document.documentElement;
+    var scrollTimer = null;
+    var ticking = false;
+
+    function setScrolling(active) {
+      if (active) {
+        root.classList.add('is-scrolling');
+      } else {
+        root.classList.remove('is-scrolling');
+      }
+    }
+
+    function onScrollFrame() {
+      ticking = false;
+      setScrolling(true);
+
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+
+      scrollTimer = setTimeout(function () {
+        setScrolling(false);
+        scrollTimer = null;
+      }, 120);
+    }
+
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(onScrollFrame);
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  function getRevealStaggerDelay(el) {
+    var parent = el.parentElement;
+    if (!parent) return '0ms';
+
+    var siblings = [];
+    for (var i = 0; i < parent.children.length; i++) {
+      var child = parent.children[i];
+      if (child.classList.contains('reveal')) {
+        siblings.push(child);
+      }
+    }
+
+    var index = siblings.indexOf(el);
+    if (index < 0) index = 0;
+
+    return Math.min(index, 4) * 55 + 'ms';
+  }
+
+  function revealElement(el) {
+    if (el.classList.contains('is-visible')) return;
+
+    el.classList.add('is-animating');
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.classList.add('is-visible');
+      });
+    });
+
+    el.addEventListener(
+      'transitionend',
+      function (event) {
+        if (event.propertyName !== 'opacity' || event.target !== el) return;
+        el.classList.remove('is-animating');
+        el.style.removeProperty('--reveal-delay');
+      },
+      { once: true }
+    );
+  }
+
   function initScrollReveal() {
     if (prefersReducedMotion()) return;
 
@@ -235,22 +379,21 @@
 
     var heroDelay = 0;
 
-    elements.forEach(function (el, index) {
+    elements.forEach(function (el) {
       el.classList.add('reveal');
 
       if (heroSet.has(el)) {
         setTimeout(function () {
-          el.classList.add('is-visible');
+          revealElement(el);
         }, heroDelay);
-        heroDelay += 100;
+        heroDelay += 70;
         return;
       }
 
-      el.style.setProperty('--reveal-delay', (index % 4) * 80 + 'ms');
+      el.style.setProperty('--reveal-delay', getRevealStaggerDelay(el));
 
       if (typeof IntersectionObserver === 'undefined') {
-        el.classList.add('is-visible');
-        return;
+        revealElement(el);
       }
     });
 
@@ -260,11 +403,11 @@
       function (entries) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          entry.target.classList.add('is-visible');
+          revealElement(entry.target);
           observer.unobserve(entry.target);
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -5% 0px' }
+      { threshold: 0.08, rootMargin: '0px 0px 8% 0px' }
     );
 
     elements.forEach(function (el) {
@@ -275,12 +418,15 @@
   }
 
   function init() {
+    applyTheme(getStoredTheme());
+    clearThemeTransitionGuard('theme-loading');
     initThemeToggle();
     initEmailReveal();
+    initScrollPerformance();
     initScrollReveal();
   }
 
-  /* Anti-flash: apply saved theme before CSS paints */
+  /* Sync theme state; inline head script applies before first paint */
   applyTheme(getStoredTheme());
 
   if (document.readyState === 'loading') {
