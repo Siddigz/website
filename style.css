@@ -965,7 +965,7 @@ html.is-scrolling .site-header {
 
 .contact-email-revealed .contact-email {
   color: var(--accent);
-  cursor: text;
+  cursor: pointer;
 }
 
 .contact-email-copy {
