@@ -95,7 +95,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-sans);
-  font-size: 1rem;
+  font-size: 1.5rem;
   line-height: 1.6;
   color: var(--text);
   background-color: var(--bg);
@@ -266,7 +266,7 @@ html.is-scrolling .site-header {
 }
 
 .nav-links a {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--text-muted);
 }
 
@@ -677,7 +677,7 @@ html.is-scrolling .site-header {
 
 .experience-date {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -779,7 +779,7 @@ html.is-scrolling .site-header {
 
 .project-award-star {
   flex-shrink: 0;
-  font-size: 0.625rem;
+  font-size: 1.5rem;
   color: #f5b800;
   line-height: 1;
 }
