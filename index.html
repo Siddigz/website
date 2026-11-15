@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,28 +7,27 @@
   <title>Siddig Ahmed | Portfolio</title>
 
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f8f9fa">
+  <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
+  <script>
+  /* Apply a stored scheme override before first paint (FOUC prevention only). */
+  (function () {
+    document.documentElement.classList.add('theme-loading');
+    try {
+      var scheme = localStorage.getItem('color-scheme');
+      if (scheme !== 'light' && scheme !== 'dark') return;
+      document.querySelector('meta[name="color-scheme"]').content = scheme;
+      var color = scheme === 'dark' ? '#0b0b0c' : '#f8f9fa';
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = color; });
+    } catch (e) {}
+  })();
+  </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <script>
-  (function () {
-    var theme = 'light';
-    var themeColors = { light: '#f8f9fa', dark: '#0b0b0c' };
-    try {
-      var stored = localStorage.getItem('theme');
-      if (stored === 'dark' || stored === 'light') theme = stored;
-    } catch (e) {}
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.classList.add('theme-loading');
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = themeColors[theme] || themeColors.light;
-  })();
-  </script>
 
   <script src="app.js" defer></script>
 
@@ -81,10 +80,9 @@
           id="theme-toggle"
           class="theme-toggle"
           type="button"
-          role="switch"
-          aria-label="Dark mode"
-          aria-checked="false"
         >
+          <span class="visually-hidden theme-toggle-label--to-dark">Switch to dark theme</span>
+          <span class="visually-hidden theme-toggle-label--to-light">Switch to light theme</span>
           <svg class="theme-toggle-icon theme-toggle-icon--sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="5"/>
             <line x1="12" y1="1" x2="12" y2="3"/>

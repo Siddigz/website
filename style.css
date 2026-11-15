@@ -6,16 +6,29 @@
    CSS Variables
    -------------------------------------------------------------------------- */
 
+/* Color scheme: follows the system by default. The toggle pins a scheme by
+   setting <meta name="color-scheme"> to "light" or "dark"; these rules map
+   that back onto the property, and light-dark() tokens follow it. */
 :root {
-  --bg: #f8f9fa;
-  --text: #1a1a1a;
-  --text-muted: #5c5c5c;
-  --accent: #009e82;
-  --accent-muted: #007a66;
-  --border: #e2e4e8;
-  --surface: #ffffff;
+  color-scheme: light dark;
 
-  --badge-bg: var(--surface);
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+  }
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+
+  --bg: light-dark(#f8f9fa, #0b0b0c);
+  --text: light-dark(#1a1a1a, #f5f5f5);
+  --text-muted: light-dark(#5c5c5c, #a0a0a5);
+  --accent: light-dark(#009e82, #00d4aa);
+  --accent-muted: light-dark(#007a66, #00a888);
+  --border: light-dark(#e2e4e8, #2a2a2e);
+  --surface: light-dark(#ffffff, #141416);
+
+  --badge-bg: light-dark(var(--surface), transparent);
   --badge-text: var(--text);
   --badge-border: var(--border);
 
@@ -31,29 +44,62 @@
   --reveal-duration: 0.55s;
   --reveal-distance: 1.25rem;
 
-  --glow-accent: rgba(0, 158, 130, 0.09);
-  --glow-teal: rgba(0, 122, 102, 0.07);
-  --glow-mint: rgba(32, 176, 132, 0.06);
-  --glow-deep: rgba(0, 108, 88, 0.05);
+  --glow-accent: light-dark(rgba(0, 158, 130, 0.09), rgba(0, 212, 170, 0.11));
+  --glow-teal: light-dark(rgba(0, 122, 102, 0.07), rgba(0, 168, 136, 0.09));
+  --glow-mint: light-dark(rgba(32, 176, 132, 0.06), rgba(48, 200, 160, 0.07));
+  --glow-deep: light-dark(rgba(0, 108, 88, 0.05), rgba(0, 140, 110, 0.06));
 }
 
-[data-theme="dark"] {
-  --bg: #0b0b0c;
-  --text: #f5f5f5;
-  --text-muted: #a0a0a5;
-  --accent: #00d4aa;
-  --accent-muted: #00a888;
-  --border: #2a2a2e;
-  --surface: #141416;
+/* Browsers without light-dark(): follow the system scheme only, and hide the
+   toggle since its override could not recolor the page. */
+@supports not (color: light-dark(#fff, #000)) {
+  :root {
+    --bg: #f8f9fa;
+    --text: #1a1a1a;
+    --text-muted: #5c5c5c;
+    --accent: #009e82;
+    --accent-muted: #007a66;
+    --border: #e2e4e8;
+    --surface: #ffffff;
+    --badge-bg: var(--surface);
+    --glow-accent: rgba(0, 158, 130, 0.09);
+    --glow-teal: rgba(0, 122, 102, 0.07);
+    --glow-mint: rgba(32, 176, 132, 0.06);
+    --glow-deep: rgba(0, 108, 88, 0.05);
+  }
 
-  --badge-bg: transparent;
-  --badge-text: var(--text);
-  --badge-border: var(--border);
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0b0c;
+      --text: #f5f5f5;
+      --text-muted: #a0a0a5;
+      --accent: #00d4aa;
+      --accent-muted: #00a888;
+      --border: #2a2a2e;
+      --surface: #141416;
+      --badge-bg: transparent;
+      --glow-accent: rgba(0, 212, 170, 0.11);
+      --glow-teal: rgba(0, 168, 136, 0.09);
+      --glow-mint: rgba(48, 200, 160, 0.07);
+      --glow-deep: rgba(0, 140, 110, 0.06);
+    }
+  }
 
-  --glow-accent: rgba(0, 212, 170, 0.11);
-  --glow-teal: rgba(0, 168, 136, 0.09);
-  --glow-mint: rgba(48, 200, 160, 0.07);
-  --glow-deep: rgba(0, 140, 110, 0.06);
+  .theme-toggle {
+    display: none !important;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 html.theme-loading *,
@@ -310,12 +356,12 @@ html.is-scrolling .site-header {
   display: none;
 }
 
-[data-theme="light"] .theme-toggle-icon--moon {
+.theme-toggle-icon--moon {
   display: block;
 }
 
-[data-theme="dark"] .theme-toggle-icon--sun {
-  display: block;
+.theme-toggle-label--to-light {
+  display: none;
 }
 
 .theme-toggle.is-liquidating {
@@ -655,12 +701,26 @@ html.is-scrolling .site-header {
   display: none;
 }
 
-[data-theme="dark"] .experience-logo--theme .experience-logo-light {
-  display: none;
+/* Non-color branches for the dark scheme: system dark without a light
+   override, or a dark override. Kept in sync with the token rules above. */
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    .experience-logo--theme .experience-logo-light { display: none; }
+    .experience-logo--theme .experience-logo-dark { display: block; }
+    .theme-toggle-icon--moon { display: none; }
+    .theme-toggle-icon--sun { display: block; }
+    .theme-toggle-label--to-dark { display: none; }
+    .theme-toggle-label--to-light { display: inline; }
+  }
 }
 
-[data-theme="dark"] .experience-logo--theme .experience-logo-dark {
-  display: block;
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  .experience-logo--theme .experience-logo-light { display: none; }
+  .experience-logo--theme .experience-logo-dark { display: block; }
+  .theme-toggle-icon--moon { display: none; }
+  .theme-toggle-icon--sun { display: block; }
+  .theme-toggle-label--to-dark { display: none; }
+  .theme-toggle-label--to-light { display: inline; }
 }
 
 .experience-card-body {
