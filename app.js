@@ -1,57 +1,81 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'theme';
-  var DEFAULT_THEME = 'light';
-  var VALID_THEMES = { dark: true, light: true };
+  /*
+   * Color scheme: no stored value follows the system ("light dark").
+   * The toggle stores "light" or "dark" only when it differs from the
+   * system scheme; toggling back to match the system clears it.
+   */
+  var STORAGE_KEY = 'color-scheme';
+  var LEGACY_STORAGE_KEY = 'theme';
+  var SYSTEM_SCHEME = 'light dark';
   var THEME_COLORS = { light: '#f8f9fa', dark: '#0b0b0c' };
+  var systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-  function getStoredTheme() {
+  function isScheme(value) {
+    return value === 'light' || value === 'dark';
+  }
+
+  function getStoredScheme() {
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && VALID_THEMES[stored]) {
+      if (isScheme(stored)) {
         return stored;
       }
     } catch (err) {
-      /* localStorage unavailable; fall back to default */
+      /* localStorage unavailable; follow the system */
     }
-    return DEFAULT_THEME;
+    return null;
   }
 
-  function persistTheme(theme) {
+  function persistScheme(scheme) {
     try {
-      localStorage.setItem(STORAGE_KEY, theme);
+      if (scheme) {
+        localStorage.setItem(STORAGE_KEY, scheme);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     } catch (err) {
-      /* ignore write failures */
+      /* ignore write failures; the scheme still applies to this page */
     }
   }
 
-  function updateThemeColor(theme) {
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.name = 'theme-color';
-      document.head.appendChild(meta);
+  function clearLegacyTheme() {
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch (err) {
+      /* ignore */
     }
-    meta.content = THEME_COLORS[theme] || THEME_COLORS.light;
   }
 
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    syncToggleButton(theme);
-    updateThemeColor(theme);
+  function getSchemeMeta() {
+    return document.querySelector('meta[name="color-scheme"]');
   }
 
-  function syncToggleButton(theme) {
-    var toggle = document.getElementById('theme-toggle');
-    if (!toggle) return;
+  function getSystemScheme() {
+    return systemDarkQuery.matches ? 'dark' : 'light';
+  }
 
-    var isDark = theme === 'dark';
-    toggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
-    toggle.setAttribute(
-      'aria-label',
-      isDark ? 'Switch to light mode' : 'Switch to dark mode'
-    );
+  function getRenderedScheme() {
+    var meta = getSchemeMeta();
+    var content = meta ? meta.content : SYSTEM_SCHEME;
+    return isScheme(content) ? content : getSystemScheme();
+  }
+
+  function updateThemeColor(scheme) {
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+      var own = /dark/.test(meta.media) ? 'dark' : 'light';
+      meta.content = THEME_COLORS[scheme || own];
+    });
+  }
+
+  /* scheme: "light", "dark", or null to follow the system */
+  function applyScheme(scheme) {
+    var meta = getSchemeMeta();
+    if (meta) {
+      meta.content = scheme || SYSTEM_SCHEME;
+    }
+    updateThemeColor(scheme);
   }
 
   function clearThemeTransitionGuard(className) {
@@ -63,19 +87,18 @@
     });
   }
 
-  function applyThemeSwitch(next) {
+  function applyThemeSwitch(scheme) {
     var root = document.documentElement;
     root.classList.add('theme-switching');
-    persistTheme(next);
-    applyTheme(next);
+    persistScheme(scheme);
+    applyScheme(scheme);
     clearThemeTransitionGuard('theme-switching');
   }
 
-  function playLiquidThemeSwitch(toggle, next) {
-    var root = document.documentElement;
+  function playLiquidThemeSwitch(toggle, target, scheme) {
     var overlay = document.getElementById('theme-liquid-overlay');
     if (!overlay || !toggle) {
-      applyThemeSwitch(next);
+      applyThemeSwitch(scheme);
       return;
     }
 
@@ -87,7 +110,7 @@
     var switchAt = 320;
 
     overlay.classList.remove('to-light', 'to-dark');
-    overlay.classList.add(next === 'dark' ? 'to-dark' : 'to-light');
+    overlay.classList.add(target === 'dark' ? 'to-dark' : 'to-light');
 
     blobs.forEach(function (blob) {
       blob.style.left = x + 'px';
@@ -101,7 +124,7 @@
     overlay.classList.add('is-active');
 
     setTimeout(function () {
-      applyThemeSwitch(next);
+      applyThemeSwitch(scheme);
     }, switchAt);
 
     setTimeout(function () {
@@ -112,25 +135,30 @@
 
   function toggleTheme() {
     var toggle = document.getElementById('theme-toggle');
-    var root = document.documentElement;
-    var current = root.getAttribute('data-theme') || DEFAULT_THEME;
-    var next = current === 'dark' ? 'light' : 'dark';
+    /* Flip what is on screen; store it only if it differs from the system */
+    var target = getRenderedScheme() === 'dark' ? 'light' : 'dark';
+    var scheme = target === getSystemScheme() ? null : target;
 
     if (prefersReducedMotion()) {
-      applyThemeSwitch(next);
+      applyThemeSwitch(scheme);
       return;
     }
 
-    playLiquidThemeSwitch(toggle, next);
+    playLiquidThemeSwitch(toggle, target, scheme);
   }
 
   function initThemeToggle() {
-    syncToggleButton(getStoredTheme());
-
     var toggle = document.getElementById('theme-toggle');
     if (toggle) {
       toggle.addEventListener('click', toggleTheme);
     }
+
+    /* Keep tabs in sync when the override changes elsewhere */
+    window.addEventListener('storage', function (event) {
+      if (event.key === STORAGE_KEY || event.key === null) {
+        applyScheme(getStoredScheme());
+      }
+    });
   }
 
   function prefersReducedMotion() {
@@ -418,16 +446,13 @@
   }
 
   function init() {
-    applyTheme(getStoredTheme());
+    clearLegacyTheme();
     clearThemeTransitionGuard('theme-loading');
     initThemeToggle();
     initEmailReveal();
     initScrollPerformance();
     initScrollReveal();
   }
-
-  /* Sync theme state; inline head script applies before first paint */
-  applyTheme(getStoredTheme());
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
