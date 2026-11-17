@@ -1,2 +1,8 @@
 .todo
 .todo.txt
+
+# Private notes and local secrets: never commit
+CLAUDE.local.md
+.env
+.env.*
+!.env.example
