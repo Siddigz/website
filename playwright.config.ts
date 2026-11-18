@@ -5,7 +5,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI ? 'github' : 'list',
-  use: { baseURL: 'http://localhost:4321' },
+  use: { baseURL: 'http://localhost:4321', actionTimeout: 5_000 },
+  expect: { timeout: 3_000 },
   webServer: {
     command: 'node scripts/serve-dist.mjs 4321',
     url: 'http://localhost:4321',

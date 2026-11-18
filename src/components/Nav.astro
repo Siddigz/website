@@ -1,0 +1,68 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+const links = [
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#experience', label: 'Experience' },
+  { href: '/#about', label: 'About' },
+];
+---
+
+<header class="site-header">
+  <nav class="nav container" aria-label="Main">
+    <a class="home" href="/">Siddig Ahmed</a>
+    <ul class="links" role="list">
+      {links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+    </ul>
+    <ThemeToggle />
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 5;
+    border-block-end: var(--border-width) solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-3);
+  }
+
+  .home {
+    margin-inline-end: auto;
+    color: var(--color-text);
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    gap: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .links a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .links a:hover {
+    color: var(--color-text);
+  }
+
+  /* On narrow screens the links drop to their own row. */
+  @media (max-width: 30rem) {
+    .links {
+      order: 3;
+      flex-basis: 100%;
+    }
+  }
+</style>
