@@ -20,8 +20,8 @@ const ownerRepo = z
   .url()
   .refine((url) => url.startsWith(OWNER_REPO_PREFIX), `Must start with ${OWNER_REPO_PREFIX}`);
 
-/** `image` is Astro's image helper; tests pass a stand-in. */
-export function projectSchema(image: () => z.ZodType) {
+/** `image` is Astro's image helper; tests pass a stand-in. Generic so the image type reaches components. */
+export function projectSchema<Image extends z.ZodType>(image: () => Image) {
   return z
     .object({
       title: z.string().min(1),

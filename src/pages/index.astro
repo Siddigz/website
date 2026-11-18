@@ -1,13 +1,19 @@
 ---
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProofStrip from '../components/ProofStrip.astro';
 import SkillsStrip from '../components/SkillsStrip.astro';
 import Experience from '../components/Experience.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ProjectRow from '../components/ProjectRow.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import { featuredProjects, moreProjects } from '../lib/projects';
 
 const site = (await getEntry('site', 'main'))!.data;
 const title = `${site.name.first} ${site.name.last}`;
+const projects = await getCollection('projects');
 ---
 
 <BaseLayout title={title} description={site.pitch} path="/">
@@ -15,4 +21,33 @@ const title = `${site.name.first} ${site.name.last}`;
   <ProofStrip />
   <SkillsStrip />
   <Experience />
+
+  <section id="projects" class="section container">
+    <h2 class="section-title">Featured projects</h2>
+    <div class="cards">
+      {featuredProjects(projects).map((project) => <ProjectCard project={project} />)}
+    </div>
+  </section>
+
+  <section id="more-projects" class="section container">
+    <h2 class="section-title">More projects</h2>
+    <ul class="rows" role="list">
+      {moreProjects(projects).map((project) => <ProjectRow project={project} />)}
+    </ul>
+  </section>
+
+  <About />
+  <Contact />
 </BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .rows {
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+</style>
