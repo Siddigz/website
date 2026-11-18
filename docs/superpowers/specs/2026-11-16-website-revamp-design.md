@@ -133,7 +133,7 @@ content as files, interactivity added only where wanted.
 ├──────────────────────────────────────────────────────────┤
 │ [Siddig] [Ahmed]                             (photo slot, │ top
 │ One-line pitch                                empty until │
-│ Looking for: <term and role>                  a photo is  │
+│ Looking-for line (can be switched off)        a photo is  │
 │ School line · GPA · Expected April 2028       supplied)   │
 │ Greeting line (differs per visitor)                       │
 │ GitHub · LinkedIn · Email · (Resume, when on)             │
@@ -225,6 +225,13 @@ one shows none.
   greeting.
 
 ## 8. Features
+
+### "Looking for" line
+
+One generic line at the top, for example "Open to software engineering
+internships". It names no term or year, so it does not go stale. It has an
+on/off switch in `site.yaml`. When off, the line is not rendered and the top
+closes up with no gap. Changing the switch or the wording is a one-line edit.
 
 ### Name pronunciation
 
@@ -556,7 +563,6 @@ compact rows; stripping photo metadata.
 
 None of these block the build.
 
-- The exact "looking for" line (term and role).
 - Photos of himself.
 - Two recordings: "Siddig" and "Ahmed".
 - A Schedule Scoop screenshot.
