@@ -1,0 +1,22 @@
+# Site-wide settings. One entry, keyed `main`.
+main:
+  url: https://siddigz.com
+  name:
+    first: Siddig
+    last: Ahmed
+  # Draft. One sentence, at most 22 words.
+  pitch: I build software people actually use, from award-winning hackathon projects to student tools, with two software engineering internships behind me.
+  # Set `enabled` to false to hide the line. Keep the text free of terms and years.
+  lookingFor:
+    enabled: true
+    text: Open to software engineering internships
+  school: Computer Science (Honours), Software Engineering stream, Minor in Mathematics · Carleton University
+  gpa: 3.85/4.00
+  expectedGraduation: April 2028
+  links:
+    github: https://github.com/Siddigz
+    linkedin: https://linkedin.com/in/siddigz
+  # Used by the per-visitor greeting (stage 3).
+  home:
+    city: Ottawa
+    timeZone: America/Toronto

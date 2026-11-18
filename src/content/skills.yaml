@@ -1,0 +1,25 @@
+# The moving skills strip, in display order. Skills that large tech
+# companies screen for come first.
+main:
+  items:
+    - Python
+    - TypeScript
+    - JavaScript
+    - Java
+    - C++
+    - C
+    - SQL
+    - React
+    - React Native
+    - FastAPI
+    - Node.js
+    - PostgreSQL
+    - MongoDB
+    - PyTorch
+    - Docker
+    - GitHub Actions
+    - CI/CD
+    - Git
+    - Linux
+    - Bash
+    - CMake

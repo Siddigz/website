@@ -1,0 +1,24 @@
+# The proof strip. Awards are worded exactly as given.
+peoples-choice:
+  label: People's Choice
+  detail: cuHacking 7
+  link: https://cuhacking.ca/
+  order: 1
+best-ai-environment:
+  label: Best AI for Environmental Impact
+  detail: AGI Ventures Canada Hackathon 3.0
+  link: https://luma.com/9k96tg5z
+  order: 2
+scholarship:
+  label: Jacob Freedman Scholarship
+  detail: $16,000, academic achievement in Computer Science
+  order: 3
+honour-list:
+  label: Deans' Honour List
+  detail: 2023–24, 2024–25, 2025–26
+  link: https://carleton.ca/awards/awards/deans-honour-list/
+  order: 4
+gpa:
+  label: GPA 3.85/4.00
+  detail: Carleton University
+  order: 5
