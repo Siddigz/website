@@ -1,9 +1,18 @@
 ---
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import SkillsStrip from '../components/SkillsStrip.astro';
+import Experience from '../components/Experience.astro';
+
+const site = (await getEntry('site', 'main'))!.data;
+const title = `${site.name.first} ${site.name.last}`;
 ---
 
-<BaseLayout title="Siddig Ahmed" description="Siddig Ahmed, software engineer." path="/">
-  <section id="top" class="section container">
-    <h1>Siddig Ahmed</h1>
-  </section>
+<BaseLayout title={title} description={site.pitch} path="/">
+  <Hero />
+  <ProofStrip />
+  <SkillsStrip />
+  <Experience />
 </BaseLayout>

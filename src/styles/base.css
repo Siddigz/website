@@ -161,3 +161,31 @@ button {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Show an element in only one colour scheme, for images that cannot use
+ * light-dark(). Follows the system unless the theme toggle has pinned one.
+ */
+.only-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) {
+    .only-light {
+      display: none;
+    }
+    .only-dark {
+      display: revert;
+    }
+  }
+}
+
+:root:has(> head > meta[name='color-scheme'][content='dark']) {
+  .only-light {
+    display: none;
+  }
+  .only-dark {
+    display: revert;
+  }
+}

@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { formatRange } from '../lib/dates';
+import ciena from '../assets/logos/ciena.svg';
+import carletonLight from '../assets/logos/carleton-light.svg';
+import carletonDark from '../assets/logos/carleton-dark.svg';
+
+// A logo key from experience.yaml maps to one image, or to a pair that
+// swaps with the colour scheme.
+const logos = {
+  ciena: { light: ciena, dark: ciena },
+  carleton: { light: carletonLight, dark: carletonDark },
+};
+
+const roles = (await getCollection('experience')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section id="experience" class="section container">
+  <h2 class="section-title">Experience</h2>
+  <ol role="list">
+    {
+      roles.map(({ data }) => {
+        const logo = data.logo ? logos[data.logo] : undefined;
+        return (
+          <li>
+            <span class="logo">
+              {logo && logo.light === logo.dark && <Image src={logo.light} alt="" width={32} height={32} />}
+              {logo && logo.light !== logo.dark && (
+                <>
+                  <Image class="only-light" src={logo.light} alt="" width={32} height={32} />
+                  <Image class="only-dark" src={logo.dark} alt="" width={32} height={32} />
+                </>
+              )}
+            </span>
+            <span class="role">
+              <strong>{data.title}</strong>
+              <span class="muted">
+                {data.organisation} · {data.team}
+              </span>
+            </span>
+            <span class="dates muted">{formatRange(data.start, data.end)}</span>
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>
+
+<style>
+  ol {
+    display: grid;
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: var(--logo-size) 1fr auto;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    padding-block: var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .logo {
+    display: grid;
+    place-items: center;
+    inline-size: var(--logo-size);
+    block-size: var(--logo-size);
+  }
+
+  .logo :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+
+  .role {
+    display: grid;
+  }
+
+  .dates {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+  }
+
+  /* On narrow screens the dates drop under the role. */
+  @media (max-width: 36rem) {
+    li {
+      grid-template-columns: var(--logo-size) 1fr;
+    }
+
+    .dates {
+      grid-column: 2;
+    }
+  }
+</style>

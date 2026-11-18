@@ -1,0 +1,11 @@
+---
+// Test-only page: the top of the home page with the looking-for line switched
+// off, so the off state can be checked without editing site.yaml.
+// It must be removed or excluded from the production build before ship.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+---
+
+<BaseLayout title="Test page" description="Test page." path="/dev/no-looking-for" noindex>
+  <Hero lookingForOverride={false} />
+</BaseLayout>

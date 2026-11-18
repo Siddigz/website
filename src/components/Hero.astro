@@ -1,0 +1,110 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props {
+  /** Test-only: force the looking-for line on or off regardless of site.yaml. */
+  lookingForOverride?: boolean;
+}
+
+const site = (await getEntry('site', 'main'))!.data;
+const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled;
+---
+
+<section id="top" class="hero section container">
+  <div class="text" data-hero-text>
+    <h1>
+      <span data-name-part="first">{site.name.first}</span>
+      <span data-name-part="last">{site.name.last}</span>
+    </h1>
+    <p class="pitch">{site.pitch}</p>
+    {showLookingFor && <p class="looking-for" data-looking-for>{site.lookingFor.text}</p>}
+    <p class="facts muted">
+      {site.school}<br />
+      GPA {site.gpa} · Expected {site.expectedGraduation}
+    </p>
+    <!-- Stage 3 replaces this text with a greeting built from the visitor's clock. -->
+    <p class="greeting muted" data-greeting>Hello, and welcome.</p>
+    <ul class="links" role="list">
+      <li><a class="button" href={site.links.github}>GitHub</a></li>
+      <li><a class="button" href={site.links.linkedin}>LinkedIn</a></li>
+    </ul>
+  </div>
+  <!-- Empty until a photo is supplied. Takes no space while empty. -->
+  <div class="photo" data-photo-slot></div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-8) var(--space-7);
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    max-inline-size: var(--measure);
+  }
+
+  .pitch {
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+  }
+
+  .looking-for {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+
+  .looking-for::before {
+    content: '';
+    inline-size: var(--space-2);
+    block-size: var(--space-2);
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .facts,
+  .greeting {
+    font-size: var(--text-sm);
+  }
+
+  /* One line is always reserved, so the stage 3 greeting cannot shift the page. */
+  .greeting {
+    min-block-size: calc(var(--text-sm) * var(--leading-normal));
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .button {
+    display: inline-flex;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .button:hover {
+    border-color: var(--color-accent);
+  }
+
+  .photo:empty {
+    display: none;
+  }
+</style>
