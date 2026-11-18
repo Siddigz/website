@@ -1,0 +1,81 @@
+---
+import { getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const about = (await getEntry('about', 'about'))!;
+const { Content } = await render(about);
+const { title, activities, photos } = about.data;
+---
+
+<section id="about" class="section container">
+  <h2 class="section-title">{title}</h2>
+  <div class="layout">
+    <div class="text">
+      <div class="bio"><Content /></div>
+      <ul class="activities" role="list">
+        {
+          activities.map((activity) => (
+            <li>
+              <strong>{activity.name}</strong>
+              <span class="muted">{activity.role}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="photos">
+      {
+        photos.map((photo) => (
+          <figure>
+            <Image src={photo.src} alt={photo.alt} width={480} height={600} fit="cover" position="top" />
+            <figcaption class="muted">{photo.caption}</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 48rem) {
+    .layout {
+      grid-template-columns: 1fr minmax(0, 20rem);
+      align-items: start;
+    }
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-5);
+    max-inline-size: var(--measure);
+  }
+
+  .activities {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .activities li {
+    display: grid;
+  }
+
+  figure {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  figure :global(img) {
+    inline-size: 100%;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  figcaption {
+    font-size: var(--text-sm);
+  }
+</style>

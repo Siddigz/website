@@ -13,8 +13,7 @@ const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled
 <section id="top" class="hero section container">
   <div class="text" data-hero-text>
     <h1>
-      <span data-name-part="first">{site.name.first}</span>
-      <span data-name-part="last">{site.name.last}</span>
+      <span data-name-part="first">{site.name.first}</span>{" "}<span data-name-part="last">{site.name.last}</span>
     </h1>
     <p class="pitch">{site.pitch}</p>
     {showLookingFor && <p class="looking-for" data-looking-for>{site.lookingFor.text}</p>}

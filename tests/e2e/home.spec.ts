@@ -13,6 +13,7 @@ test('top half has its sections in order', async ({ page }) => {
 
 test('hero shows the name, pitch, school facts and links', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('h1')).toHaveText('Siddig Ahmed');
   await expect(page.locator('h1 [data-name-part="first"]')).toHaveText('Siddig');
   await expect(page.locator('h1 [data-name-part="last"]')).toHaveText('Ahmed');
   await expect(page.getByText(site.pitch)).toBeVisible();
@@ -93,4 +94,73 @@ test('skills strip is still under reduced motion', async ({ page }) => {
   await expect(page.locator('#skills [aria-hidden="true"]')).toBeHidden();
   await expect(page.getByRole('checkbox', { name: 'Pause the skills strip' })).toHaveCount(0);
   await expect(page.getByRole('list', { name: 'Skills' }).getByRole('listitem').last()).toBeVisible();
+});
+
+test('all eight sections are in order', async ({ page }) => {
+  await page.goto('/');
+  const ids = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.id));
+  expect(ids).toEqual(['top', 'proof', 'skills', 'experience', 'projects', 'more-projects', 'about', 'contact']);
+});
+
+test('six featured cards in order, each linking to its page', async ({ page }) => {
+  await page.goto('/');
+  const hrefs = await page
+    .locator('#projects article h3 a')
+    .evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  expect(hrefs).toEqual([
+    '/projects/curiding',
+    '/projects/alternative-signals',
+    '/projects/brightspace-deadlines',
+    '/projects/visioncompanion',
+    '/projects/ecocart',
+    '/projects/cpu-cache-benchmark',
+  ]);
+  await expect(page.locator('#projects article').first()).toContainText("People's Choice · cuHacking 7");
+  await expect(page.locator('#projects article').first()).toContainText("Won People's Choice at cuHacking 7.");
+  await expect(page.locator('#projects article img')).toHaveCount(6);
+});
+
+test('seven compact rows link to GitHub', async ({ page }) => {
+  await page.goto('/');
+  const rows = page.locator('#more-projects li[data-category]');
+  await expect(rows).toHaveCount(7);
+  const hrefs = await rows.locator('h3 a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  expect(hrefs).toHaveLength(7);
+  for (const href of hrefs) expect(href).toMatch(/^https:\/\/github\.com\/Siddigz\//);
+  await expect(rows.first()).toContainText('PDF-merger');
+});
+
+test('a row with only required fields renders cleanly', async ({ page }) => {
+  await page.goto('/');
+  const row = page.locator('#more-projects li', { hasText: 'Markit' });
+  await expect(row).toHaveCount(1);
+  await expect(row.locator('img')).toHaveCount(0);
+  await expect(row).toContainText('Systems');
+  await expect(page.locator('a[href=""], a:not([href])')).toHaveCount(0);
+  const broken = await page
+    .locator('img')
+    .evaluateAll((imgs) => imgs.filter((i) => !i.getAttribute('src') || i.getAttribute('alt') === null).length);
+  expect(broken).toBe(0);
+});
+
+test('every image declares its size so nothing jumps', async ({ page }) => {
+  await page.goto('/');
+  const unsized = await page
+    .locator('img')
+    .evaluateAll((imgs) => imgs.filter((i) => !i.getAttribute('width') || !i.getAttribute('height')).length);
+  expect(unsized).toBe(0);
+});
+
+test('about shows the bio, activities and the Hack the North caption', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#about')).toContainText('Carleton Tennis Club');
+  await expect(page.locator('#about')).toContainText('Hack the North 2026, Waterloo');
+  await expect(page.locator('#about figure img')).toHaveCount(1);
+});
+
+test('contact has GitHub and LinkedIn and no email control', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#contact').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
+  await expect(page.locator('#contact').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
+  await expect(page.locator('#contact').getByText(/email/i)).toHaveCount(0);
 });

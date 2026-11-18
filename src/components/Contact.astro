@@ -1,0 +1,29 @@
+---
+import { getEntry } from 'astro:content';
+
+const site = (await getEntry('site', 'main'))!.data;
+---
+
+<!-- The click-to-reveal contact button arrives in stage 3. -->
+<section id="contact" class="section container">
+  <h2 class="section-title">Contact</h2>
+  <p class="muted">The quickest way to reach me is a message on LinkedIn.</p>
+  <ul role="list">
+    <li><a href={site.links.linkedin}>LinkedIn</a></li>
+    <li><a href={site.links.github}>GitHub</a></li>
+  </ul>
+</section>
+
+<style>
+  section {
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-block-start: var(--space-4);
+    font-weight: var(--weight-medium);
+  }
+</style>

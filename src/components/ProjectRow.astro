@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { CATEGORY_LABELS } from '../content/schemas';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { data } = Astro.props.project;
+---
+
+<li class="row" data-category={data.category}>
+  {
+    data.cover && (
+      <Image class="thumb" src={data.cover} alt="" width={112} height={112} fit="cover" position="left top" />
+    )
+  }
+  <div class="text">
+    <h3><a href={data.links.repo}>{data.title}</a></h3>
+    <p class="muted">{data.oneLiner}</p>
+  </div>
+  <span class="category muted">{CATEGORY_LABELS[data.category]}</span>
+</li>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    padding-block: var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  /* A thumbnail takes a first column only on rows that have one. */
+  .row:has(.thumb) {
+    grid-template-columns: var(--thumb-size) 1fr auto;
+  }
+
+  .thumb {
+    inline-size: var(--thumb-size);
+    block-size: var(--thumb-size);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    object-position: left top;
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  h3 {
+    font-size: var(--text-base);
+    overflow-wrap: anywhere;
+  }
+
+  h3 a {
+    color: var(--color-text);
+  }
+
+  p,
+  .category {
+    font-size: var(--text-sm);
+  }
+
+  .category {
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+
+  /* On narrow screens the category drops under the text. */
+  @media (max-width: 36rem) {
+    .row,
+    .row:has(.thumb) {
+      grid-template-columns: 1fr;
+    }
+
+    .row:has(.thumb) {
+      grid-template-columns: var(--thumb-size) 1fr;
+    }
+
+    .category {
+      grid-column: -2 / -1;
+    }
+  }
+</style>
