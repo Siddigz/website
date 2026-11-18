@@ -7,5 +7,7 @@ const { url } = parse(readFileSync(new URL('./src/content/site.yaml', import.met
 
 export default defineConfig({
   site: url,
+  // The home page is the list of projects, so the bare folder address leads there.
+  redirects: { '/projects': '/#projects' },
   image: { layout: 'constrained', responsiveStyles: true },
 });

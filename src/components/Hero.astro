@@ -12,31 +12,75 @@ const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled
 
 <section id="top" class="hero section container">
   <div class="text" data-hero-text>
-    <h1>
+    <h1 translate="no">
       <span data-name-part="first">{site.name.first}</span>{" "}<span data-name-part="last">{site.name.last}</span>
     </h1>
     <p class="pitch">{site.pitch}</p>
     {showLookingFor && <p class="looking-for" data-looking-for>{site.lookingFor.text}</p>}
     <p class="facts muted">
-      {site.school}<br />
-      GPA {site.gpa} · Expected {site.expectedGraduation}
+      <span data-program>{site.program}</span><br />
+      <span class="fact"><span data-school>{site.school}</span> ·</span>{' '}
+      <span class="fact">GPA {site.gpa} ·</span>{' '}
+      <span class="fact">Expected {site.expectedGraduation}</span>
     </p>
-    <!-- Stage 3 replaces this text with a greeting built from the visitor's clock. -->
+    {/* Stage 3 replaces this text with a greeting built from the visitor's clock. */}
     <p class="greeting muted" data-greeting>Hello, and welcome.</p>
     <ul class="links" role="list">
       <li><a class="button" href={site.links.github}>GitHub</a></li>
       <li><a class="button" href={site.links.linkedin}>LinkedIn</a></li>
     </ul>
   </div>
-  <!-- Empty until a photo is supplied. Takes no space while empty. -->
-  <div class="photo" data-photo-slot></div>
+  {/* A generic placeholder until a real photo is supplied. Decorative, so hidden from screen readers. */}
+  <div class="photo" data-photo-slot>
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <rect class="frame" width="120" height="120" rx="14"></rect>
+      <circle class="figure" cx="60" cy="46" r="20"></circle>
+      <path class="figure" d="M20 120c1-27 18-42 40-42s39 15 40 42z"></path>
+    </svg>
+  </div>
 </section>
 
 <style>
   .hero {
     display: grid;
     gap: var(--space-6);
-    padding-block: var(--space-8) var(--space-7);
+    align-items: center;
+    padding-block: var(--space-7);
+  }
+
+  /* The photo sits above the text on narrow screens and beside it on wide ones. */
+  .photo {
+    order: -1;
+  }
+
+  @media (min-width: 48rem) {
+    .hero {
+      grid-template-columns: 1fr auto;
+      padding-block: var(--space-8) var(--space-7);
+    }
+
+    .photo {
+      order: 2;
+    }
+  }
+
+  .photo svg {
+    inline-size: var(--avatar-size);
+    block-size: var(--avatar-size);
+  }
+
+  .frame {
+    fill: var(--color-surface);
+    stroke: var(--color-border);
+  }
+
+  .figure {
+    fill: var(--color-border);
+  }
+
+  /* Each fact stays whole: "Carleton University" never splits across lines. */
+  .fact {
+    white-space: nowrap;
   }
 
   .text {
@@ -103,7 +147,4 @@ const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled
     border-color: var(--color-accent);
   }
 
-  .photo:empty {
-    display: none;
-  }
 </style>

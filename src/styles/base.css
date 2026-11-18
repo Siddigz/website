@@ -7,7 +7,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-block-start: var(--space-8);
+  /* Keeps anchored sections and focused elements clear of the sticky header. */
+  scroll-padding-block-start: var(--header-offset);
 }
 
 body {
@@ -73,6 +74,14 @@ svg {
 button {
   font: inherit;
   color: inherit;
+}
+
+/* No double-tap zoom delay on things meant to be tapped. */
+a,
+button,
+label,
+input {
+  touch-action: manipulation;
 }
 
 :focus-visible {

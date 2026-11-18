@@ -13,6 +13,10 @@ coverAlt: The Brightspace Deadlines grades page, showing a course average and th
 gallery:
   - src: ../../assets/projects/brightspace-deadlines/deadlines.png
     alt: The deadlines page listing a week of quizzes, tests and assignments by day, colour-coded by course. Sample data.
+  - src: ../../assets/projects/brightspace-deadlines/announcements.png
+    alt: The announcements page, a single feed of new posts from every course. Sample data.
+  - src: ../../assets/projects/brightspace-deadlines/phone.png
+    alt: The read-only phone view of the dashboard. Sample data.
 ---
 
 ## Problem

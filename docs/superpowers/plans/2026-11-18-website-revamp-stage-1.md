@@ -899,3 +899,21 @@ above. Later plans should build on this section, not on the task text.
 - **Categories** follow the GitHub profile README.
 - **Not yet done:** tests run in Chromium only. Add WebKit and Firefox when the
   real look lands in stage 2.
+
+### Changes after the owner's first review (2026-11-18)
+
+- The skills strip moved below Experience.
+- The top shows a generic placeholder figure in the photo slot: beside the text
+  on wide screens, above the name on phones.
+- The school line is split into `program` and `school` in `site.yaml`, and each
+  fact stays on one line.
+- A proof item's `detail` may be a list, shown line by line.
+- `/projects` redirects to `/#projects`. Project pages have a back link at the
+  top and the bottom, and a two-column gallery under the cover.
+- Projects gained `coverPosition`; `links.repo` is optional for compact rows
+  (Home Server has none).
+- Dates are formatted with `Intl.DateTimeFormat`. Brand and technology names
+  carry `translate="no"`. Tappable elements set `touch-action: manipulation`.
+- Audited against Vercel's Web Interface Guidelines. Left for stage 2, with the
+  real look: a `theme-color` meta that matches the background, curly quotes,
+  an intentional tap-highlight colour, and the Title Case question.

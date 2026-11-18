@@ -13,14 +13,14 @@ const { data } = Astro.props.project;
 <li class="row" data-category={data.category}>
   {
     data.cover && (
-      <Image class="thumb" src={data.cover} alt="" width={112} height={112} fit="cover" position="left top" />
+      <Image class="thumb" src={data.cover} alt="" width={112} height={112} fit="cover" position={data.coverPosition} />
     )
   }
   <div class="text">
-    <h3><a href={data.links.repo}>{data.title}</a></h3>
+    <h3>{data.links.repo ? <a href={data.links.repo}>{data.title}</a> : data.title}</h3>
     <p class="muted">{data.oneLiner}</p>
     <div class="meta muted">
-      <ul class="stack" role="list" aria-label="Built with">
+      <ul class="stack" role="list" aria-label="Built with" translate="no">
         {data.stack.map((item) => <li>{item}</li>)}
       </ul>
       {

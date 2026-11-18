@@ -76,8 +76,8 @@ will usually ask Claude to do it, so the steps are written down as a recipe.
   on the `revamp` branch, which gets its own Vercel preview address on every
   push.
 - **Public repo:** see "Rules".
-- **Photos of the owner:** not available yet. The top of the home page must
-  look complete with no photo and accept one later with no redesign.
+- **Photos of the owner:** not available yet. The top of the home page shows
+  a generic placeholder figure and accepts a real photo later with no redesign.
 - **Voice recordings:** not available yet. Placeholder sounds stand in.
 - **Employer detail:** experience entries show organisation, title, team and
   dates only.
@@ -140,9 +140,9 @@ content as files, interactivity added only where wanted.
 ├──────────────────────────────────────────────────────────┤
 │ Proof strip: awards, scholarship, honours                 │
 ├──────────────────────────────────────────────────────────┤
-│ ‹ Python · TypeScript · React · C++ · SQL · Docker · … ›  │ skills strip,
-├──────────────────────────────────────────────────────────┤ always moving
 │ Experience: one line per role                             │
+├──────────────────────────────────────────────────────────┤
+│ ‹ Python · TypeScript · React · C++ · SQL · Docker · … ›  │ skills strip,
 ├──────────────────────────────────────────────────────────┤
 │ Featured projects: large cards, each opens its page       │
 ├──────────────────────────────────────────────────────────┤
@@ -162,10 +162,15 @@ Decisions behind the order:
 
 - Experience sits above projects because internships are the first thing a
   recruiter checks, and with one line per role it costs little space.
+- `/projects` on its own redirects to the projects section of the home page.
+  Every project page has a "Back to projects" link at the top and the bottom,
+  and "Next" cycles through the featured projects, wrapping from the last to
+  the first.
 - The old "Involvement" section is split. Hackathon wins go to the proof strip
   and the project pages. Clubs, organising and volunteering go to About.
-- Skills are a single moving strip near the top, not a section of lists (see
-  "Skills strip" in section 8). Each project also shows its own stack.
+- Skills are a single moving strip below Experience, where it divides "who"
+  from "work" without competing with the pitch (see "Skills strip" in
+  section 8). Each project also shows its own stack.
 - Navigation is a top bar, the same on every page and on phones. It shows the
   current section with an animated indicator.
 
@@ -177,7 +182,8 @@ Brief by rule: at most about 120 words of body text, in three short blocks.
 2. **Problem** (one or two sentences)
 3. **What I built** (two to four sentences, names the stack in context)
 4. **Result** (a number, an award, or what it enabled)
-5. Media: embedded video or live demo if one exists, then screenshots
+5. Media: embedded video or live demo if one exists, then the cover and any
+   number of gallery images
 6. Link to the next featured project
 
 Body text is drafted by Claude from the project's README and code. The owner
@@ -198,13 +204,15 @@ message.
 | `category` | yes | `web-apps`, `ai-data` or `systems` |
 | `stack` | yes | List of technologies |
 | `date` | yes | Year and month, for ordering |
-| `links.repo` | yes | Public repository only |
+| `links.repo` | featured: yes; others: optional | Public repository only. A compact row with no repository shows its title as plain text. |
 | `links.live`, `links.video` | no | |
 | `featured` | no | A number. Sets the order among featured projects. Present means the project gets a large card and its own page. |
 | `result` | featured only | One short measurable line shown on the card |
 | `award` | no | `{ name, event }`. Shown as a badge. |
 | `cover` | featured: yes; others: optional | Image shown on the card and the preview card |
-| `gallery` | no | Extra images for a featured project's page |
+| `gallery` | no | Extra images for a featured project's page. No limit. |
+| `coverFit` | no | `cover` (default) crops to fill the card; `contain` shows a whole chart or screenshot |
+| `coverPosition` | no | Which part of a cropped cover to keep: `left top` (default), `top`, `center`, `bottom` |
 | body | featured only | The three short blocks |
 
 Projects without `featured` appear as compact rows that link to the
@@ -217,7 +225,7 @@ one shows none.
 - `src/content/experience.yaml`: organisation, title, team, start, end, logo.
   No description field exists, by design.
 - `src/content/proof.yaml`: the proof-strip items, each with a label, a
-  detail and an optional link.
+  detail (one line, or a list shown line by line) and an optional link.
 - `src/content/skills.yaml`: the ordered list shown in the skills strip.
 - `src/content/about.md`: the bio and activities.
 - `src/content/site.yaml`: name, pitch, the "looking for" line, school line,

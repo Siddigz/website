@@ -16,6 +16,7 @@ award:
   event: cuHacking 7
 cover: ../../assets/projects/curiding/cover.jpg
 coverAlt: A hand holding a small camera wired to a Raspberry Pi, with a laptop behind it showing the live camera view.
+coverPosition: center
 gallery:
   - src: ../../assets/projects/curiding/team.jpg
     alt: Four teammates around a table of laptops and electronics parts, smiling at the camera.

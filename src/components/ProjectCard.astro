@@ -27,7 +27,7 @@ const contain = data.coverFit === 'contain';
         width={800}
         height={500}
         fit="cover"
-        position="left top"
+        position={data.coverPosition}
         sizes="(min-width: 48rem) 34rem, 100vw"
       />
     )
@@ -43,7 +43,7 @@ const contain = data.coverFit === 'contain';
     <h3><a href={`/projects/${id}`}>{data.title}</a></h3>
     <p class="muted">{data.oneLiner}</p>
     {data.result && <p class="result">{data.result}</p>}
-    <ul class="stack muted" role="list" aria-label="Built with">
+    <ul class="stack muted" role="list" aria-label="Built with" translate="no">
       {data.stack.map((item) => <li>{item}</li>)}
     </ul>
   </div>

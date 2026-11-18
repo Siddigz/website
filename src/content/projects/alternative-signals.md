@@ -11,6 +11,11 @@ result: Tested 7 signals across 40 companies, 261,000+ reviews and 3.0 million i
 cover: ../../assets/projects/alternative-signals/cover.png
 coverAlt: Bar chart of how well seven free signals predict sales surprises and stock returns across 40 companies. Google search has the longest bar.
 coverFit: contain
+gallery:
+  - src: ../../assets/projects/alternative-signals/copying-congress.png
+    alt: Line chart of the growth of one dollar from copying trades by members of Congress, tracking the market indexes closely.
+  - src: ../../assets/projects/alternative-signals/sector-rotation.png
+    alt: Line chart of the growth of one dollar across 12 industries since 1930, with a momentum rotation strategy above the equal-weight line.
 ---
 
 ## Problem

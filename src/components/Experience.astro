@@ -25,11 +25,11 @@ const roles = (await getCollection('experience')).sort((a, b) => a.data.order - 
         return (
           <li>
             <span class="logo">
-              {logo && logo.light === logo.dark && <Image src={logo.light} alt="" width={32} height={32} />}
+              {logo && logo.light === logo.dark && <Image src={logo.light} alt="" width={72} height={72} />}
               {logo && logo.light !== logo.dark && (
                 <>
-                  <Image class="only-light" src={logo.light} alt="" width={32} height={32} />
-                  <Image class="only-dark" src={logo.dark} alt="" width={32} height={32} />
+                  <Image class="only-light" src={logo.light} alt="" width={72} height={72} />
+                  <Image class="only-dark" src={logo.dark} alt="" width={72} height={72} />
                 </>
               )}
             </span>

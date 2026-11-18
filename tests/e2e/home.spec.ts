@@ -13,7 +13,7 @@ const more = moreSlugs();
 test('top half has its sections in order', async ({ page }) => {
   await page.goto('/');
   const ids = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.id));
-  expect(ids.slice(0, 4)).toEqual(['top', 'proof', 'skills', 'experience']);
+  expect(ids.slice(0, 4)).toEqual(['top', 'proof', 'experience', 'skills']);
 });
 
 test('hero shows the name, pitch, school facts and links', async ({ page }) => {
@@ -53,10 +53,55 @@ test('with the switch off the line is gone and leaves no gap', async ({ page }) 
   expect(new Set(gaps).size).toBe(1);
 });
 
-test('the photo slot takes no space while there is no photo', async ({ page }) => {
+test('the photo slot shows a generic placeholder until a photo is supplied', async ({ page }) => {
   await page.goto('/');
-  const box = await page.locator('[data-photo-slot]').boundingBox();
-  expect(box === null || box.width === 0 || box.height === 0).toBe(true);
+  const placeholder = page.locator('[data-photo-slot] svg');
+  await expect(placeholder).toBeVisible();
+  await expect(placeholder).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('[data-photo-slot] img')).toHaveCount(0);
+  const box = await placeholder.boundingBox();
+  expect(box!.width).toBeGreaterThan(80);
+  expect(Math.abs(box!.width - box!.height)).toBeLessThan(2);
+});
+
+test('the school name stays on one line', async ({ page }) => {
+  await page.goto('/');
+  const school = page.locator('#top [data-school]');
+  await expect(school).toHaveText(site.school);
+  expect(await school.evaluate((el) => el.getClientRects().length)).toBe(1);
+  await expect(page.locator('#top [data-program]')).toHaveText(site.program);
+  // The facts read as separate items, with a space on both sides of each dot.
+  await expect(page.locator('#top .facts')).toContainText(`${site.school} · GPA ${site.gpa} · Expected ${site.expectedGraduation}`);
+});
+
+test('on a wide screen the photo sits to the right of the text', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const text = (await page.locator('#top [data-hero-text]').boundingBox())!;
+  const photo = (await page.locator('#top [data-photo-slot]').boundingBox())!;
+  expect(photo.x).toBeGreaterThan(text.x + text.width - 1);
+});
+
+test('on a phone the photo sits above the name', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const name = (await page.locator('#top h1').boundingBox())!;
+  const photo = (await page.locator('#top [data-photo-slot]').boundingBox())!;
+  expect(photo.y + photo.height).toBeLessThanOrEqual(name.y);
+});
+
+test('a proof item with several details shows each on its own line', async ({ page }) => {
+  await page.goto('/');
+  const lines = page.locator('#proof li', { hasText: "Deans' Honour List" }).locator('[data-detail-line]');
+  await expect(lines).toHaveText(['2023–24', '2024–25', '2025–26']);
+  const tops = await lines.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(3);
+});
+
+test('/projects leads to the projects section of the home page', async ({ page }) => {
+  await page.goto('/projects');
+  await expect(page).toHaveURL(/\/#projects$/);
+  await expect(page.locator('#projects')).toBeVisible();
 });
 
 test('experience lists three roles and no descriptions', async ({ page }) => {
@@ -122,7 +167,7 @@ test('skills strip is still under reduced motion', async ({ page }) => {
 test('all eight sections are in order', async ({ page }) => {
   await page.goto('/');
   const ids = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.id));
-  expect(ids).toEqual(['top', 'proof', 'skills', 'experience', 'projects', 'more-projects', 'about', 'contact']);
+  expect(ids).toEqual(['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'about', 'contact']);
 });
 
 test('featured cards appear in order, each linking to its page', async ({ page }) => {
@@ -146,20 +191,24 @@ test('compact rows appear newest first and link to GitHub', async ({ page }) => 
   const rows = page.locator('#more-projects li[data-category]');
   await expect(rows).toHaveCount(more.length);
   const hrefs = await rows.locator('h3 a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-  expect(hrefs).toEqual(more.map((slug) => project(slug).data.links.repo));
+  expect(hrefs).toEqual(more.map((slug) => project(slug).data.links?.repo).filter(Boolean));
   for (const [index, slug] of more.entries()) {
     const { data } = project(slug);
     const row = rows.nth(index);
     await expect(row.getByRole('list', { name: 'Built with' }).getByRole('listitem')).toHaveText(data.stack);
+    // A project with no repository shows its title as plain text.
+    await expect(row.locator('h3 a')).toHaveCount(data.links?.repo ? 1 : 0);
+    await expect(row.locator('h3')).toHaveText(data.title);
     const live = row.getByRole('link', { name: `Live: ${data.title}` });
-    await expect(live).toHaveCount(data.links.live ? 1 : 0);
-    if (data.links.live) await expect(live).toHaveAttribute('href', data.links.live);
+    await expect(live).toHaveCount(data.links?.live ? 1 : 0);
+    if (data.links?.live) await expect(live).toHaveAttribute('href', data.links.live);
     await expect(row.locator('img')).toHaveCount(data.cover ? 1 : 0);
   }
 });
 
 test('some row shows a live link, so the check above is not empty', () => {
-  expect(more.some((slug) => project(slug).data.links.live)).toBe(true);
+  expect(more.some((slug) => project(slug).data.links?.live)).toBe(true);
+  expect(more.some((slug) => !project(slug).data.links?.repo)).toBe(true);
   expect(more.some((slug) => !project(slug).data.cover)).toBe(true);
 });
 

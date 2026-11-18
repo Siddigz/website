@@ -15,7 +15,11 @@ scholarship:
   order: 3
 honour-list:
   label: Deans' Honour List
-  detail: 2023–24, 2024–25, 2025–26
+  # A list shows each entry on its own line.
+  detail:
+    - 2023–24
+    - 2024–25
+    - 2025–26
   link: https://carleton.ca/awards/awards/deans-honour-list/
   order: 4
 gpa:

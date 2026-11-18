@@ -11,7 +11,8 @@ const DIST = 'dist';
 const JS_BUDGET_BYTES = 60 * 1024;
 
 const built = textFiles(DIST);
-const pages = built.filter(([path]) => path.endsWith('.html'));
+// Redirect stubs (for example /projects) are not pages a visitor reads.
+const pages = built.filter(([path, html]) => path.endsWith('.html') && !/http-equiv="refresh"/i.test(html));
 
 describe('built site', () => {
   it('has been built', () => {
