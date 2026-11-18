@@ -5,15 +5,9 @@
  */
 :root {
   /* Follow the system by default. The theme toggle pins a scheme by changing
-     the <meta name="color-scheme"> content; these rules map it back to CSS. */
+     the <meta name="color-scheme"> content; rules below map it back to CSS.
+     This file uses no CSS nesting on purpose (see tests/content/styles.test.ts). */
   color-scheme: light dark;
-
-  &:has(> head > meta[name='color-scheme'][content='dark']) {
-    color-scheme: dark;
-  }
-  &:has(> head > meta[name='color-scheme'][content='light']) {
-    color-scheme: light;
-  }
 
   /* Raw colour values */
   --color-bg-light: oklch(98.5% 0.003 250);
@@ -36,24 +30,6 @@
   --color-text-muted: var(--color-text-muted-light);
   --color-accent: var(--color-accent-light);
   --color-border: var(--color-border-light);
-
-  @media (prefers-color-scheme: dark) {
-    --color-bg: var(--color-bg-dark);
-    --color-surface: var(--color-surface-dark);
-    --color-text: var(--color-text-dark);
-    --color-text-muted: var(--color-text-muted-dark);
-    --color-accent: var(--color-accent-dark);
-    --color-border: var(--color-border-dark);
-  }
-
-  @supports (color: light-dark(white, black)) {
-    --color-bg: light-dark(var(--color-bg-light), var(--color-bg-dark));
-    --color-surface: light-dark(var(--color-surface-light), var(--color-surface-dark));
-    --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
-    --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
-    --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
-    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
-  }
 
   /* Type */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -98,5 +74,40 @@
   --measure: 65ch;
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
   --thumb-size: 3.5rem;
-  --logo-size: 2rem;
+  --logo-size: 3.5rem;
+  --media-width: 56rem;
+  --layer-header: 5;
+  --layer-skip-link: 10;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='dark']) {
+  color-scheme: dark;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='light']) {
+  color-scheme: light;
+}
+
+/* Dark values for browsers without light-dark(). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-text: var(--color-text-dark);
+    --color-text-muted: var(--color-text-muted-dark);
+    --color-accent: var(--color-accent-dark);
+    --color-border: var(--color-border-dark);
+  }
+}
+
+/* Where light-dark() exists, colours follow the scheme, including a pinned one. */
+@supports (color: light-dark(white, black)) {
+  :root {
+    --color-bg: light-dark(var(--color-bg-light), var(--color-bg-dark));
+    --color-surface: light-dark(var(--color-surface-light), var(--color-surface-dark));
+    --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
+    --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
+    --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
+    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
+  }
 }

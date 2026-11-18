@@ -13,7 +13,7 @@ const { items } = (await getEntry('skills', 'main'))!.data;
 <section id="skills" class="skills">
   <h2 class="visually-hidden">Skills</h2>
   <div class="strip">
-    <div class="viewport container">
+    <div class="viewport container" data-skills-viewport>
       <div class="track" data-track>
         <ul aria-label="Skills" role="list">
           {items.map((skill) => <li>{skill}</li>)}
@@ -23,10 +23,12 @@ const { items } = (await getEntry('skills', 'main'))!.data;
         </ul>
       </div>
     </div>
-    <label class="pause container">
-      <input type="checkbox" aria-label="Pause the skills strip" />
-      <span>Pause</span>
-    </label>
+    <div class="container">
+      <label class="pause">
+        <input type="checkbox" aria-label="Pause the skills strip" />
+        <span>Pause</span>
+      </label>
+    </div>
   </div>
 </section>
 
@@ -78,7 +80,7 @@ const { items } = (await getEntry('skills', 'main'))!.data;
     }
 
     .pause {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: var(--space-2);
       margin-block-start: var(--space-2);
@@ -86,8 +88,7 @@ const { items } = (await getEntry('skills', 'main'))!.data;
       color: var(--color-text-muted);
     }
 
-    .strip:hover .track,
-    .strip:focus-within .track,
+    .viewport:hover .track,
     .strip:has(.pause input:checked) .track {
       animation-play-state: paused;
     }

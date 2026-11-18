@@ -1,9 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
+import { featuredSlugs, moreSlugs, readProjects } from '../content/helpers';
 
 const site = parse(readFileSync('src/content/site.yaml', 'utf8')).main;
 const skills: string[] = parse(readFileSync('src/content/skills.yaml', 'utf8')).main.items;
+const projects = readProjects();
+const project = (slug: string) => projects.find((p) => p.slug === slug)!;
+const featured = featuredSlugs();
+const more = moreSlugs();
 
 test('top half has its sections in order', async ({ page }) => {
   await page.goto('/');
@@ -40,6 +45,12 @@ test('with the switch off the line is gone and leaves no gap', async ({ page }) 
     .locator('#top [data-hero-text] > *')
     .evaluateAll((els) => els.filter((e) => !e.textContent?.trim()).length);
   expect(empties).toBe(0);
+  // Nothing shifts: the space between every pair of neighbours is the same.
+  const gaps = await page.locator('#top [data-hero-text] > *').evaluateAll((els) =>
+    els.slice(1).map((el, i) => Math.round(el.getBoundingClientRect().top - els[i]!.getBoundingClientRect().bottom)),
+  );
+  expect(gaps.length).toBeGreaterThan(2);
+  expect(new Set(gaps).size).toBe(1);
 });
 
 test('the photo slot takes no space while there is no photo', async ({ page }) => {
@@ -80,8 +91,20 @@ test('skills strip moves, and the pause control stops it', async ({ page }) => {
   const track = page.locator('#skills [data-track]');
   expect(await track.evaluate((e) => getComputedStyle(e).animationName)).not.toBe('none');
   expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('running');
-  await page.getByRole('checkbox', { name: 'Pause the skills strip' }).check();
+  const pause = page.getByRole('checkbox', { name: 'Pause the skills strip' });
+  await pause.check();
   expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('paused');
+  // Unchecking resumes at once, while the checkbox still has focus.
+  await pause.uncheck();
+  await expect(pause).toBeFocused();
+  expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('running');
+});
+
+test('skills strip pauses while the pointer is over it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  await page.locator('[data-skills-viewport]').hover();
+  expect(await page.locator('#skills [data-track]').evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('paused');
 });
 
 test('skills strip is still under reduced motion', async ({ page }) => {
@@ -102,32 +125,42 @@ test('all eight sections are in order', async ({ page }) => {
   expect(ids).toEqual(['top', 'proof', 'skills', 'experience', 'projects', 'more-projects', 'about', 'contact']);
 });
 
-test('six featured cards in order, each linking to its page', async ({ page }) => {
+test('featured cards appear in order, each linking to its page', async ({ page }) => {
   await page.goto('/');
-  const hrefs = await page
-    .locator('#projects article h3 a')
-    .evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-  expect(hrefs).toEqual([
-    '/projects/curiding',
-    '/projects/alternative-signals',
-    '/projects/brightspace-deadlines',
-    '/projects/visioncompanion',
-    '/projects/ecocart',
-    '/projects/cpu-cache-benchmark',
-  ]);
-  await expect(page.locator('#projects article').first()).toContainText("People's Choice · cuHacking 7");
-  await expect(page.locator('#projects article').first()).toContainText("Won People's Choice at cuHacking 7.");
-  await expect(page.locator('#projects article img')).toHaveCount(6);
+  const cards = page.locator('#projects article');
+  const hrefs = await cards.locator('h3 a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  expect(hrefs).toEqual(featured.map((slug) => `/projects/${slug}`));
+  await expect(cards.locator('img')).toHaveCount(featured.length);
+  for (const [index, slug] of featured.entries()) {
+    const { data } = project(slug);
+    const card = cards.nth(index);
+    await expect(card).toContainText(data.oneLiner);
+    await expect(card).toContainText(data.result);
+    if (data.award) await expect(card).toContainText(`${data.award.name} · ${data.award.event}`);
+    await expect(card.getByRole('list', { name: 'Built with' }).getByRole('listitem')).toHaveText(data.stack);
+  }
 });
 
-test('seven compact rows link to GitHub', async ({ page }) => {
+test('compact rows appear newest first and link to GitHub', async ({ page }) => {
   await page.goto('/');
   const rows = page.locator('#more-projects li[data-category]');
-  await expect(rows).toHaveCount(7);
+  await expect(rows).toHaveCount(more.length);
   const hrefs = await rows.locator('h3 a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-  expect(hrefs).toHaveLength(7);
-  for (const href of hrefs) expect(href).toMatch(/^https:\/\/github\.com\/Siddigz\//);
-  await expect(rows.first()).toContainText('PDF-merger');
+  expect(hrefs).toEqual(more.map((slug) => project(slug).data.links.repo));
+  for (const [index, slug] of more.entries()) {
+    const { data } = project(slug);
+    const row = rows.nth(index);
+    await expect(row.getByRole('list', { name: 'Built with' }).getByRole('listitem')).toHaveText(data.stack);
+    const live = row.getByRole('link', { name: `Live: ${data.title}` });
+    await expect(live).toHaveCount(data.links.live ? 1 : 0);
+    if (data.links.live) await expect(live).toHaveAttribute('href', data.links.live);
+    await expect(row.locator('img')).toHaveCount(data.cover ? 1 : 0);
+  }
+});
+
+test('some row shows a live link, so the check above is not empty', () => {
+  expect(more.some((slug) => project(slug).data.links.live)).toBe(true);
+  expect(more.some((slug) => !project(slug).data.cover)).toBe(true);
 });
 
 test('a row with only required fields renders cleanly', async ({ page }) => {
@@ -163,4 +196,5 @@ test('contact has GitHub and LinkedIn and no email control', async ({ page }) =>
   await expect(page.locator('#contact').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
   await expect(page.locator('#contact').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
   await expect(page.locator('#contact').getByText(/email/i)).toHaveCount(0);
+  await expect(page.locator('#contact')).toContainText(site.contactNote);
 });

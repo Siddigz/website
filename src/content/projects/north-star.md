@@ -6,6 +6,4 @@ stack: [Python, Pygame]
 date: 2026-01
 links:
   repo: https://github.com/Siddigz/North-Star
-cover: ../../assets/projects/north-star/cover.jpg
-coverAlt: A laptop showing a route map of the Canadian Arctic, with a planning whiteboard behind it.
 ---

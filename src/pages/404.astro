@@ -1,8 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSite } from '../lib/site';
+
+const site = await getSite();
 ---
 
-<BaseLayout title="Page not found · Siddig Ahmed" description="This page does not exist." path="/404">
+<BaseLayout title={`Page not found · ${site.fullName}`} description="This page does not exist." path="/404">
   <section class="section container">
     <h1>Page not found</h1>
     <p class="muted">There is nothing at this address.</p>

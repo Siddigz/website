@@ -36,6 +36,12 @@ describe('projectSchema', () => {
   it('rejects a malformed date', () => {
     expect(schema.safeParse({ ...base, date: 'Jan 2026' }).success).toBe(false);
   });
+  it('accepts only known cover fits', () => {
+    const withCover = { ...base, cover: './c.png', coverAlt: 'c' };
+    expect(schema.safeParse({ ...withCover, coverFit: 'contain' }).success).toBe(true);
+    expect(schema.safeParse({ ...withCover, coverFit: 'stretch' }).success).toBe(false);
+    expect(schema.parse(withCover).coverFit).toBe('cover');
+  });
   it('rejects an empty stack', () => {
     expect(schema.safeParse({ ...base, stack: [] }).success).toBe(false);
   });
@@ -62,6 +68,7 @@ describe('siteSchema', () => {
       gpa: 'g',
       expectedGraduation: 'e',
       links: { github: 'https://github.com/Siddigz', linkedin: 'https://linkedin.com/in/x' },
+      contactNote: 'Say hello.',
       home: { city: 'Ottawa', timeZone: 'America/Toronto' },
     };
     expect(siteSchema.safeParse(site).success).toBe(false);

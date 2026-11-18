@@ -35,6 +35,11 @@ describe('copy', () => {
     expect(site.gpa).toBe('3.85/4.00');
     expect(site.expectedGraduation).toBe('April 2028');
     expect(site.lookingFor).toEqual({ enabled: true, text: 'Open to software engineering internships' });
+    expect(site.contactNote.length).toBeGreaterThan(10);
+  });
+
+  it('does not call a current internship finished', () => {
+    expect(site.pitch).not.toMatch(/behind me/i);
   });
 
   it('lists three roles and the skills in the agreed order', () => {

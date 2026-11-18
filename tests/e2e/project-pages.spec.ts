@@ -1,19 +1,18 @@
 import { test, expect } from '@playwright/test';
 
-const FEATURED = [
-  'curiding',
-  'alternative-signals',
-  'brightspace-deadlines',
-  'visioncompanion',
-  'ecocart',
-  'cpu-cache-benchmark',
-];
+import { featuredSlugs, moreSlugs, readProjects } from '../content/helpers';
+
+// Derived from the content files, so adding a featured project needs no test edit.
+const FEATURED = featuredSlugs();
+const projects = readProjects();
 
 for (const [i, slug] of FEATURED.entries()) {
   test(`${slug} page`, async ({ page }) => {
     const response = await page.goto(`/projects/${slug}`);
     expect(response?.status()).toBe(200);
-    await expect(page.locator('h1')).toHaveCount(1);
+    const { data } = projects.find((project) => project.slug === slug)!;
+    await expect(page.locator('h1')).toHaveText(data.title);
+    await expect(page.getByRole('list', { name: 'Built with' }).getByRole('listitem')).toHaveText(data.stack);
     await expect(page.locator('main').getByRole('heading', { level: 2 })).toHaveText([
       'Problem',
       'What I built',
@@ -69,6 +68,6 @@ test('a page shows only the links its project has', async ({ page }) => {
 });
 
 test('a non-featured project has no page', async ({ page }) => {
-  const response = await page.goto('/projects/markit');
+  const response = await page.goto(`/projects/${moreSlugs()[0]}`);
   expect(response?.status()).toBe(404);
 });

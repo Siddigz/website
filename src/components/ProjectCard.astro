@@ -7,11 +7,19 @@ interface Props {
 }
 
 const { id, data } = Astro.props.project;
+const contain = data.coverFit === 'contain';
 ---
 
 <article class="card">
   {
-    data.cover && (
+    data.cover && contain && (
+      /* Charts and screenshots: the whole image, never cropped. */
+      <Image class="cover contain" src={data.cover} alt={data.coverAlt ?? ''} width={800} sizes="(min-width: 48rem) 34rem, 100vw" />
+    )
+  }
+  {
+    data.cover && !contain && (
+      /* Photos: cropped to fill the frame. */
       <Image
         class="cover"
         src={data.cover}
@@ -20,6 +28,7 @@ const { id, data } = Astro.props.project;
         height={500}
         fit="cover"
         position="left top"
+        sizes="(min-width: 48rem) 34rem, 100vw"
       />
     )
   }
@@ -34,6 +43,9 @@ const { id, data } = Astro.props.project;
     <h3><a href={`/projects/${id}`}>{data.title}</a></h3>
     <p class="muted">{data.oneLiner}</p>
     {data.result && <p class="result">{data.result}</p>}
+    <ul class="stack muted" role="list" aria-label="Built with">
+      {data.stack.map((item) => <li>{item}</li>)}
+    </ul>
   </div>
 </article>
 
@@ -60,6 +72,13 @@ const { id, data } = Astro.props.project;
     object-fit: cover;
     object-position: left top;
     border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .cover.contain {
+    padding: var(--space-3);
+    object-fit: contain;
+    object-position: center;
+    background: var(--color-bg);
   }
 
   .body {
@@ -92,5 +111,14 @@ const { id, data } = Astro.props.project;
 
   .result {
     font-weight: var(--weight-medium);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-block-start: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
   }
 </style>

@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { EMAIL_PATTERN, textFiles } from '../content/helpers';
+import { EMAIL_PATTERN, readYaml, textFiles } from '../content/helpers';
 
 const DIST = 'dist';
 const JS_BUDGET_BYTES = 60 * 1024;
@@ -65,11 +65,13 @@ describe('built site', () => {
     expect(linking).toEqual([]);
   });
 
-  it('every page has one h1, a description and a canonical address on siddigz.com', () => {
+  it('every page has one h1, a description and a canonical address from site.yaml', () => {
+    const origin = new URL(readYaml('src/content/site.yaml').main.url).origin;
+    expect(origin).toBe('https://siddigz.com');
     for (const [path, html] of pages) {
       expect(html.match(/<h1[\s>]/g)?.length, `${path} h1 count`).toBe(1);
       expect(html, path).toMatch(/<meta name="description" content="[^"]+"/);
-      expect(html, path).toMatch(/<link rel="canonical" href="https:\/\/siddigz\.com\//);
+      expect(html, path).toContain(`<link rel="canonical" href="${origin}/`);
     }
   });
 });

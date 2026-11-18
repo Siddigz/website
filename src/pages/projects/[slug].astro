@@ -4,6 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { featuredProjects, nextFeatured } from '../../lib/projects';
+import { getSite } from '../../lib/site';
 
 // Only featured projects get a page. The rest link straight to GitHub.
 export async function getStaticPaths() {
@@ -22,12 +23,13 @@ interface Props {
 const { project, next } = Astro.props;
 const { data } = project;
 const { Content } = await render(project);
+const site = await getSite();
 
-/** 'https://github.com/Siddigz/cuRiding-Server' becomes 'cuRiding-Server'. */
+/** The last part of a repository address: '…/cuRiding-Server' becomes 'cuRiding-Server'. */
 const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url;
 ---
 
-<BaseLayout title={`${data.title} · Siddig Ahmed`} description={data.oneLiner} path={`/projects/${project.id}`}>
+<BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`}>
   <article class="project section container">
     <header>
       <p><a href="/#projects">Back to projects</a></p>
@@ -146,7 +148,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
   .media {
     display: grid;
     gap: var(--space-5);
-    max-inline-size: 56rem;
+    max-inline-size: var(--media-width);
   }
 
   .media :global(img) {

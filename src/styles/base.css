@@ -112,7 +112,7 @@ button {
   position: absolute;
   inset-block-start: var(--space-2);
   inset-inline-start: var(--space-2);
-  z-index: 10;
+  z-index: var(--layer-skip-link);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -132,23 +132,21 @@ button {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .theme-toggle {
-    .to-dark {
-      display: none;
-    }
-    .to-light {
-      display: inline-flex;
-    }
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .theme-toggle .to-dark {
+    display: none;
+  }
+
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .theme-toggle .to-light {
+    display: inline-flex;
   }
 }
 
-:root:has(> head > meta[name='color-scheme'][content='dark']) .theme-toggle {
-  .to-dark {
-    display: none;
-  }
-  .to-light {
-    display: inline-flex;
-  }
+:root:has(> head > meta[name='color-scheme'][content='dark']) .theme-toggle .to-dark {
+  display: none;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='dark']) .theme-toggle .to-light {
+  display: inline-flex;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -171,21 +169,19 @@ button {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) {
-    .only-light {
-      display: none;
-    }
-    .only-dark {
-      display: revert;
-    }
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .only-light {
+    display: none;
+  }
+
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .only-dark {
+    display: revert;
   }
 }
 
-:root:has(> head > meta[name='color-scheme'][content='dark']) {
-  .only-light {
-    display: none;
-  }
-  .only-dark {
-    display: revert;
-  }
+:root:has(> head > meta[name='color-scheme'][content='dark']) .only-light {
+  display: none;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='dark']) .only-dark {
+  display: revert;
 }

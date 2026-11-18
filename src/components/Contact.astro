@@ -1,13 +1,13 @@
 ---
-import { getEntry } from 'astro:content';
+import { getSite } from '../lib/site';
 
-const site = (await getEntry('site', 'main'))!.data;
+const site = await getSite();
 ---
 
 <!-- The click-to-reveal contact button arrives in stage 3. -->
 <section id="contact" class="section container">
   <h2 class="section-title">Contact</h2>
-  <p class="muted">The quickest way to reach me is a message on LinkedIn.</p>
+  <p class="muted">{site.contactNote}</p>
   <ul role="list">
     <li><a href={site.links.linkedin}>LinkedIn</a></li>
     <li><a href={site.links.github}>GitHub</a></li>

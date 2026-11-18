@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { pagePaths } from '../content/helpers';
 
 test('every internal link resolves', async ({ page, request }) => {
   const seen = new Set<string>();
@@ -16,16 +17,8 @@ test('every internal link resolves', async ({ page, request }) => {
       .evaluateAll((links) => links.map((link) => new URL((link as HTMLAnchorElement).href).pathname));
     queue.push(...hrefs);
   }
-  // The home page and the six project pages.
-  expect([...seen].sort()).toEqual([
-    '/',
-    '/projects/alternative-signals',
-    '/projects/brightspace-deadlines',
-    '/projects/cpu-cache-benchmark',
-    '/projects/curiding',
-    '/projects/ecocart',
-    '/projects/visioncompanion',
-  ]);
+  // The home page and one page per featured project, and nothing else.
+  expect([...seen].sort()).toEqual(pagePaths().sort());
 });
 
 test('same-page links point at sections that exist', async ({ page }) => {
