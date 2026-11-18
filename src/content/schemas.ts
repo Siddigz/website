@@ -42,6 +42,8 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       award: z.object({ name: z.string().min(1), event: z.string().min(1) }).optional(),
       cover: image().optional(),
       coverAlt: z.string().min(1).optional(),
+      /** 'cover' crops to fill the card (photos). 'contain' shows the whole image (charts, screenshots). */
+      coverFit: z.enum(['cover', 'contain']).default('cover'),
       gallery: z.array(z.object({ src: image(), alt: z.string().min(1) })).optional(),
     })
     .superRefine((project, context) => {
@@ -96,6 +98,8 @@ export const siteSchema = z.object({
   gpa: z.string().min(1),
   expectedGraduation: z.string().min(1),
   links: z.object({ github: z.url(), linkedin: z.url() }),
+  /** The sentence in the Contact section. */
+  contactNote: z.string().min(1),
   home: z.object({ city: z.string().min(1), timeZone: z.string().min(1) }),
 });
 

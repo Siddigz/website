@@ -46,3 +46,19 @@ export function textFiles(root: string): [string, string][] {
 }
 
 export const EMAIL_PATTERN = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
+
+// Lists derived from the content files, so tests keep working when a project
+// is added, removed or reordered.
+import { featuredProjects, moreProjects } from '../../src/lib/projects';
+
+const asEntries = () =>
+  readProjects().map((project) => ({
+    id: project.slug,
+    data: project.data as { featured?: number; date: string },
+  }));
+
+export const featuredSlugs = (): string[] => featuredProjects(asEntries()).map((entry) => entry.id);
+export const moreSlugs = (): string[] => moreProjects(asEntries()).map((entry) => entry.id);
+
+/** Every page a visitor can reach from the home page. */
+export const pagePaths = (): string[] => ['/', ...featuredSlugs().map((slug) => `/projects/${slug}`)];

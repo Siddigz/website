@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProofStrip from '../components/ProofStrip.astro';
@@ -10,13 +10,13 @@ import ProjectRow from '../components/ProjectRow.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import { featuredProjects, moreProjects } from '../lib/projects';
+import { getSite } from '../lib/site';
 
-const site = (await getEntry('site', 'main'))!.data;
-const title = `${site.name.first} ${site.name.last}`;
+const site = await getSite();
 const projects = await getCollection('projects');
 ---
 
-<BaseLayout title={title} description={site.pitch} path="/">
+<BaseLayout title={site.fullName} description={site.pitch} path="/">
   <Hero />
   <ProofStrip />
   <SkillsStrip />

@@ -397,7 +397,7 @@ it('does not enlarge a small image', async () => {
 | `ecocart` | `EcoCart` | 5 | `web-apps` | `video`: `https://youtu.be/w-SaoFrLJkc`. Award: `Best AI for Environmental Impact`, `AGI Ventures Canada Hackathon 3.0` |
 | `cpu-cache-benchmark` | `CPU-Cache-Benchmark` | 6 | `systems` | |
 | `curate` | `curate` | | `systems` | |
-| `schedule-scoop` | `schedule-scoop` | | `web-apps` | `live`: the Chrome Web Store link in `git show main:index.html`. Describe what it does; say nothing about who else worked on it. |
+| `schedule-scoop` | `schedule-scoop` | | `web-apps` | `live`: the Chrome Web Store link in `git show main:index.html`. Describe what the extension does. |
 | `north-star` | `North-Star` | | `ai-data` | |
 | `pdf-merger` | `PDF-merger` | | `web-apps` | |
 | `markit` | `Markit` | | `web-apps` | |
@@ -868,3 +868,34 @@ test('every internal link resolves', async ({ page, request }) => {
   4. Whether "Home Server" from the old site should come back.
   5. Which cover images to replace.
   6. Reminder that the look is a placeholder; choosing it is stage 2.
+
+---
+
+## What changed during the build
+
+Stage 1 is built. These are the places where the result differs from the tasks
+above. Later plans should build on this section, not on the task text.
+
+- **Theme.** The chosen scheme lives in the content of `<meta name="color-scheme">`
+  (`light dark`, `light` or `dark`), not in an `html[data-theme]` attribute. CSS maps
+  it with `:root:has(> head > meta[...])`. Toggling back to the system's scheme
+  clears the stored choice. Helpers are in `src/lib/theme.ts`.
+- **Browser tests** serve `dist/` with `scripts/serve-dist.mjs`, because Astro 7
+  detaches `astro preview` into the background when an agent runs it.
+  `npm run test:e2e` builds first.
+- **Skills strip.** It has a CSS-only Pause checkbox, and it only moves when
+  reduced motion is not set.
+- **Site settings** are read through `getSite()` in `src/lib/site.ts`. The site
+  address is the `url` in `site.yaml`; `astro.config.mjs` reads it. The Contact
+  sentence is `contactNote`.
+- **Projects.** `coverFit: contain` shows a whole chart or screenshot instead of
+  cropping it. Rows show the stack and any live or demo link. Cards show the stack.
+- **Tests derive their lists from the content files.** Adding, removing or
+  reordering a project needs no test edit.
+- **Checks added:** accessibility scan (axe, WCAG 2.2 AA) on three pages in both
+  themes; image metadata and size; no CSS nesting in the global stylesheets; no
+  email in any tracked file; the owner's name is not hard-coded in components.
+- **Global stylesheets use no CSS nesting**, so older Safari still gets every token.
+- **Categories** follow the GitHub profile README.
+- **Not yet done:** tests run in Chromium only. Add WebKit and Firefox when the
+  real look lands in stage 2.

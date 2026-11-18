@@ -1,12 +1,12 @@
 ---
-import { getEntry } from 'astro:content';
+import { getSite } from '../lib/site';
 
 interface Props {
   /** Test-only: force the looking-for line on or off regardless of site.yaml. */
   lookingForOverride?: boolean;
 }
 
-const site = (await getEntry('site', 'main'))!.data;
+const site = await getSite();
 const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled;
 ---
 

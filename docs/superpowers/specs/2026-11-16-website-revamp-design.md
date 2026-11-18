@@ -500,6 +500,8 @@ The owner reviews the list with the first content draft.
 4. Run the checks. Open the preview address. Confirm the card, the page and
    the preview image.
 5. Update the GitHub profile README with the same one-liner.
+6. If the featured list or its order changed, update the README's order and
+   the six pinned repositories on GitHub to match.
 
 ### Checks
 

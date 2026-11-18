@@ -10,6 +10,7 @@ featured: 2
 result: Tested 7 signals across 40 companies, 261,000+ reviews and 3.0 million insider trades. One held up.
 cover: ../../assets/projects/alternative-signals/cover.png
 coverAlt: Bar chart of how well seven free signals predict sales surprises and stock returns across 40 companies. Google search has the longest bar.
+coverFit: contain
 ---
 
 ## Problem

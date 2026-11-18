@@ -2,13 +2,27 @@ import { test, expect } from '@playwright/test';
 
 const scheme = 'meta[name="color-scheme"]';
 
+// What the visitor actually sees, not only what the page records.
+const rendered = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => ({
+    scheme: getComputedStyle(document.documentElement).colorScheme,
+    background: getComputedStyle(document.body).backgroundColor,
+    text: getComputedStyle(document.body).color,
+  }));
+
 test('toggle switches the theme and it survives a reload', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/');
   await expect(page.locator(scheme)).toHaveAttribute('content', 'light dark');
+  const light = await rendered(page);
   await page.getByRole('button', { name: 'Switch to dark theme' }).click();
   await expect(page.locator(scheme)).toHaveAttribute('content', 'dark');
+  const dark = await rendered(page);
+  expect(dark.scheme).toBe('dark');
+  expect(dark.background).not.toBe(light.background);
+  expect(dark.text).not.toBe(light.text);
   await page.reload();
+  expect(await rendered(page)).toEqual(dark);
   await expect(page.locator(scheme)).toHaveAttribute('content', 'dark');
   await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible();
 });
@@ -39,8 +53,10 @@ test('blocked storage does not break the page or the toggle', async ({ page }) =
   page.on('pageerror', (error) => errors.push(error.message));
   await page.emulateMedia({ colorScheme: 'light' });
   await page.goto('/');
+  const light = await rendered(page);
   await page.getByRole('button', { name: 'Switch to dark theme' }).click();
   await expect(page.locator(scheme)).toHaveAttribute('content', 'dark');
+  expect((await rendered(page)).background).not.toBe(light.background);
   expect(errors).toEqual([]);
 });
 
@@ -55,4 +71,16 @@ test('skip link jumps to the main content', async ({ page }) => {
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   await expect(page.locator('main#main')).toHaveCount(1);
+});
+
+test('a pinned light theme stays light when the system is dark', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+  const dark = await rendered(page);
+  await page.getByRole('button', { name: 'Switch to light theme' }).click();
+  await expect(page.locator(scheme)).toHaveAttribute('content', 'light');
+  const light = await rendered(page);
+  expect(light.scheme).toBe('light');
+  expect(light.background).not.toBe(dark.background);
+  await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
 });

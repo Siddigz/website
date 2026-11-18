@@ -19,6 +19,20 @@ const { data } = Astro.props.project;
   <div class="text">
     <h3><a href={data.links.repo}>{data.title}</a></h3>
     <p class="muted">{data.oneLiner}</p>
+    <div class="meta muted">
+      <ul class="stack" role="list" aria-label="Built with">
+        {data.stack.map((item) => <li>{item}</li>)}
+      </ul>
+      {
+        data.award && (
+          <span class="award">
+            {data.award.name} · {data.award.event}
+          </span>
+        )
+      }
+      {data.links.live && <a href={data.links.live} aria-label={`Live: ${data.title}`}>Live</a>}
+      {data.links.video && <a href={data.links.video} aria-label={`Demo: ${data.title}`}>Demo</a>}
+    </div>
   </div>
   <span class="category muted">{CATEGORY_LABELS[data.category]}</span>
 </li>
@@ -63,19 +77,35 @@ const { data } = Astro.props.project;
   }
 
   p,
+  .meta,
   .category {
     font-size: var(--text-sm);
   }
 
+  .meta,
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .stack,
   .category {
     font-family: var(--font-mono);
+  }
+
+  .award {
+    color: var(--color-accent);
+    font-weight: var(--weight-bold);
+  }
+
+  .category {
     white-space: nowrap;
   }
 
   /* On narrow screens the category drops under the text. */
   @media (max-width: 36rem) {
-    .row,
-    .row:has(.thumb) {
+    .row {
       grid-template-columns: 1fr;
     }
 

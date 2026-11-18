@@ -1,11 +1,12 @@
 # Site-wide settings. One entry, keyed `main`.
+# `url` is the one place the site address lives: astro.config.mjs reads it.
 main:
   url: https://siddigz.com
   name:
     first: Siddig
     last: Ahmed
   # Draft. One sentence, at most 22 words.
-  pitch: I build software people actually use, from award-winning hackathon projects to student tools, with two software engineering internships behind me.
+  pitch: I build software people actually use, from award-winning hackathon projects to student tools, plus two software engineering internships at Ciena.
   # Set `enabled` to false to hide the line. Keep the text free of terms and years.
   lookingFor:
     enabled: true
@@ -16,6 +17,7 @@ main:
   links:
     github: https://github.com/Siddigz
     linkedin: https://linkedin.com/in/siddigz
+  contactNote: The quickest way to reach me is a message on LinkedIn.
   # Used by the per-visitor greeting (stage 3).
   home:
     city: Ottawa

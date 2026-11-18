@@ -80,6 +80,17 @@ This repository is public. Everything committed here must be safe for anyone to 
    the preview image.
 5. Update the GitHub profile README with the same one-liner.
 
+## Keeping GitHub in step
+
+The GitHub profile README and the six pinned repositories should show the same
+projects as the featured list here, in the same order, with the same one-liners.
+
+- When a project is added, renamed or reworded: update its line in the profile
+  README.
+- When the featured list or its order changes: update the README's order and the
+  six pinned repositories to match.
+- This is a manual step. Nothing syncs it automatically.
+
 ## Commands
 
 - `npm run dev`: local site at http://localhost:4321

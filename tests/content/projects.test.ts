@@ -1,24 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readProjects } from './helpers';
+import { featuredSlugs, moreSlugs, readProjects } from './helpers';
 import { wordCount } from '../../src/lib/text';
-
-const FEATURED = [
-  'curiding',
-  'alternative-signals',
-  'brightspace-deadlines',
-  'visioncompanion',
-  'ecocart',
-  'cpu-cache-benchmark',
-];
-const MORE = [
-  'curate',
-  'schedule-scoop',
-  'north-star',
-  'pdf-merger',
-  'markit',
-  'student-management-system',
-  'relational-algebra-query-processor',
-];
 
 const projects = readProjects();
 const bySlug = (slug: string) => {
@@ -26,28 +8,28 @@ const bySlug = (slug: string) => {
   if (!project) throw new Error(`No project file for ${slug}`);
   return project;
 };
+const featured = featuredSlugs();
+const more = moreSlugs();
 
-describe('launch projects', () => {
-  it('has exactly the launch projects', () => {
-    expect(projects.map((p) => p.slug).sort()).toEqual([...FEATURED, ...MORE].sort());
+describe('projects', () => {
+  it('has featured projects and more projects', () => {
+    expect(featured.length).toBeGreaterThan(0);
+    expect(more.length).toBeGreaterThan(0);
   });
 
-  it('features the six in the agreed order', () => {
-    const order = projects
-      .filter((p) => p.data.featured !== undefined)
-      .sort((a, b) => a.data.featured - b.data.featured);
-    expect(order.map((p) => p.slug)).toEqual(FEATURED);
-    expect(order.map((p) => p.data.featured)).toEqual([1, 2, 3, 4, 5, 6]);
+  it('numbers featured projects 1 to n with no gaps or repeats', () => {
+    const numbers = featured.map((slug) => bySlug(slug).data.featured);
+    expect(numbers).toEqual(featured.map((_, index) => index + 1));
   });
 
-  it.each(FEATURED)('%s has a brief three-part body', (slug) => {
+  it.each(featured)('featured project %s has a brief three-part body', (slug) => {
     const { body } = bySlug(slug);
     expect(body.match(/^## .+$/gm)).toEqual(['## Problem', '## What I built', '## Result']);
     expect(wordCount(body)).toBeLessThanOrEqual(120);
     expect(wordCount(body)).toBeGreaterThan(30);
   });
 
-  it.each(MORE)('%s has no body', (slug) => {
+  it.each(more)('%s has no body, because it has no page', (slug) => {
     expect(bySlug(slug).body.trim()).toBe('');
   });
 
@@ -57,8 +39,6 @@ describe('launch projects', () => {
       name: 'Best AI for Environmental Impact',
       event: 'AGI Ventures Canada Hackathon 3.0',
     });
-    const awarded = projects.filter((p) => p.data.award).map((p) => p.slug).sort();
-    expect(awarded).toEqual(['curiding', 'ecocart']);
   });
 
   it('links both cuRiding repositories', () => {

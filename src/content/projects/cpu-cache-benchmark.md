@@ -10,6 +10,7 @@ featured: 6
 result: Four benchmarks whose plots show access time rising at each cache boundary on a real CPU.
 cover: ../../assets/projects/cpu-cache-benchmark/cover.png
 coverAlt: Line chart of access time against array size. Sequential access stays flat while random access climbs after the L1 and L2 cache boundaries.
+coverFit: contain
 ---
 
 ## Problem
