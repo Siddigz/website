@@ -26,7 +26,12 @@ for (const [i, slug] of FEATURED.entries()) {
       'href',
       `/projects/${FEATURED[(i + 1) % FEATURED.length]}`,
     );
-    await expect(page.getByRole('link', { name: 'Back to projects' })).toHaveAttribute('href', '/#projects');
+    // One way back at the top of the page and one at the bottom.
+    const back = page.getByRole('link', { name: 'Back to projects' });
+    await expect(back).toHaveCount(2);
+    for (const link of await back.all()) await expect(link).toHaveAttribute('href', '/#projects');
+    expect((await back.first().boundingBox())!.y).toBeLessThan(200);
+    await expect(page.locator('main img')).toHaveCount(1 + (data.gallery?.length ?? 0));
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
       `https://siddigz.com/projects/${slug}`,
@@ -55,7 +60,6 @@ test('cuRiding links both repositories and the demo', async ({ page }) => {
     'https://www.youtube.com/shorts/Ubc34F7nnvk',
   );
   await expect(page.getByText("People's Choice · cuHacking 7")).toBeVisible();
-  await expect(page.locator('main img')).toHaveCount(3);
 });
 
 test('a page shows only the links its project has', async ({ page }) => {

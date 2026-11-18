@@ -15,10 +15,10 @@ const { items } = (await getEntry('skills', 'main'))!.data;
   <div class="strip">
     <div class="viewport container" data-skills-viewport>
       <div class="track" data-track>
-        <ul aria-label="Skills" role="list">
+        <ul aria-label="Skills" role="list" translate="no">
           {items.map((skill) => <li>{skill}</li>)}
         </ul>
-        <ul class="copy" aria-hidden="true" role="list">
+        <ul class="copy" aria-hidden="true" role="list" translate="no">
           {items.map((skill) => <li>{skill}</li>)}
         </ul>
       </div>

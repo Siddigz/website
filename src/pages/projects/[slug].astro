@@ -32,7 +32,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
 <BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`}>
   <article class="project section container">
     <header>
-      <p><a href="/#projects">Back to projects</a></p>
+      <a class="back" href="/#projects"><span aria-hidden="true">←</span> Back to projects</a>
       {
         data.award && (
           <p class="award" data-award>
@@ -43,7 +43,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
       <h1>{data.title}</h1>
       <p class="one-liner">{data.oneLiner}</p>
       <ul class="links" role="list">
-        <li><a class="button" href={data.links.repo}>Repository</a></li>
+        {data.links.repo && <li><a class="button" href={data.links.repo}>Repository</a></li>}
         {
           data.links.extraRepos?.map((url) => (
             <li>
@@ -56,7 +56,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
         {data.links.live && <li><a class="button" href={data.links.live}>Live app</a></li>}
         {data.links.video && <li><a class="button" href={data.links.video}>Watch demo</a></li>}
       </ul>
-      <ul class="stack muted" role="list" aria-label="Built with">
+      <ul class="stack muted" role="list" aria-label="Built with" translate="no">
         {data.stack.map((item) => <li>{item}</li>)}
       </ul>
     </header>
@@ -64,16 +64,13 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
     <div class="body"><Content /></div>
 
     <div class="media">
-      {
-        data.cover && (
-          <Image src={data.cover} alt={data.coverAlt ?? ''} width={1200} loading="eager" fetchpriority="high" />
-        )
-      }
-      {data.gallery?.map((image) => <Image src={image.src} alt={image.alt} width={1200} />)}
+      {data.cover && <Image class="lead" src={data.cover} alt={data.coverAlt ?? ''} width={1200} />}
+      {data.gallery?.map((image) => <Image src={image.src} alt={image.alt} width={800} />)}
     </div>
 
     <footer>
-      <a href={`/projects/${next.id}`}>Next: {next.data.title}</a>
+      <a href="/#projects"><span aria-hidden="true">←</span> Back to projects</a>
+      <a href={`/projects/${next.id}`}>Next: {next.data.title} <span aria-hidden="true">→</span></a>
     </footer>
   </article>
 </BaseLayout>
@@ -145,10 +142,27 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
     font-size: var(--text-xl);
   }
 
+  .back {
+    font-weight: var(--weight-medium);
+  }
+
+  /* The cover runs full width; the other images sit two across on wide screens. */
   .media {
     display: grid;
     gap: var(--space-5);
+    align-items: start;
     max-inline-size: var(--media-width);
+  }
+
+  @media (min-width: 48rem) {
+    .media {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .media :global(.lead),
+    .media :global(img:only-child) {
+      grid-column: 1 / -1;
+    }
   }
 
   .media :global(img) {
@@ -157,6 +171,10 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
   }
 
   footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-5);
     padding-block-start: var(--space-5);
     border-block-start: var(--border-width) solid var(--color-border);
     font-weight: var(--weight-medium);

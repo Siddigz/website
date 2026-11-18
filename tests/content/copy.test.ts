@@ -36,6 +36,8 @@ describe('copy', () => {
     expect(site.expectedGraduation).toBe('April 2028');
     expect(site.lookingFor).toEqual({ enabled: true, text: 'Open to software engineering internships' });
     expect(site.contactNote.length).toBeGreaterThan(10);
+    expect(site.school).toBe('Carleton University');
+    expect(site.program).toContain('Computer Science');
   });
 
   it('does not call a current internship finished', () => {

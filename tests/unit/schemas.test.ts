@@ -42,6 +42,18 @@ describe('projectSchema', () => {
     expect(schema.safeParse({ ...withCover, coverFit: 'stretch' }).success).toBe(false);
     expect(schema.parse(withCover).coverFit).toBe('cover');
   });
+  it('accepts only known cover positions', () => {
+    const withCover = { ...base, cover: './c.png', coverAlt: 'c' };
+    expect(schema.safeParse({ ...withCover, coverPosition: 'center' }).success).toBe(true);
+    expect(schema.safeParse({ ...withCover, coverPosition: 'sideways' }).success).toBe(false);
+    expect(schema.parse(withCover).coverPosition).toBe('left top');
+  });
+  it('lets a compact project have no repository, but not a featured one', () => {
+    const { links, ...noLinks } = base;
+    expect(schema.safeParse(noLinks).success).toBe(true);
+    const featured = { ...noLinks, featured: 1, result: 'Won.', cover: './c.png', coverAlt: 'c' };
+    expect(schema.safeParse(featured).success).toBe(false);
+  });
   it('rejects an empty stack', () => {
     expect(schema.safeParse({ ...base, stack: [] }).success).toBe(false);
   });
@@ -64,6 +76,7 @@ describe('siteSchema', () => {
       name: { first: 'A', last: 'B' },
       pitch: 'p',
       lookingFor: { enabled: 'yes', text: 't' },
+      program: 'p',
       school: 's',
       gpa: 'g',
       expectedGraduation: 'e',

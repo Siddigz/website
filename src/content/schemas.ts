@@ -30,12 +30,15 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       category: z.enum(CATEGORIES),
       stack: z.array(z.string().min(1)).min(1),
       date: yearMonth,
-      links: z.object({
-        repo: ownerRepo,
-        extraRepos: z.array(ownerRepo).optional(),
-        live: z.url().optional(),
-        video: z.url().optional(),
-      }),
+      /** A compact project may have no repository; a featured one must. */
+      links: z
+        .object({
+          repo: ownerRepo.optional(),
+          extraRepos: z.array(ownerRepo).optional(),
+          live: z.url().optional(),
+          video: z.url().optional(),
+        })
+        .default({}),
       /** Order among featured projects. Present means a large card and a page. */
       featured: z.number().int().positive().optional(),
       result: z.string().min(1).optional(),
@@ -44,6 +47,8 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       coverAlt: z.string().min(1).optional(),
       /** 'cover' crops to fill the card (photos). 'contain' shows the whole image (charts, screenshots). */
       coverFit: z.enum(['cover', 'contain']).default('cover'),
+      /** Which part of a cropped cover to keep. */
+      coverPosition: z.enum(['left top', 'top', 'center', 'bottom']).default('left top'),
       gallery: z.array(z.object({ src: image(), alt: z.string().min(1) })).optional(),
     })
     .superRefine((project, context) => {
@@ -55,6 +60,9 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       if (project.featured !== undefined) {
         require('result', 'A featured project needs a result line');
         require('cover', 'A featured project needs a cover image');
+        if (project.links.repo === undefined) {
+          context.addIssue({ code: 'custom', path: ['links', 'repo'], message: 'A featured project needs a repository' });
+        }
       }
       if (project.cover !== undefined) {
         require('coverAlt', 'A cover image needs alt text');
@@ -78,7 +86,8 @@ export const experienceSchema = z.strictObject({
 export const proofSchema = z.object({
   id: z.string().optional(),
   label: z.string().min(1),
-  detail: z.string().min(1),
+  /** One line, or several lines shown under each other. */
+  detail: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]),
   link: z.url().optional(),
   order: z.number(),
 });
@@ -94,6 +103,7 @@ export const siteSchema = z.object({
   name: z.object({ first: z.string().min(1), last: z.string().min(1) }),
   pitch: z.string().min(1),
   lookingFor: z.object({ enabled: z.boolean(), text: z.string().min(1) }),
+  program: z.string().min(1),
   school: z.string().min(1),
   gpa: z.string().min(1),
   expectedGraduation: z.string().min(1),

@@ -12,6 +12,13 @@ featured: 4
 result: A live app built at Hack the Hill III that speaks hazards in English and French.
 cover: ../../assets/projects/visioncompanion/cover.jpg
 coverAlt: The VisionCompanion hazard map of downtown Ottawa, with coloured markers for potholes, uneven pavement and crossings.
+gallery:
+  - src: ../../assets/projects/visioncompanion/phone-near-me.jpg
+    alt: The VisionCompanion start screen on a phone, with setup steps, a nearby-potholes summary and a Start walk button.
+  - src: ../../assets/projects/visioncompanion/phone-map.jpg
+    alt: The hazard map on a phone, with markers along the streets and a Pin here button.
+  - src: ../../assets/projects/visioncompanion/signal-path-3d.png
+    alt: Diagram of the signal path. The camera takes a photo, Gemini sees the hazards, the app picks what matters, ElevenLabs turns it into a voice, and the walker hears it in headphones.
 ---
 
 ## Problem

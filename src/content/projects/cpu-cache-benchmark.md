@@ -11,6 +11,13 @@ result: Four benchmarks whose plots show access time rising at each cache bounda
 cover: ../../assets/projects/cpu-cache-benchmark/cover.png
 coverAlt: Line chart of access time against array size. Sequential access stays flat while random access climbs after the L1 and L2 cache boundaries.
 coverFit: contain
+gallery:
+  - src: ../../assets/projects/cpu-cache-benchmark/pointer-chasing.png
+    alt: Line chart of pointer-chasing access time against data size, rising sharply after the L1 and L2 cache boundaries.
+  - src: ../../assets/projects/cpu-cache-benchmark/stride.png
+    alt: Line chart of access time against stride, rising as the stride grows and neighbouring reads stop sharing a cache line.
+  - src: ../../assets/projects/cpu-cache-benchmark/aos-soa.png
+    alt: Chart comparing array-of-structs and struct-of-arrays layouts across data sizes.
 ---
 
 ## Problem
