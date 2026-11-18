@@ -13,7 +13,7 @@
     "check": "astro check",
     "test": "vitest run tests/unit tests/content",
     "test:build": "vitest run tests/build",
-    "test:e2e": "playwright test"
+    "test:e2e": "astro build && playwright test"
   },
   "dependencies": {
     "astro": "^7.4.13"
