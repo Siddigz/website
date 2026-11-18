@@ -1,0 +1,102 @@
+/*
+ * Design tokens. Every colour, type, spacing and motion value used by a
+ * component comes from here. This is the neutral placeholder look; the
+ * visual direction chosen in stage 2 replaces these values, not the names.
+ */
+:root {
+  /* Follow the system by default. The theme toggle pins a scheme by changing
+     the <meta name="color-scheme"> content; these rules map it back to CSS. */
+  color-scheme: light dark;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
+
+  /* Raw colour values */
+  --color-bg-light: oklch(98.5% 0.003 250);
+  --color-bg-dark: oklch(16% 0.006 250);
+  --color-surface-light: oklch(100% 0 0);
+  --color-surface-dark: oklch(20.5% 0.008 250);
+  --color-text-light: oklch(22% 0.01 250);
+  --color-text-dark: oklch(94% 0.005 250);
+  --color-text-muted-light: oklch(45% 0.012 250);
+  --color-text-muted-dark: oklch(74% 0.01 250);
+  --color-accent-light: oklch(46% 0.19 265);
+  --color-accent-dark: oklch(80% 0.12 265);
+  --color-border-light: oklch(89% 0.005 250);
+  --color-border-dark: oklch(31% 0.01 250);
+
+  /* Colour tokens. Fallback first, for browsers without light-dark(). */
+  --color-bg: var(--color-bg-light);
+  --color-surface: var(--color-surface-light);
+  --color-text: var(--color-text-light);
+  --color-text-muted: var(--color-text-muted-light);
+  --color-accent: var(--color-accent-light);
+  --color-border: var(--color-border-light);
+
+  @media (prefers-color-scheme: dark) {
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-text: var(--color-text-dark);
+    --color-text-muted: var(--color-text-muted-dark);
+    --color-accent: var(--color-accent-dark);
+    --color-border: var(--color-border-dark);
+  }
+
+  @supports (color: light-dark(white, black)) {
+    --color-bg: light-dark(var(--color-bg-light), var(--color-bg-dark));
+    --color-surface: light-dark(var(--color-surface-light), var(--color-surface-dark));
+    --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
+    --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
+    --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
+    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
+  }
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  --text-3xl: clamp(2.25rem, 1.5rem + 3.6vw, 3.75rem);
+  --leading-tight: 1.15;
+  --leading-normal: 1.6;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+
+  /* Shape */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --border-width: 1px;
+  --focus-width: 2px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-marquee: 60s;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  --content-width: 72rem;
+  --measure: 65ch;
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+  --thumb-size: 3.5rem;
+  --logo-size: 2rem;
+}
