@@ -481,13 +481,14 @@ owner's call when reviewing the first draft of the content.
 
 **Proof strip:** People's Choice at cuHacking 7; Best AI for Environmental
 Impact at AGI Ventures Canada Hackathon 3.0; Jacob Freedman Scholarship;
-Deans' Honour List, three years; GPA.
+Deans' Honour List, two years (2024–25 and 2025–26); GPA.
 
 **Experience:** three roles, as on the current site, one line each.
 
-**About:** rewritten bio; Carleton Tennis Club (VP Finance); Hack the Hill III
-sponsorship team; volunteer notetaking; a photo captioned "Hack the North
-2026, Waterloo"; event photos.
+**About:** rewritten bio; the guest lecture given to the database course;
+Carleton Tennis Club (VP Finance); Hack the Hill III sponsorship team;
+volunteer notetaking with its Letters of Appreciation; a photo captioned
+"Hack the North 2026, Waterloo"; event photos.
 
 **Skills strip:** starts from the skills listed on the current site,
 reordered so web, backend, data and cloud skills come before low-level ones.
@@ -547,7 +548,11 @@ The owner reviews the list with the first content draft.
 6. One commit to the GitHub profile README: add the site back and match the
    project one-liners.
 7. Replace this repo's README, which still describes the old site.
-8. Remind the owner to bring LinkedIn in line with the site and README.
+8. Remind the owner to bring LinkedIn in line with the site and README. In
+   particular: the Featured link there still points to the old address and
+   should become `siddigz.com`, and the About section is a placeholder.
+9. The GPA appears in three places that must agree: this site, the resume and
+   LinkedIn. When it changes, all three change.
 
 ## 13. Left to the builder
 

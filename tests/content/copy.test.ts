@@ -32,12 +32,17 @@ describe('copy', () => {
 
   it('shows the agreed facts', () => {
     expect(site.url).toBe('https://siddigz.com');
-    expect(site.gpa).toBe('3.91/4.00');
+    expect(site.gpa).toBe('3.96/4.00');
     expect(site.expectedGraduation).toBe('April 2028');
     expect(site.lookingFor).toEqual({ enabled: true, text: 'Open to software engineering internships' });
     expect(site.contactNote.length).toBeGreaterThan(10);
     expect(site.school).toBe('Carleton University');
     expect(site.program).toContain('Computer Science');
+  });
+
+  it("lists only the confirmed Deans' Honour List years", () => {
+    const proof = readYaml('src/content/proof.yaml');
+    expect(proof['honour-list'].detail).toEqual(['2024–25', '2025–26']);
   });
 
   it('gives the same GPA in the proof strip as at the top', () => {

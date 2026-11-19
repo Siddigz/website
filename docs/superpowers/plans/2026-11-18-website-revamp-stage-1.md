@@ -920,8 +920,8 @@ above. Later plans should build on this section, not on the task text.
 
 ### Changes after the owner's second review (2026-11-19)
 
-- GPA corrected to 3.91/4.00 everywhere. A test keeps the proof strip and the
-  top of the page in step.
+- GPA corrected to 3.96/4.00 everywhere (first set to 3.91, then corrected by
+  the owner). A test keeps the proof strip and the top of the page in step.
 - Categories changed for three projects: cuRiding and VisionCompanion are
   AI & data, Student Management System is Web & apps. The GitHub profile README
   is matched at ship.
@@ -950,3 +950,7 @@ above. Later plans should build on this section, not on the task text.
   of by date. Home Server, which has no image, is last.
 - Ship is a pull request from `revamp` into `main`, and the text needs the
   owner's explicit approval first.
+- Deans' Honour List shows 2024–25 and 2025–26. The earlier 2023–24 entry was
+  wrong and is gone.
+- About gained the guest lecture given to the database course, and the
+  notetaking entry gained its dates and its three Letters of Appreciation.
