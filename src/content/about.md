@@ -1,12 +1,14 @@
 ---
 title: About
 activities:
+  - name: COMP 3005 Database Management Systems
+    role: Guest lecture on Neo4j data import and export, Fall 2025
   - name: Carleton Tennis Club
     role: VP Finance, May 2025 to April 2026
   - name: Hack the Hill III
     role: Sponsorship Team
   - name: Paul Menton Centre
-    role: Volunteer Notetaker
+    role: Volunteer Notetaker, September 2024 to August 2025, three Letters of Appreciation
 photos:
   - src: ../assets/about/hack-the-north.jpg
     alt: Siddig and a friend standing in front of the Hack the North sign.

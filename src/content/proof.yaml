@@ -17,12 +17,11 @@ honour-list:
   label: Deans' Honour List
   # A list shows each entry on its own line.
   detail:
-    - 2023–24
     - 2024–25
     - 2025–26
   link: https://carleton.ca/awards/awards/deans-honour-list/
   order: 4
 gpa:
-  label: GPA 3.91/4.00
+  label: GPA 3.96/4.00
   detail: Carleton University
   order: 5

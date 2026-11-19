@@ -131,9 +131,11 @@ test('the photo fills the width on a phone and is large on a wide screen', async
 test('a proof item with several details shows each on its own line', async ({ page }) => {
   await page.goto('/');
   const lines = page.locator('#proof li', { hasText: "Deans' Honour List" }).locator('[data-detail-line]');
-  await expect(lines).toHaveText(['2023–24', '2024–25', '2025–26']);
+  const years: string[] = parse(readFileSync('src/content/proof.yaml', 'utf8'))['honour-list'].detail;
+  expect(years.length).toBeGreaterThan(1);
+  await expect(lines).toHaveText(years);
   const tops = await lines.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
-  expect(new Set(tops).size).toBe(3);
+  expect(new Set(tops).size).toBe(years.length);
 });
 
 test('/projects leads to the projects section of the home page', async ({ page }) => {
@@ -328,6 +330,14 @@ test('every image declares its size so nothing jumps', async ({ page }) => {
 test('about shows the bio, activities and the Hack the North caption', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#about')).toContainText('Carleton Tennis Club');
+  // Every activity in about.md is shown, name and role.
+  const activities = readMarkdown('src/content/about.md').data.activities as { name: string; role: string }[];
+  const items = page.locator('#about .activities li');
+  await expect(items).toHaveCount(activities.length);
+  for (const [index, activity] of activities.entries()) {
+    await expect(items.nth(index)).toContainText(activity.name);
+    await expect(items.nth(index)).toContainText(activity.role);
+  }
   await expect(page.locator('#about')).toContainText('Hack the North 2026, Waterloo');
   // Every photo in about.md is shown with its caption, side by side when there are several.
   const photos = readMarkdown('src/content/about.md').data.photos as { alt: string; caption: string }[];
