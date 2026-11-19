@@ -13,17 +13,18 @@ const { items } = (await getEntry('skills', 'main'))!.data;
 <section id="skills" class="skills">
   <h2 class="visually-hidden">Skills</h2>
   <div class="strip">
-    <div class="viewport container" data-skills-viewport>
-      <div class="track" data-track>
-        <ul aria-label="Skills" role="list" translate="no">
-          {items.map((skill) => <li>{skill}</li>)}
-        </ul>
-        <ul class="copy" aria-hidden="true" role="list" translate="no">
-          {items.map((skill) => <li>{skill}</li>)}
-        </ul>
-      </div>
-    </div>
     <div class="container">
+      {/* Inside the container, so the strip is exactly as wide as the other sections. */}
+      <div class="viewport" data-skills-viewport>
+        <div class="track" data-track>
+          <ul aria-label="Skills" role="list" translate="no">
+            {items.map((skill) => <li>{skill}</li>)}
+          </ul>
+          <ul class="copy" aria-hidden="true" role="list" translate="no">
+            {items.map((skill) => <li>{skill}</li>)}
+          </ul>
+        </div>
+      </div>
       <label class="pause">
         <input type="checkbox" aria-label="Pause the skills strip" />
         <span>Pause</span>
@@ -58,9 +59,23 @@ const { items } = (await getEntry('skills', 'main'))!.data;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Clip the moving track so it can never widen the page. */
+    /* Clip the moving track so it can never widen the page, and fade both ends. */
     .viewport {
       overflow: clip;
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black var(--space-6),
+        black calc(100% - var(--space-6)),
+        transparent
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent,
+        black var(--space-6),
+        black calc(100% - var(--space-6)),
+        transparent
+      );
     }
 
     .track {

@@ -78,6 +78,7 @@
   --avatar-size: clamp(6rem, 4rem + 12vw, 13rem);
   --header-offset: 7rem;
   --media-width: 56rem;
+  --aside-width: 28rem;
   --layer-header: 5;
   --layer-skip-link: 10;
 }
