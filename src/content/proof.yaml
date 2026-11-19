@@ -10,8 +10,12 @@ best-ai-environment:
   link: https://luma.com/9k96tg5z
   order: 2
 scholarship:
-  label: Jacob Freedman Scholarship
-  detail: $16,000, academic achievement in Computer Science
+  # One scholarship promised on admission, paid under a different name each year.
+  label: $16,000 in scholarships
+  detail:
+    - Over four years
+    - Faculty Scholarship, 2024
+    - Jacob Freedman Scholarship, 2025 and 2026
   order: 3
 honour-list:
   label: Deans' Honour List

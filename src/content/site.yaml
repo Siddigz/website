@@ -11,7 +11,7 @@ main:
   lookingFor:
     enabled: true
     text: Open to software engineering internships
-  program: Computer Science (Honours), Software Engineering stream, Minor in Mathematics
+  program: Computer Science (Honours), Minor in Mathematics
   school: Carleton University
   gpa: 3.96/4.00
   expectedGraduation: April 2028

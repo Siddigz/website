@@ -480,7 +480,8 @@ The current site also lists a "Home Server" project. Whether it stays is the
 owner's call when reviewing the first draft of the content.
 
 **Proof strip:** People's Choice at cuHacking 7; Best AI for Environmental
-Impact at AGI Ventures Canada Hackathon 3.0; Jacob Freedman Scholarship;
+Impact at AGI Ventures Canada Hackathon 3.0; $16,000 in scholarships over
+four years, naming the Faculty Scholarship and the Jacob Freedman Scholarship;
 Deans' Honour List, two years (2024–25 and 2025–26); GPA.
 
 **Experience:** three roles, as on the current site, one line each.
