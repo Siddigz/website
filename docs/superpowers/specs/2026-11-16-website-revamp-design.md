@@ -250,6 +250,10 @@ a short recording of that word. There is no instruction text; a small speaker
 icon appears on hover and focus. Placeholder sounds ship until real recordings
 are supplied. The audio files load only when first needed.
 
+There is no written pronunciation beside the name, by the owner's choice. How
+a word shows that it is playing (the icon pulsing, or something else) is
+decided at the visual-direction step.
+
 ### Skills strip
 
 One horizontal strip that scrolls sideways on its own, continuously, and loops
