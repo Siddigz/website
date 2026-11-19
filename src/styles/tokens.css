@@ -73,8 +73,8 @@
   --content-width: 72rem;
   --measure: 65ch;
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
-  --thumb-size: 3.5rem;
-  --logo-size: 4.5rem;
+  --thumb-size: clamp(3.5rem, 2.5rem + 5vw, 5rem);
+  --logo-size: clamp(4.5rem, 3.5rem + 5vw, 6.5rem);
   --avatar-size: clamp(6rem, 4rem + 12vw, 13rem);
   --header-offset: 7rem;
   --media-width: 56rem;

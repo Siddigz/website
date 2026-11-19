@@ -1,7 +1,7 @@
 import { it, expect } from 'vitest';
 import { featuredProjects, moreProjects, nextFeatured } from '../../src/lib/projects';
 
-const p = (id: string, date: string, featured?: number) => ({ id, data: { date, featured } });
+const p = (id: string, date?: string, featured?: number) => ({ id, data: { date, featured } });
 const all = [p('c', '2025-03'), p('a', '2026-01', 2), p('b', '2025-03'), p('d', '2024-05', 1), p('e', '2026-06')];
 
 it('featuredProjects sorts by featured number', () => {
@@ -10,6 +10,11 @@ it('featuredProjects sorts by featured number', () => {
 
 it('moreProjects sorts newest first, then by id', () => {
   expect(moreProjects(all).map((x) => x.id)).toEqual(['e', 'b', 'c']);
+});
+
+it('moreProjects puts projects with no date last, by id', () => {
+  const mixed = [p('z'), ...all, p('y')];
+  expect(moreProjects(mixed).map((x) => x.id)).toEqual(['e', 'b', 'c', 'y', 'z']);
 });
 
 it('nextFeatured wraps around', () => {

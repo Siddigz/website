@@ -427,12 +427,12 @@ Where the profile README groups a project differently, the README's group wins.
 
 **Fixed values**
 
-- `site.yaml` (`main`): `url: https://siddigz.com`; `name: { first: Siddig, last: Ahmed }`; `lookingFor: { enabled: true, text: "Open to software engineering internships" }`; `school: "Computer Science (Honours), Software Engineering stream, Minor in Mathematics · Carleton University"`; `gpa: "3.85/4.00"`; `expectedGraduation: "April 2028"`; `links: { github: https://github.com/Siddigz, linkedin: https://linkedin.com/in/siddigz }`; `home: { city: Ottawa, timeZone: America/Toronto }`; `pitch`: draft, one sentence of at most 22 words, leading with shipped work and results, for the owner to correct. Starting draft: "I build software people actually use, from award-winning hackathon projects to student tools, with two software engineering internships behind me."
+- `site.yaml` (`main`): `url: https://siddigz.com`; `name: { first: Siddig, last: Ahmed }`; `lookingFor: { enabled: true, text: "Open to software engineering internships" }`; `school: "Computer Science (Honours), Software Engineering stream, Minor in Mathematics · Carleton University"`; `gpa: "3.91/4.00"`; `expectedGraduation: "April 2028"`; `links: { github: https://github.com/Siddigz, linkedin: https://linkedin.com/in/siddigz }`; `home: { city: Ottawa, timeZone: America/Toronto }`; `pitch`: draft, one sentence of at most 22 words, leading with shipped work and results, for the owner to correct. Starting draft: "I build software people actually use, from award-winning hackathon projects to student tools, with two software engineering internships behind me."
 - `experience.yaml`, in this order:
   1. Ciena, Embedded Software Engineering Intern, Modem Control Software, start `2026-09`, no end, logo `ciena`
   2. Ciena, Software Engineering Intern, Tooling & Infrastructure Automation, `2026-01` to `2026-08`, logo `ciena`
   3. Carleton University, Undergraduate Teaching Assistant, Programming and Algorithms, `2025-09` to `2025-12`, logo `carleton`
-- `proof.yaml`, in this order: `People's Choice` / `cuHacking 7`; `Best AI for Environmental Impact` / `AGI Ventures Canada Hackathon 3.0`; `Jacob Freedman Scholarship` / `$16,000, academic achievement in Computer Science`; `Deans' Honour List` / `2023–24, 2024–25, 2025–26`; `GPA 3.85/4.00` / `Carleton University`. Links, where the old page had one, come from `git show main:index.html`.
+- `proof.yaml`, in this order: `People's Choice` / `cuHacking 7`; `Best AI for Environmental Impact` / `AGI Ventures Canada Hackathon 3.0`; `Jacob Freedman Scholarship` / `$16,000, academic achievement in Computer Science`; `Deans' Honour List` / `2023–24, 2024–25, 2025–26`; `GPA 3.91/4.00` / `Carleton University`. Links, where the old page had one, come from `git show main:index.html`.
 - `skills.yaml` (`main`), `items` in this order: Python, TypeScript, JavaScript, Java, C++, C, SQL, React, React Native, FastAPI, Node.js, PostgreSQL, MongoDB, PyTorch, Docker, GitHub Actions, CI/CD, Git, Linux, Bash, CMake.
 - `about.md`: a bio of at most 80 words, drafted from the old page's intro (`git show main:index.html`) and reframed per the spec's section 1. Then a short list: Carleton Tennis Club, VP Finance (May 2025 to April 2026); Hack the Hill III, Sponsorship Team; Paul Menton Centre, Volunteer Notetaker. The Hack the North photo is captioned exactly "Hack the North 2026, Waterloo".
 
@@ -558,7 +558,7 @@ test('hero shows the name, pitch, school facts and links', async ({ page }) => {
   await expect(page.locator('h1 [data-name-part="first"]')).toHaveText('Siddig');
   await expect(page.locator('h1 [data-name-part="last"]')).toHaveText('Ahmed');
   await expect(page.getByText(site.pitch)).toBeVisible();
-  await expect(page.locator('#top')).toContainText('3.85/4.00');
+  await expect(page.locator('#top')).toContainText('3.91/4.00');
   await expect(page.locator('#top')).toContainText('April 2028');
   await expect(page.locator('#top').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
   await expect(page.locator('#top').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
@@ -917,3 +917,19 @@ above. Later plans should build on this section, not on the task text.
 - Audited against Vercel's Web Interface Guidelines. Left for stage 2, with the
   real look: a `theme-color` meta that matches the background, curly quotes,
   an intentional tap-highlight colour, and the Title Case question.
+
+### Changes after the owner's second review (2026-11-19)
+
+- GPA corrected to 3.91/4.00 everywhere. A test keeps the proof strip and the
+  top of the page in step.
+- Categories changed for three projects: cuRiding and VisionCompanion are
+  AI & data, Student Management System is Web & apps. The GitHub profile README
+  is matched at ship.
+- A project's `date` is optional and only orders the list. Home Server has none
+  and goes last.
+- `site.yaml` gained an optional `photo`. The top of the page shows it, loaded
+  first and never lazily; the placeholder figure remains the fallback.
+- North-Star, Markit, Student Management System and Relational Algebra Query
+  Processor have thumbnails, cropped from the images in their repositories.
+- Experience logos and row thumbnails grow with the screen, up to 104 px and
+  80 px.

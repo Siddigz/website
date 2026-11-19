@@ -32,12 +32,17 @@ describe('copy', () => {
 
   it('shows the agreed facts', () => {
     expect(site.url).toBe('https://siddigz.com');
-    expect(site.gpa).toBe('3.85/4.00');
+    expect(site.gpa).toBe('3.91/4.00');
     expect(site.expectedGraduation).toBe('April 2028');
     expect(site.lookingFor).toEqual({ enabled: true, text: 'Open to software engineering internships' });
     expect(site.contactNote.length).toBeGreaterThan(10);
     expect(site.school).toBe('Carleton University');
     expect(site.program).toContain('Computer Science');
+  });
+
+  it('gives the same GPA in the proof strip as at the top', () => {
+    const labels = Object.values(readYaml('src/content/proof.yaml')).map((item: any) => item.label);
+    expect(labels).toContain(`GPA ${site.gpa}`);
   });
 
   it('does not call a current internship finished', () => {

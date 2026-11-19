@@ -13,7 +13,7 @@ const { data } = Astro.props.project;
 <li class="row" data-category={data.category}>
   {
     data.cover && (
-      <Image class="thumb" src={data.cover} alt="" width={112} height={112} fit="cover" position={data.coverPosition} />
+      <Image class="thumb" src={data.cover} alt="" width={160} height={160} fit="cover" position={data.coverPosition} />
     )
   }
   <div class="text">

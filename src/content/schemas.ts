@@ -29,7 +29,8 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       oneLiner: z.string().min(1),
       category: z.enum(CATEGORIES),
       stack: z.array(z.string().min(1)).min(1),
-      date: yearMonth,
+      /** Only used to order the list. A project with no date goes last. */
+      date: yearMonth.optional(),
       /** A compact project may have no repository; a featured one must. */
       links: z
         .object({
@@ -107,6 +108,8 @@ export const siteSchema = z.object({
   school: z.string().min(1),
   gpa: z.string().min(1),
   expectedGraduation: z.string().min(1),
+  /** The photo at the top of the home page. Without one, a generic figure is shown. */
+  photo: z.object({ src: z.string().min(1), alt: z.string().min(1) }).optional(),
   links: z.object({ github: z.url(), linkedin: z.url() }),
   /** The sentence in the Contact section. */
   contactNote: z.string().min(1),

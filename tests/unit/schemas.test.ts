@@ -36,6 +36,10 @@ describe('projectSchema', () => {
   it('rejects a malformed date', () => {
     expect(schema.safeParse({ ...base, date: 'Jan 2026' }).success).toBe(false);
   });
+  it('lets a project have no date', () => {
+    const { date, ...undated } = base;
+    expect(schema.safeParse(undated).success).toBe(true);
+  });
   it('accepts only known cover fits', () => {
     const withCover = { ...base, cover: './c.png', coverAlt: 'c' };
     expect(schema.safeParse({ ...withCover, coverFit: 'contain' }).success).toBe(true);
@@ -86,5 +90,9 @@ describe('siteSchema', () => {
     };
     expect(siteSchema.safeParse(site).success).toBe(false);
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' } }).success).toBe(true);
+    // The photo is optional, but one with no alt text is refused.
+    const complete = { ...site, lookingFor: { enabled: false, text: 't' } };
+    expect(siteSchema.safeParse({ ...complete, photo: { src: './me.jpg', alt: 'Me' } }).success).toBe(true);
+    expect(siteSchema.safeParse({ ...complete, photo: { src: './me.jpg' } }).success).toBe(false);
   });
 });

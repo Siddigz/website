@@ -22,7 +22,7 @@ test('hero shows the name, pitch, school facts and links', async ({ page }) => {
   await expect(page.locator('h1 [data-name-part="first"]')).toHaveText('Siddig');
   await expect(page.locator('h1 [data-name-part="last"]')).toHaveText('Ahmed');
   await expect(page.getByText(site.pitch)).toBeVisible();
-  await expect(page.locator('#top')).toContainText('3.85/4.00');
+  await expect(page.locator('#top')).toContainText(`GPA ${site.gpa}`);
   await expect(page.locator('#top')).toContainText('April 2028');
   await expect(page.locator('#top [data-greeting]')).toHaveText('Hello, and welcome.');
   await expect(page.locator('#top').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
@@ -53,15 +53,33 @@ test('with the switch off the line is gone and leaves no gap', async ({ page }) 
   expect(new Set(gaps).size).toBe(1);
 });
 
-test('the photo slot shows a generic placeholder until a photo is supplied', async ({ page }) => {
+test('the photo slot shows the photo from site.yaml, or a generic placeholder without one', async ({ page }) => {
   await page.goto('/');
+  const photo = page.locator('[data-photo-slot] img');
+  const placeholder = page.locator('[data-photo-slot] svg');
+  const shown = site.photo ? photo : placeholder;
+  await expect(shown).toBeVisible();
+  await expect(site.photo ? placeholder : photo).toHaveCount(0);
+  if (site.photo) {
+    await expect(photo).toHaveAttribute('alt', site.photo.alt);
+    // It is at the top of the page, so it must not wait to load.
+    await expect(photo).toHaveAttribute('fetchpriority', 'high');
+    await expect(photo).not.toHaveAttribute('loading', 'lazy');
+    expect(await photo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  } else {
+    await expect(placeholder).toHaveAttribute('aria-hidden', 'true');
+  }
+  const box = await shown.boundingBox();
+  expect(box!.width).toBeGreaterThan(80);
+  expect(Math.abs(box!.width - box!.height)).toBeLessThan(2);
+});
+
+test('with no photo the slot falls back to the placeholder', async ({ page }) => {
+  await page.goto('/dev/no-looking-for');
   const placeholder = page.locator('[data-photo-slot] svg');
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveAttribute('aria-hidden', 'true');
   await expect(page.locator('[data-photo-slot] img')).toHaveCount(0);
-  const box = await placeholder.boundingBox();
-  expect(box!.width).toBeGreaterThan(80);
-  expect(Math.abs(box!.width - box!.height)).toBeLessThan(2);
 });
 
 test('the school name stays on one line', async ({ page }) => {
@@ -214,10 +232,16 @@ test('some row shows a live link, so the check above is not empty', () => {
 
 test('a row with only required fields renders cleanly', async ({ page }) => {
   await page.goto('/');
-  const row = page.locator('#more-projects li', { hasText: 'Markit' });
+  // The barest row on the page: no cover, and ideally no repository or date either.
+  const bare = more
+    .map((slug) => project(slug).data)
+    .filter((data) => !data.cover)
+    .sort((a, b) => Object.keys(a).length - Object.keys(b).length)[0]!;
+  const row = page.locator('#more-projects li', { hasText: bare.title });
   await expect(row).toHaveCount(1);
   await expect(row.locator('img')).toHaveCount(0);
-  await expect(row).toContainText('Systems');
+  await expect(row.locator('h3')).toHaveText(bare.title);
+  await expect(row.locator('.category')).not.toBeEmpty();
   await expect(page.locator('a[href=""], a:not([href])')).toHaveCount(0);
   const broken = await page
     .locator('img')

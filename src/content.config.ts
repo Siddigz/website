@@ -39,7 +39,10 @@ const skills = defineCollection({
 
 const site = defineCollection({
   loader: file('src/content/site.yaml'),
-  schema: siteSchema,
+  schema: ({ image }) =>
+    siteSchema.extend({
+      photo: siteSchema.shape.photo.unwrap().extend({ src: image() }).optional(),
+    }),
 });
 
 export const collections = { projects, about, experience, proof, skills, site };
