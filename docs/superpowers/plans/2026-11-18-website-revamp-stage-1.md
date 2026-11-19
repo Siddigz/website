@@ -930,7 +930,7 @@ above. Later plans should build on this section, not on the task text.
 - `site.yaml` gained an optional `photo`. The top of the page shows it, loaded
   first and never lazily; the placeholder figure remains the fallback.
 - North-Star, Markit, Student Management System and Relational Algebra Query
-  Processor have thumbnails, cropped from the images in their repositories.
+  Processor have thumbnails, taken whole from the images in their repositories.
 - Experience logos and row thumbnails grow with the screen, up to 104 px and
   80 px.
 - The menu lists sections in page order: Experience, Projects, About.
@@ -941,5 +941,12 @@ above. Later plans should build on this section, not on the task text.
 - GitHub and LinkedIn appear in one order everywhere, GitHub first. The order
   lives in `src/lib/site.ts`, and both the top of the page and Contact read it.
 - The photo at the top is cut from the full-resolution original, with the power
-  lines removed as in the owner's own edit. On a phone it spans the column, above the name. Beside the
-  text it grows with the screen, up to 22rem on a desktop.
+  lines removed as in the owner's own edit. On a phone it spans the column,
+  above the name. Beside the text it grows with the screen, up to 22rem on a
+  desktop.
+- Row thumbnails sit in one wide box (16:10). A project marked
+  `coverFit: contain` shows its whole image there, uncropped.
+- The other projects are listed by an `order` number, strongest first, instead
+  of by date. Home Server, which has no image, is last.
+- Ship is a pull request from `revamp` into `main`, and the text needs the
+  owner's explicit approval first.

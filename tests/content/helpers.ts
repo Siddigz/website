@@ -54,7 +54,7 @@ import { featuredProjects, moreProjects } from '../../src/lib/projects';
 const asEntries = () =>
   readProjects().map((project) => ({
     id: project.slug,
-    data: project.data as { featured?: number; date?: string },
+    data: project.data as { featured?: number; date?: string; order?: number },
   }));
 
 export const featuredSlugs = (): string[] => featuredProjects(asEntries()).map((entry) => entry.id);

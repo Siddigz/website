@@ -8,4 +8,6 @@ links:
   repo: https://github.com/Siddigz/PDF-merger
 cover: ../../assets/projects/pdf-merger/cover.png
 coverAlt: The PDF Merger page with a drag-and-drop area and a Merge PDFs button.
+order: 7
+coverFit: contain
 ---

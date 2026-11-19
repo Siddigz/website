@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parse } from 'yaml';
+import sharp from 'sharp';
 import { featuredSlugs, moreSlugs, readMarkdown, readProjects } from '../content/helpers';
 
 const site = parse(readFileSync('src/content/site.yaml', 'utf8')).main;
@@ -242,7 +244,7 @@ test('featured cards appear in order, each linking to its page', async ({ page }
   }
 });
 
-test('compact rows appear newest first and link to GitHub', async ({ page }) => {
+test('compact rows appear in their set order and link to GitHub', async ({ page }) => {
   await page.goto('/');
   const rows = page.locator('#more-projects li[data-category]');
   await expect(rows).toHaveCount(more.length);
@@ -260,6 +262,34 @@ test('compact rows appear newest first and link to GitHub', async ({ page }) => 
     if (data.links?.live) await expect(live).toHaveAttribute('href', data.links.live);
     await expect(row.locator('img')).toHaveCount(data.cover ? 1 : 0);
   }
+});
+
+test('a compact row thumbnail shows its whole image unless it is a photo', async ({ page }) => {
+  await page.goto('/');
+  const rows = page.locator('#more-projects li[data-category]');
+  let whole = 0;
+  for (const [index, slug] of more.entries()) {
+    const { data } = project(slug);
+    if (!data.cover) continue;
+    const thumb = rows.nth(index).locator('img');
+    // Thumbnails load lazily, so bring each into view and wait for it.
+    await thumb.scrollIntoViewIfNeeded();
+    await expect.poll(() => thumb.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+    const shown = await thumb.evaluate((img: HTMLImageElement) => ({
+      ratio: img.naturalWidth / img.naturalHeight,
+      fit: getComputedStyle(img).objectFit,
+      box: img.clientWidth / img.clientHeight,
+    }));
+    // Every thumbnail box has the same wide shape, so the text beside them lines up.
+    expect(Math.abs(shown.box - 1.6), slug).toBeLessThan(0.05);
+    if (data.coverFit !== 'contain') continue;
+    whole += 1;
+    const source = await sharp(join('src/content/projects', data.cover)).metadata();
+    expect(shown.fit, slug).toBe('contain');
+    // The file the browser got has the source's shape: nothing was cut off when it was built.
+    expect(Math.abs(shown.ratio - source.width / source.height), slug).toBeLessThan(0.03);
+  }
+  expect(whole).toBeGreaterThan(0);
 });
 
 test('some row shows a live link, so the check above is not empty', () => {

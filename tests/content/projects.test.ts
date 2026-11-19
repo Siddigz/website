@@ -22,6 +22,16 @@ describe('projects', () => {
     expect(numbers).toEqual(featured.map((_, index) => index + 1));
   });
 
+  it('numbers the other projects 1 to n with no gaps or repeats', () => {
+    const numbers = more.map((slug) => bySlug(slug).data.order);
+    expect(numbers).toEqual(more.map((_, index) => index + 1));
+  });
+
+  it('lists the other projects that have no image after those that do', () => {
+    const hasCover = more.map((slug) => bySlug(slug).data.cover !== undefined);
+    expect(hasCover).toEqual([...hasCover].sort((x, y) => Number(y) - Number(x)));
+  });
+
   it.each(featured)('featured project %s has a brief three-part body', (slug) => {
     const { body } = bySlug(slug);
     expect(body.match(/^## .+$/gm)).toEqual(['## Problem', '## What I built', '## Result']);
