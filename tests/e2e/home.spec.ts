@@ -304,3 +304,15 @@ test('contact has GitHub and LinkedIn and no email control', async ({ page }) =>
   await expect(page.locator('#contact').getByText(/email/i)).toHaveCount(0);
   await expect(page.locator('#contact')).toContainText(site.contactNote);
 });
+
+test('the profile links come in the same order at the top and in Contact', async ({ page }) => {
+  await page.goto('/');
+  const hrefs: string[] = Object.values(site.links);
+  const order = (scope: string) =>
+    page
+      .locator(`${scope} a`)
+      .evaluateAll((links, wanted) => links.map((a) => a.getAttribute('href')!).filter((href) => wanted.includes(href)), hrefs);
+  const top = await order('#top');
+  expect(top).toEqual(hrefs);
+  expect(await order('#contact')).toEqual(top);
+});

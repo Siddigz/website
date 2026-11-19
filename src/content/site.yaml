@@ -15,6 +15,10 @@ main:
   school: Carleton University
   gpa: 3.91/4.00
   expectedGraduation: April 2028
+  # Shown at the top of the home page. Remove these lines to show a generic figure instead.
+  photo:
+    src: ../assets/about/portrait.jpg
+    alt: Siddig Ahmed, smiling, in glasses and a blue-grey polo shirt.
   links:
     github: https://github.com/Siddigz
     linkedin: https://linkedin.com/in/siddigz

@@ -30,8 +30,7 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     {/* Stage 3 replaces this text with a greeting built from the visitor's clock. */}
     <p class="greeting muted" data-greeting>Hello, and welcome.</p>
     <ul class="links" role="list">
-      <li><a class="button" href={site.links.github}>GitHub</a></li>
-      <li><a class="button" href={site.links.linkedin}>LinkedIn</a></li>
+      {site.profileLinks.map((link) => <li><a class="button" href={link.href}>{link.label}</a></li>)}
     </ul>
   </div>
   {/* The photo from site.yaml. Without one, a generic figure: decorative, so hidden from screen readers. */}

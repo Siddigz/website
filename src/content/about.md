@@ -13,7 +13,7 @@ photos:
     caption: Hack the North 2026, Waterloo
   - src: ../assets/about/ottawa-10k.jpg
     alt: Siddig mid-stride in a road race, wearing headphones and a bib that reads Ottawa 10K.
-    caption: Ottawa 10K
+    caption: Tamarack Ottawa Race Weekend 10K
 ---
 
 I'm a Computer Science student at Carleton University, in the Software Engineering stream with a minor in Mathematics. I like building things end to end, from backend services and data pipelines to the tools people open every day, and I care about making them measurably faster and more reliable. Outside class and work I'm usually at a hackathon, on a tennis court, out for a run, or building a tool for a problem I actually have.
