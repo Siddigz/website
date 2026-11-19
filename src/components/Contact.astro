@@ -9,8 +9,7 @@ const site = await getSite();
   <h2 class="section-title">Contact</h2>
   <p class="muted">{site.contactNote}</p>
   <ul role="list">
-    <li><a href={site.links.linkedin}>LinkedIn</a></li>
-    <li><a href={site.links.github}>GitHub</a></li>
+    {site.profileLinks.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
   </ul>
 </section>
 
