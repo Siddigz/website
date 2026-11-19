@@ -941,4 +941,4 @@ above. Later plans should build on this section, not on the task text.
 - GitHub and LinkedIn appear in one order everywhere, GitHub first. The order
   lives in `src/lib/site.ts`, and both the top of the page and Contact read it.
 - The photo at the top is the owner's own edit of the headshot with the power
-  lines removed.
+  lines removed. It is larger: 9rem on a phone, growing to 18rem on a desktop.
