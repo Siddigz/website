@@ -40,6 +40,11 @@ describe('projectSchema', () => {
     const { date, ...undated } = base;
     expect(schema.safeParse(undated).success).toBe(true);
   });
+  it('takes a whole positive number as the order among compact projects', () => {
+    expect(schema.safeParse({ ...base, order: 3 }).success).toBe(true);
+    expect(schema.safeParse({ ...base, order: 0 }).success).toBe(false);
+    expect(schema.safeParse({ ...base, order: 1.5 }).success).toBe(false);
+  });
   it('accepts only known cover fits', () => {
     const withCover = { ...base, cover: './c.png', coverAlt: 'c' };
     expect(schema.safeParse({ ...withCover, coverFit: 'contain' }).success).toBe(true);

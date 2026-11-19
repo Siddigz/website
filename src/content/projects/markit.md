@@ -7,5 +7,7 @@ date: 2025-09
 links:
   repo: https://github.com/Siddigz/Markit
 cover: ../../assets/projects/markit/cover.png
-coverAlt: A terminal run of Markit accepting three submissions and rejecting a late one.
+coverAlt: A terminal run of Markit accepting three submissions, rejecting a late one and grading each against the marking scheme.
+order: 4
+coverFit: contain
 ---

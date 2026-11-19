@@ -204,21 +204,22 @@ message.
 | `oneLiner` | yes | Same sentence as the GitHub profile README uses |
 | `category` | yes | `web-apps`, `ai-data` or `systems` |
 | `stack` | yes | List of technologies |
-| `date` | no | Year and month, for ordering only; never shown. A project with no date goes last. |
+| `date` | no | Year and month, for ordering only; never shown. Used only among projects that have no `order`. |
 | `links.repo` | featured: yes; others: optional | Public repository only. A compact row with no repository shows its title as plain text. |
 | `links.live`, `links.video` | no | |
 | `featured` | no | A number. Sets the order among featured projects. Present means the project gets a large card and its own page. |
+| `order` | no | A number. Sets the order among the other projects, strongest first. |
 | `result` | featured only | One short measurable line shown on the card |
 | `award` | no | `{ name, event }`. Shown as a badge. |
 | `cover` | featured: yes; others: optional | Image shown on the card and the preview card |
 | `gallery` | no | Extra images for a featured project's page. No limit. |
-| `coverFit` | no | `cover` (default) crops to fill the card; `contain` shows a whole chart or screenshot |
+| `coverFit` | no | `cover` (default) crops to fill its box; `contain` shows a whole chart, screenshot or diagram, on cards and on row thumbnails |
 | `coverPosition` | no | Which part of a cropped cover to keep: `left top` (default), `top`, `center`, `bottom` |
 | body | featured only | The three short blocks |
 
 Projects without `featured` appear as compact rows that link to the
-repository. A row with a `cover` shows it as a small thumbnail; a row without
-one shows none.
+repository, in the order their `order` numbers give. A row with a `cover`
+shows it as a small thumbnail in a wide box; a row without one shows none.
 
 ### Other content
 
@@ -464,8 +465,10 @@ VisionCompanion, EcoCart, CPU-Cache-Benchmark.
 cuRiding is one project made of two repositories (the device and the server).
 Its page links both.
 
-**More projects:** curate, Schedule Scoop, North-Star, PDF-merger, Markit,
-Student Management System, Relational Algebra Query Processor.
+**More projects, strongest first:** Schedule Scoop, curate, North-Star, Markit,
+Relational Algebra Query Processor, Student Management System, PDF-merger,
+Home Server. Each has an `order` number. A project with no image goes after
+those that have one.
 
 The current site also lists a "Home Server" project. Whether it stays is the
 owner's call when reviewing the first draft of the content.
@@ -525,12 +528,14 @@ The owner reviews the list with the first content draft.
 
 ### Ship checklist
 
-1. Owner approves the preview address on phone and laptop.
+1. Owner approves the preview address on phone and laptop. This includes the
+   text: the owner has read every line and said so. No comment on a piece of
+   text means it has not been read, not that it is approved.
 2. Speed budget, link check and legacy scan all pass.
 3. Preview card checked in LinkedIn's inspector.
 4. Private settings are set in Vercel: contact address, resume switch (off),
    GitHub token. `siddigz.com` is made the primary domain.
-5. Merge `revamp` into `main`.
+5. Open a pull request from `revamp` into `main`. The owner merges it.
 5a. Run the private pre-ship steps recorded in the git-ignored
    `CLAUDE.local.md`. They need the owner's go-ahead at the time.
 6. One commit to the GitHub profile README: add the site back and match the

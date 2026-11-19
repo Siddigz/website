@@ -12,9 +12,13 @@ const { data } = Astro.props.project;
 
 <li class="row" data-category={data.category}>
   {
-    data.cover && (
-      <Image class="thumb" src={data.cover} alt="" width={160} height={160} fit="cover" position={data.coverPosition} />
-    )
+    data.cover &&
+      (data.coverFit === 'contain' ? (
+        // Keeps the image's own shape, so nothing is cut off.
+        <Image class="thumb whole" src={data.cover} alt="" width={256} />
+      ) : (
+        <Image class="thumb" src={data.cover} alt="" width={256} height={160} fit="cover" position={data.coverPosition} />
+      ))
   }
   <div class="text">
     <h3>{data.links.repo ? <a href={data.links.repo}>{data.title}</a> : data.title}</h3>
@@ -49,16 +53,22 @@ const { data } = Astro.props.project;
 
   /* A thumbnail takes a first column only on rows that have one. */
   .row:has(.thumb) {
-    grid-template-columns: var(--thumb-size) 1fr auto;
+    grid-template-columns: var(--thumb-width) 1fr auto;
   }
 
+  /* Every thumbnail gets the same wide box, so the text beside them lines up. */
   .thumb {
-    inline-size: var(--thumb-size);
+    inline-size: var(--thumb-width);
     block-size: var(--thumb-size);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-md);
+    background: var(--color-surface);
     object-fit: cover;
-    object-position: left top;
+  }
+
+  /* Screenshots and diagrams show in full, with the box showing around them. */
+  .thumb.whole {
+    object-fit: contain;
   }
 
   .text {
@@ -110,7 +120,7 @@ const { data } = Astro.props.project;
     }
 
     .row:has(.thumb) {
-      grid-template-columns: var(--thumb-size) 1fr;
+      grid-template-columns: var(--thumb-width) 1fr;
     }
 
     .category {

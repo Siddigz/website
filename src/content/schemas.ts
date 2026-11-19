@@ -42,11 +42,13 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
         .default({}),
       /** Order among featured projects. Present means a large card and a page. */
       featured: z.number().int().positive().optional(),
+      /** Order among the other projects, strongest first. Any without one follow, newest first. */
+      order: z.number().int().positive().optional(),
       result: z.string().min(1).optional(),
       award: z.object({ name: z.string().min(1), event: z.string().min(1) }).optional(),
       cover: image().optional(),
       coverAlt: z.string().min(1).optional(),
-      /** 'cover' crops to fill the card (photos). 'contain' shows the whole image (charts, screenshots). */
+      /** 'cover' crops to fill its box (photos). 'contain' shows the whole image (charts, screenshots, diagrams). */
       coverFit: z.enum(['cover', 'contain']).default('cover'),
       /** Which part of a cropped cover to keep. */
       coverPosition: z.enum(['left top', 'top', 'center', 'bottom']).default('left top'),

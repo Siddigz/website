@@ -10,4 +10,5 @@ links:
 cover: ../../assets/projects/schedule-scoop/cover.png
 coverAlt: The ScheduleScoop popup with Winter 2027 and Google Calendar selected, above an Export button.
 coverFit: contain
+order: 1
 ---

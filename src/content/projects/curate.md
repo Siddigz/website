@@ -8,4 +8,6 @@ links:
   repo: https://github.com/Siddigz/curate
 cover: ../../assets/projects/curate/cover.png
 coverAlt: The curate editor showing a C file with syntax highlighting and a status bar.
+order: 2
+coverFit: contain
 ---
