@@ -1,5 +1,5 @@
 ---
-title: CPU-Cache-Benchmark
+title: CPU Cache Benchmark
 oneLiner: A C benchmark suite with a Python visualizer measuring cache behaviour, with automatic L1/L2/L3 detection.
 category: systems
 stack: [C, Python]

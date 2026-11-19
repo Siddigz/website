@@ -1,5 +1,5 @@
 ---
-title: PDF-merger
+title: PDF Merger
 oneLiner: A FastAPI web app to drag, drop, reorder and merge PDFs.
 category: web-apps
 stack: [Python, FastAPI, JavaScript]

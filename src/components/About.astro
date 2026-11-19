@@ -16,7 +16,7 @@ const { title, activities, photos } = about.data;
         {
           activities.map((activity) => (
             <li>
-              <strong>{activity.name}</strong>
+              <strong>{activity.link ? <a href={activity.link}>{activity.name}</a> : activity.name}</strong>
               <span class="muted">{activity.role}</span>
             </li>
           ))
@@ -62,6 +62,16 @@ const { title, activities, photos } = about.data;
 
   .activities li {
     display: grid;
+  }
+
+  /* A linked name looks like the linked awards in the proof strip. */
+  .activities a {
+    color: var(--color-text);
+    text-decoration-color: var(--color-border);
+  }
+
+  .activities a:hover {
+    text-decoration-color: var(--color-accent);
   }
 
   /* Photos sit side by side, however many there are. */

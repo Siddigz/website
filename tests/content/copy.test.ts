@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readMarkdown, readYaml, textFiles } from './helpers';
+import { readMarkdown, readProjects, readYaml, textFiles } from './helpers';
 import { wordCount } from '../../src/lib/text';
 
 const site = readYaml('src/content/site.yaml')?.main;
@@ -40,19 +40,31 @@ describe('copy', () => {
     expect(site.program).toBe('Computer Science (Honours), Minor in Mathematics');
   });
 
+  it('writes project names as words, without the hyphens their repositories use', () => {
+    const titles = readProjects().map((project) => project.data.title);
+    for (const title of ['Alternative Signals', 'CPU Cache Benchmark', 'North Star', 'PDF Merger']) {
+      expect(titles).toContain(title);
+    }
+    expect(titles.filter((title: string) => title.includes('-'))).toEqual([]);
+  });
+
+  it('gives every activity a year, in the same short form', () => {
+    const { activities } = readMarkdown('src/content/about.md').data;
+    for (const activity of activities) {
+      expect(activity.role, activity.name).toMatch(/ · \d{4}(–\d{2})?( · |$)/);
+      expect(activity.role.length, activity.name).toBeLessThanOrEqual(64);
+    }
+  });
+
   it('names no stream, since a stream can change', () => {
     expect(site.program).not.toMatch(/stream/i);
     expect(readMarkdown('src/content/about.md').body).not.toMatch(/stream/i);
   });
 
-  it('words the scholarships with the amount, the period and both names', () => {
+  it('words the scholarships with the amount and both names', () => {
     const { scholarship } = readYaml('src/content/proof.yaml');
     expect(scholarship.label).toBe('$16,000 in scholarships');
-    expect(scholarship.detail).toEqual([
-      'Over four years',
-      'Faculty Scholarship, 2024',
-      'Jacob Freedman Scholarship, 2025 and 2026',
-    ]);
+    expect(scholarship.detail).toEqual(['Faculty Scholarship, 2024', 'Jacob Freedman Scholarship, 2025 & 2026']);
   });
 
   it("lists only the confirmed Deans' Honour List years", () => {

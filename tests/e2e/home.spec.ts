@@ -163,6 +163,21 @@ test('proof strip shows the awards as worded', async ({ page }) => {
   await expect(page.locator('#proof li').nth(1)).toContainText('Best AI for Environmental Impact');
 });
 
+test('each award links where proof.yaml says, or nowhere', async ({ page }) => {
+  await page.goto('/');
+  const proof = Object.values(parse(readFileSync('src/content/proof.yaml', 'utf8'))) as {
+    label: string;
+    link?: string;
+    order: number;
+  }[];
+  const items = page.locator('#proof li');
+  for (const [index, item] of proof.sort((a, b) => a.order - b.order).entries()) {
+    const link = items.nth(index).getByRole('link', { name: item.label });
+    await expect(link).toHaveCount(item.link ? 1 : 0);
+    if (item.link) await expect(link).toHaveAttribute('href', item.link);
+  }
+});
+
 test('the menu lists sections in the order they appear on the page', async ({ page }) => {
   await page.goto('/');
   const targets = await page
@@ -331,12 +346,17 @@ test('about shows the bio, activities and the Hack the North caption', async ({ 
   await page.goto('/');
   await expect(page.locator('#about')).toContainText('Carleton Tennis Club');
   // Every activity in about.md is shown, name and role.
-  const activities = readMarkdown('src/content/about.md').data.activities as { name: string; role: string }[];
+  const activities = readMarkdown('src/content/about.md').data.activities as { name: string; role: string; link?: string }[];
   const items = page.locator('#about .activities li');
   await expect(items).toHaveCount(activities.length);
+  expect(activities.some((activity) => activity.link)).toBe(true);
   for (const [index, activity] of activities.entries()) {
     await expect(items.nth(index)).toContainText(activity.name);
     await expect(items.nth(index)).toContainText(activity.role);
+    // An activity with a link shows its name as that link.
+    const link = items.nth(index).getByRole('link', { name: activity.name });
+    await expect(link).toHaveCount(activity.link ? 1 : 0);
+    if (activity.link) await expect(link).toHaveAttribute('href', activity.link);
   }
   await expect(page.locator('#about')).toContainText('Hack the North 2026, Waterloo');
   // Every photo in about.md is shown with its caption, side by side when there are several.

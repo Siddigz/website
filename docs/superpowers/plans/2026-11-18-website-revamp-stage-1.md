@@ -959,3 +959,15 @@ above. Later plans should build on this section, not on the task text.
   (2025 and 2026). The amount belongs to the pair, not to either one alone.
 - The programme line and the About paragraph no longer name a stream. They
   read "Computer Science (Honours), Minor in Mathematics".
+
+### Changes from the owner's text review (2026-11-19)
+
+- Four projects are named in words: Alternative Signals, CPU Cache Benchmark,
+  North Star, PDF Merger. Their repositories keep the hyphenated names for now.
+- The scholarship item lists the two awards without "Over four years", and
+  writes the later years as "2025 & 2026".
+- About activities are one short line each and all end with a year or years
+  after a middle dot. The lecture is "Guest Lecture".
+- The two hackathon awards in the proof strip, the lecture in About, and the
+  cuRiding and EcoCart pages link to the owner's own posts about them. A
+  project's post is `links.post`; an activity's is `link`.

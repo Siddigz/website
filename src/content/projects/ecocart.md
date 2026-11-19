@@ -7,6 +7,7 @@ date: 2025-09
 links:
   repo: https://github.com/Siddigz/EcoCart
   video: https://youtu.be/w-SaoFrLJkc
+  post: https://www.linkedin.com/feed/update/urn:li:activity:7372464027039412224/
 featured: 5
 result: Won Best AI for Environmental Impact at AGI Ventures Canada Hackathon 3.0.
 award:

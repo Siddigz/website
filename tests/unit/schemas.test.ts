@@ -45,6 +45,11 @@ describe('projectSchema', () => {
     expect(schema.safeParse({ ...base, order: 0 }).success).toBe(false);
     expect(schema.safeParse({ ...base, order: 1.5 }).success).toBe(false);
   });
+  it('takes a web address for a post about the project, and nothing else', () => {
+    const links = { repo: base.links.repo, post: 'https://www.linkedin.com/feed/update/urn:li:activity:1/' };
+    expect(schema.safeParse({ ...base, links }).success).toBe(true);
+    expect(schema.safeParse({ ...base, links: { ...links, post: 'see my profile' } }).success).toBe(false);
+  });
   it('accepts only known cover fits', () => {
     const withCover = { ...base, cover: './c.png', coverAlt: 'c' };
     expect(schema.safeParse({ ...withCover, coverFit: 'contain' }).success).toBe(true);

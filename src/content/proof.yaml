@@ -2,20 +2,19 @@
 peoples-choice:
   label: People's Choice
   detail: cuHacking 7
-  link: https://cuhacking.ca/
+  link: https://www.linkedin.com/feed/update/urn:li:activity:7484996503888101377/
   order: 1
 best-ai-environment:
   label: Best AI for Environmental Impact
   detail: AGI Ventures Canada Hackathon 3.0
-  link: https://luma.com/9k96tg5z
+  link: https://www.linkedin.com/feed/update/urn:li:activity:7372464027039412224/
   order: 2
 scholarship:
   # One scholarship promised on admission, paid under a different name each year.
   label: $16,000 in scholarships
   detail:
-    - Over four years
     - Faculty Scholarship, 2024
-    - Jacob Freedman Scholarship, 2025 and 2026
+    - Jacob Freedman Scholarship, 2025 & 2026
   order: 3
 honour-list:
   label: Deans' Honour List

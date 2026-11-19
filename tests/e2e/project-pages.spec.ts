@@ -62,6 +62,17 @@ test('cuRiding links both repositories and the demo', async ({ page }) => {
   await expect(page.getByText("People's Choice · cuHacking 7")).toBeVisible();
 });
 
+test('a project with a post about it links to that post, and the others do not', async ({ page }) => {
+  const projects = readProjects().filter((project) => project.data.featured !== undefined);
+  expect(projects.some((project) => project.data.links?.post)).toBe(true);
+  for (const { slug, data } of projects) {
+    await page.goto(`/projects/${slug}`);
+    const link = page.getByRole('link', { name: 'LinkedIn post' });
+    await expect(link).toHaveCount(data.links?.post ? 1 : 0);
+    if (data.links?.post) await expect(link).toHaveAttribute('href', data.links.post);
+  }
+});
+
 test('a page shows only the links its project has', async ({ page }) => {
   await page.goto('/projects/visioncompanion');
   await expect(page.getByRole('link', { name: 'Live app' })).toHaveAttribute('href', 'https://visioncompanion.vercel.app');
