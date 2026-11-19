@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
-import { featuredSlugs, moreSlugs, readProjects } from '../content/helpers';
+import { featuredSlugs, moreSlugs, readMarkdown, readProjects } from '../content/helpers';
 
 const site = parse(readFileSync('src/content/site.yaml', 'utf8')).main;
 const skills: string[] = parse(readFileSync('src/content/skills.yaml', 'utf8')).main.items;
@@ -141,6 +141,26 @@ test('proof strip shows the awards as worded', async ({ page }) => {
   await expect(page.locator('#proof li').nth(1)).toContainText('Best AI for Environmental Impact');
 });
 
+test('the menu lists sections in the order they appear on the page', async ({ page }) => {
+  await page.goto('/');
+  const targets = await page
+    .locator('header nav ul a')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')!.replace('/#', '')));
+  const sections = await page.locator('main > section').evaluateAll((els) => els.map((el) => el.id));
+  const positions = targets.map((id) => sections.indexOf(id));
+  expect(positions.length).toBeGreaterThan(1);
+  expect(positions.every((position) => position >= 0)).toBe(true);
+  expect(positions).toEqual([...positions].sort((a, b) => a - b));
+});
+
+test('the skills strip is exactly as wide as the rest of the content', async ({ page }) => {
+  await page.goto('/');
+  const strip = (await page.locator('[data-skills-viewport]').boundingBox())!;
+  const list = (await page.locator('#experience ol').boundingBox())!;
+  expect(Math.abs(strip.x - list.x)).toBeLessThan(1);
+  expect(Math.abs(strip.width - list.width)).toBeLessThan(1);
+});
+
 test('skills strip lists every skill once for assistive tech', async ({ page }) => {
   await page.goto('/');
   const list = page.getByRole('list', { name: 'Skills' });
@@ -261,7 +281,20 @@ test('about shows the bio, activities and the Hack the North caption', async ({ 
   await page.goto('/');
   await expect(page.locator('#about')).toContainText('Carleton Tennis Club');
   await expect(page.locator('#about')).toContainText('Hack the North 2026, Waterloo');
-  await expect(page.locator('#about figure img')).toHaveCount(1);
+  // Every photo in about.md is shown with its caption, side by side when there are several.
+  const photos = readMarkdown('src/content/about.md').data.photos as { alt: string; caption: string }[];
+  const figures = page.locator('#about figure');
+  await expect(figures).toHaveCount(photos.length);
+  for (const [index, photo] of photos.entries()) {
+    await expect(figures.nth(index).locator('img')).toHaveAttribute('alt', photo.alt);
+    await expect(figures.nth(index).locator('figcaption')).toHaveText(photo.caption);
+  }
+  if (photos.length > 1) {
+    const first = (await figures.nth(0).boundingBox())!;
+    const second = (await figures.nth(1).boundingBox())!;
+    expect(Math.abs(first.y - second.y)).toBeLessThan(1);
+    expect(second.x).toBeGreaterThan(first.x + first.width - 1);
+  }
 });
 
 test('contact has GitHub and LinkedIn and no email control', async ({ page }) => {

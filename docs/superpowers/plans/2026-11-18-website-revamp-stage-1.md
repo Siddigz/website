@@ -933,3 +933,8 @@ above. Later plans should build on this section, not on the task text.
   Processor have thumbnails, cropped from the images in their repositories.
 - Experience logos and row thumbnails grow with the screen, up to 104 px and
   80 px.
+- The menu lists sections in page order: Experience, Projects, About.
+- The skills strip is exactly as wide as the other sections and fades at both
+  ends.
+- About shows its photos side by side. A second photo, from the Ottawa 10K, sits
+  beside the Hack the North one.
