@@ -38,7 +38,7 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     {
       photo ? (
         // At the top of the page, so it loads first and never lazily.
-        <Image src={photo.src} alt={photo.alt} width={208} height={208} fit="cover" priority />
+        <Image src={photo.src} alt={photo.alt} width={288} height={288} fit="cover" priority />
       ) : (
         <svg viewBox="0 0 120 120" aria-hidden="true">
           <rect class="frame" width="120" height="120" rx="14" />
