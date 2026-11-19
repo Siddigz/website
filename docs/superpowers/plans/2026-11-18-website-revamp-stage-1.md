@@ -940,6 +940,6 @@ above. Later plans should build on this section, not on the task text.
   Race Weekend 10K, sits beside the Hack the North one.
 - GitHub and LinkedIn appear in one order everywhere, GitHub first. The order
   lives in `src/lib/site.ts`, and both the top of the page and Contact read it.
-- The photo at the top is the owner's own edit of the headshot with the power
-  lines removed. On a phone it spans the column, above the name. Beside the
+- The photo at the top is cut from the full-resolution original, with the power
+  lines removed as in the owner's own edit. On a phone it spans the column, above the name. Beside the
   text it grows with the screen, up to 22rem on a desktop.
