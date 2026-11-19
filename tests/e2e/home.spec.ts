@@ -108,6 +108,24 @@ test('on a phone the photo sits above the name', async ({ page }) => {
   expect(photo.y + photo.height).toBeLessThanOrEqual(name.y);
 });
 
+test('the photo fills the width on a phone and is large on a wide screen', async ({ page }) => {
+  test.skip(!site.photo, 'site.yaml has no photo');
+  const photoBox = async () => (await page.locator('#top [data-photo-slot] img').boundingBox())!;
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  const text = (await page.locator('#top [data-hero-text]').boundingBox())!;
+  const narrow = await photoBox();
+  expect(Math.abs(narrow.x - text.x)).toBeLessThan(1);
+  expect(Math.abs(narrow.width - text.width)).toBeLessThan(1);
+  expect(Math.abs(narrow.width - narrow.height)).toBeLessThan(1);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const wide = await photoBox();
+  expect(Math.round(wide.width)).toBe(352);
+  expect(Math.abs(wide.width - wide.height)).toBeLessThan(1);
+});
+
 test('a proof item with several details shows each on its own line', async ({ page }) => {
   await page.goto('/');
   const lines = page.locator('#proof li', { hasText: "Deans' Honour List" }).locator('[data-detail-line]');

@@ -38,7 +38,7 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     {
       photo ? (
         // At the top of the page, so it loads first and never lazily.
-        <Image src={photo.src} alt={photo.alt} width={288} height={288} fit="cover" priority />
+        <Image src={photo.src} alt={photo.alt} width={448} height={448} fit="cover" priority />
       ) : (
         <svg viewBox="0 0 120 120" aria-hidden="true">
           <rect class="frame" width="120" height="120" rx="14" />
@@ -80,10 +80,21 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     block-size: var(--avatar-size);
   }
 
+  /* Above the text the photo spans the column, up to a limit so it never towers on a small tablet. */
   .photo :global(img) {
+    inline-size: 100%;
+    max-inline-size: var(--avatar-size-narrow);
+    block-size: auto;
+    aspect-ratio: 1;
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-lg);
     object-fit: cover;
+  }
+
+  @media (min-width: 48rem) {
+    .photo :global(img) {
+      inline-size: var(--avatar-size);
+    }
   }
 
   .frame {
