@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import sharp from 'sharp';
-import { readProjects, readMarkdown } from './helpers';
+import { readProjects, readMarkdown, readYaml } from './helpers';
 
 const RASTER = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 
@@ -32,6 +32,7 @@ describe('images', () => {
     const referenced = [
       ...readProjects().flatMap((p) => [p.data.cover, ...(p.data.gallery ?? []).map((g: { src: string }) => g.src)]),
       ...readMarkdown('src/content/about.md').data.photos.map((photo: { src: string }) => photo.src),
+      readYaml('src/content/site.yaml').main.photo?.src,
     ]
       .filter(Boolean)
       .map((path: string) => path.replace(/^(\.\.\/)+/, 'src/'));

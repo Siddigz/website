@@ -76,8 +76,9 @@ will usually ask Claude to do it, so the steps are written down as a recipe.
   on the `revamp` branch, which gets its own Vercel preview address on every
   push.
 - **Public repo:** see "Rules".
-- **Photos of the owner:** not available yet. The top of the home page shows
-  a generic placeholder figure and accepts a real photo later with no redesign.
+- **Photos of the owner:** `site.yaml` takes an optional `photo`, shown at the
+  top of the home page. Without it the slot shows a generic placeholder figure.
+  How the photo is framed and styled is decided in stage 2.
 - **Voice recordings:** not available yet. Placeholder sounds stand in.
 - **Employer detail:** experience entries show organisation, title, team and
   dates only.
@@ -203,7 +204,7 @@ message.
 | `oneLiner` | yes | Same sentence as the GitHub profile README uses |
 | `category` | yes | `web-apps`, `ai-data` or `systems` |
 | `stack` | yes | List of technologies |
-| `date` | yes | Year and month, for ordering |
+| `date` | no | Year and month, for ordering only; never shown. A project with no date goes last. |
 | `links.repo` | featured: yes; others: optional | Public repository only. A compact row with no repository shows its title as plain text. |
 | `links.live`, `links.video` | no | |
 | `featured` | no | A number. Sets the order among featured projects. Present means the project gets a large card and its own page. |

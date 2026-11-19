@@ -1,13 +1,17 @@
 ---
+import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
 
 interface Props {
   /** Test-only: force the looking-for line on or off regardless of site.yaml. */
   lookingForOverride?: boolean;
+  /** Test-only: false shows the placeholder figure even when site.yaml has a photo. */
+  photoOverride?: boolean;
 }
 
 const site = await getSite();
 const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled;
+const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
 ---
 
 <section id="top" class="hero section container">
@@ -30,13 +34,20 @@ const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled
       <li><a class="button" href={site.links.linkedin}>LinkedIn</a></li>
     </ul>
   </div>
-  {/* A generic placeholder until a real photo is supplied. Decorative, so hidden from screen readers. */}
+  {/* The photo from site.yaml. Without one, a generic figure: decorative, so hidden from screen readers. */}
   <div class="photo" data-photo-slot>
-    <svg viewBox="0 0 120 120" aria-hidden="true">
-      <rect class="frame" width="120" height="120" rx="14"></rect>
-      <circle class="figure" cx="60" cy="46" r="20"></circle>
-      <path class="figure" d="M20 120c1-27 18-42 40-42s39 15 40 42z"></path>
-    </svg>
+    {
+      photo ? (
+        // At the top of the page, so it loads first and never lazily.
+        <Image src={photo.src} alt={photo.alt} width={208} height={208} fit="cover" priority />
+      ) : (
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <rect class="frame" width="120" height="120" rx="14" />
+          <circle class="figure" cx="60" cy="46" r="20" />
+          <path class="figure" d="M20 120c1-27 18-42 40-42s39 15 40 42z" />
+        </svg>
+      )
+    }
   </div>
 </section>
 
@@ -64,9 +75,16 @@ const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled
     }
   }
 
-  .photo svg {
+  .photo svg,
+  .photo :global(img) {
     inline-size: var(--avatar-size);
     block-size: var(--avatar-size);
+  }
+
+  .photo :global(img) {
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    object-fit: cover;
   }
 
   .frame {

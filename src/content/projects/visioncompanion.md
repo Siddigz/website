@@ -1,7 +1,7 @@
 ---
 title: VisionCompanion
 oneLiner: An iPhone worn on a chest strap that spots street hazards for a blind walker and announces them out loud.
-category: web-apps
+category: ai-data
 stack: [TypeScript, Python, Gemini, ElevenLabs]
 date: 2026-09
 links:

@@ -1,7 +1,7 @@
 ---
 title: cuRiding
 oneLiner: An e-scooter safety system. A Raspberry Pi 5 dashcam detects cars, pedestrians and red lights in real time, and a server streams telemetry and raises crash alerts.
-category: systems
+category: ai-data
 stack: [C++, QNX, TensorFlow Lite, OpenCV, FastAPI, WebSockets, React Native]
 date: 2026-07
 links:
