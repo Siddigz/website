@@ -37,7 +37,22 @@ describe('copy', () => {
     expect(site.lookingFor).toEqual({ enabled: true, text: 'Open to software engineering internships' });
     expect(site.contactNote.length).toBeGreaterThan(10);
     expect(site.school).toBe('Carleton University');
-    expect(site.program).toContain('Computer Science');
+    expect(site.program).toBe('Computer Science (Honours), Minor in Mathematics');
+  });
+
+  it('names no stream, since a stream can change', () => {
+    expect(site.program).not.toMatch(/stream/i);
+    expect(readMarkdown('src/content/about.md').body).not.toMatch(/stream/i);
+  });
+
+  it('words the scholarships with the amount, the period and both names', () => {
+    const { scholarship } = readYaml('src/content/proof.yaml');
+    expect(scholarship.label).toBe('$16,000 in scholarships');
+    expect(scholarship.detail).toEqual([
+      'Over four years',
+      'Faculty Scholarship, 2024',
+      'Jacob Freedman Scholarship, 2025 and 2026',
+    ]);
   });
 
   it("lists only the confirmed Deans' Honour List years", () => {

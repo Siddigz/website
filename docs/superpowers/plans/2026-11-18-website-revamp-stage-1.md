@@ -954,3 +954,8 @@ above. Later plans should build on this section, not on the task text.
   wrong and is gone.
 - About gained the guest lecture given to the database course, and the
   notetaking entry gained its dates and its three Letters of Appreciation.
+- The scholarship item reads "$16,000 in scholarships", over four years, and
+  names both awards: Faculty Scholarship (2024) and Jacob Freedman Scholarship
+  (2025 and 2026). The amount belongs to the pair, not to either one alone.
+- The programme line and the About paragraph no longer name a stream. They
+  read "Computer Science (Honours), Minor in Mathematics".
