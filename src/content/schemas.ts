@@ -38,6 +38,8 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
           extraRepos: z.array(ownerRepo).optional(),
           live: z.url().optional(),
           video: z.url().optional(),
+          /** A public post about the project, such as the announcement of an award. */
+          post: z.url().optional(),
         })
         .default({}),
       /** Order among featured projects. Present means a large card and a page. */
@@ -120,6 +122,7 @@ export const siteSchema = z.object({
 
 export const aboutSchema = z.object({
   title: z.string().min(1),
-  activities: z.array(z.object({ name: z.string().min(1), role: z.string().min(1) })),
+  /** `role` ends with the year or years, after a middle dot. A `link` turns the name into a link. */
+  activities: z.array(z.object({ name: z.string().min(1), role: z.string().min(1), link: z.url().optional() })),
   photos: z.array(z.object({ src: z.string().min(1), alt: z.string().min(1), caption: z.string().min(1) })),
 });

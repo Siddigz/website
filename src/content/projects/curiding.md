@@ -9,6 +9,7 @@ links:
   extraRepos:
     - https://github.com/Siddigz/cuRiding-Server
   video: https://www.youtube.com/shorts/Ubc34F7nnvk
+  post: https://www.linkedin.com/feed/update/urn:li:activity:7484996503888101377/
 featured: 1
 result: Won People's Choice at cuHacking 7.
 award:

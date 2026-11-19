@@ -55,6 +55,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
         }
         {data.links.live && <li><a class="button" href={data.links.live}>Live app</a></li>}
         {data.links.video && <li><a class="button" href={data.links.video}>Watch demo</a></li>}
+        {data.links.post && <li><a class="button" href={data.links.post}>LinkedIn post</a></li>}
       </ul>
       <ul class="stack muted" role="list" aria-label="Built with" translate="no">
         {data.stack.map((item) => <li>{item}</li>)}

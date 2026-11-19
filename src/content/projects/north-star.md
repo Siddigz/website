@@ -1,5 +1,5 @@
 ---
-title: North-Star
+title: North Star
 oneLiner: Arctic ship routing in Python and Pygame, using Pareto-optimal pathfinding to trade off time, fuel and safety through icy waters.
 category: ai-data
 stack: [Python, Pygame]

@@ -1,5 +1,5 @@
 ---
-title: alternative-signals
+title: Alternative Signals
 oneLiner: A backtesting pipeline testing whether 7 free data signals predict company results and stock returns.
 category: ai-data
 stack: [Python, BERT, SEC EDGAR, Google Trends]
