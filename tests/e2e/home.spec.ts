@@ -112,7 +112,14 @@ test('on a phone the photo sits above the name', async ({ page }) => {
 
 test('the photo fills the width on a phone and is large on a wide screen', async ({ page }) => {
   test.skip(!site.photo, 'site.yaml has no photo');
-  const photoBox = async () => (await page.locator('#top [data-photo-slot] img').boundingBox())!;
+  // The photo's own size and where its slot sits. The look tilts the photo a
+  // little, which widens the box drawn around it but not the photo itself.
+  const photoBox = async () => ({
+    x: (await page.locator('#top [data-photo-slot]').boundingBox())!.x,
+    ...(await page
+      .locator('#top [data-photo-slot] img')
+      .evaluate((img: HTMLElement) => ({ width: img.offsetWidth, height: img.offsetHeight }))),
+  });
 
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');

@@ -49,15 +49,15 @@ describe('built site', () => {
     expect(external).toEqual([]);
   });
 
-  it('fonts are files on this site, and only one is fetched early', () => {
+  it('fonts are files on this site, and only the two in use are fetched early', () => {
     const html = readFileSync(join(DIST, 'index.html'), 'utf8');
     const fontUrls = [...html.matchAll(/url\("([^"]+\.woff2)"\)/g)].map((match) => match[1]!);
-    expect(fontUrls.length).toBeGreaterThanOrEqual(3);
+    expect(fontUrls.length).toBe(2);
     for (const url of fontUrls) {
       expect(url, url).toMatch(/^\/_astro\//);
       expect(existsSync(join(DIST, url)), url).toBe(true);
     }
-    expect(html.match(/<link rel="preload"[^>]*as="font"/g)?.length).toBe(1);
+    expect(html.match(/<link rel="preload"[^>]*as="font"/g)?.length).toBe(2);
   });
 
   it('no built file contains an email address', () => {

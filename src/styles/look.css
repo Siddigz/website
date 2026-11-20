@@ -1,10 +1,10 @@
 /*
- * Look 2 of 3 (stage 2): Warm and playful.
- * Closest to the reference the owner named: friendly heavy headings, cream and
- * navy, a violet-to-pink accent, big corners, tinted shadows, springy hover.
- * Values first, then the rules only this look has. No CSS nesting.
+ * The look the owner chose on 2026-11-19: warm and playful. Friendly heavy
+ * headings, cream and navy, big corners, tinted shadows, springy hover.
+ * Accent colours are not here: three versions are on the preview switcher,
+ * one file each in looks/. Values first, then the rules. No CSS nesting.
  */
-:root[data-look='warm'] {
+:root[data-look] {
   /* Colour */
   --color-bg-light: oklch(97.5% 0.014 85);
   --color-bg-dark: oklch(19% 0.04 275);
@@ -14,10 +14,6 @@
   --color-text-dark: oklch(95% 0.012 85);
   --color-text-muted-light: oklch(43% 0.045 275);
   --color-text-muted-dark: oklch(81% 0.03 275);
-  --color-accent-light: oklch(48% 0.23 295);
-  --color-accent-dark: oklch(81% 0.12 300);
-  --color-accent-2-light: oklch(54% 0.23 0);
-  --color-accent-2-dark: oklch(80% 0.13 350);
   --color-border-light: oklch(89% 0.028 85);
   --color-border-dark: oklch(34% 0.05 275);
   --color-on-accent-light: oklch(99% 0.005 85);
@@ -43,45 +39,57 @@
   --radius-thumb: 0.875rem;
   --radius-pill: var(--radius-full);
   --radius-media: 1.5rem;
-  --warm-shade: oklch(40% 0.16 290);
   --shadow-card: 0 1px 2px color-mix(in oklch, var(--warm-shade) 8%, transparent), 0 1rem 2rem -1rem color-mix(in oklch, var(--warm-shade) 28%, transparent);
   --shadow-card-hover: 0 2px 4px color-mix(in oklch, var(--warm-shade) 10%, transparent), 0 1.75rem 3rem -1.25rem color-mix(in oklch, var(--warm-shade) 42%, transparent);
   --shadow-photo: 0 1.5rem 3rem -1.25rem color-mix(in oklch, var(--warm-shade) 50%, transparent);
   --lift-card: 0.375rem;
 
-  /* Only this look */
+  /* Only this look. Two colours are mixed in oklab: in oklch the hue drifts through pink when one is white or black. */
   --warm-gradient: linear-gradient(100deg, var(--color-accent), var(--color-accent-2));
   --warm-tilt: 2.5deg;
   --warm-card-tilt: 2deg;
   --warm-perspective: 60rem;
   --warm-button-depth: 0.25rem;
-  --warm-button-edge: color-mix(in oklch, var(--color-text) 22%, var(--color-border));
+  --warm-button-edge: color-mix(in oklab, var(--color-text) 22%, var(--color-border));
   --warm-photo-edge: 0.375rem;
   --warm-squiggle-height: 0.5rem;
   --warm-squiggle-width: 4.5rem;
   --warm-backdrop-height: 46rem;
-  --warm-glow-a: light-dark(oklch(88% 0.09 300 / 0.55), oklch(42% 0.16 300 / 0.4));
-  --warm-glow-b: light-dark(oklch(90% 0.09 20 / 0.5), oklch(42% 0.14 350 / 0.28));
   --warm-glow-c: light-dark(oklch(93% 0.11 95 / 0.55), oklch(40% 0.1 250 / 0.3));
   --warm-star: light-dark(transparent, oklch(96% 0.05 95 / 0.85));
-  --warm-tint-a: color-mix(in oklch, var(--color-accent) 13%, var(--color-surface));
-  --warm-tint-b: color-mix(in oklch, var(--color-accent-2) 13%, var(--color-surface));
+  --warm-tint-a: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
+  --warm-tint-b: color-mix(in oklab, var(--color-accent-2) 13%, var(--color-surface));
   --warm-tint-c: light-dark(oklch(93% 0.07 95), oklch(34% 0.06 95));
-  --warm-bounce: 0.6s;
-  --warm-hop: -0.25rem;
+  --live-light: oklch(58% 0.17 150);
+  --live-dark: oklch(78% 0.19 150);
+  --live: var(--live-light);
+  --live-ping: 1.6s;
+  --live-ping-reach: 0.375rem;
 }
 
-:root[data-look='warm'] ::selection {
+@media (prefers-color-scheme: dark) {
+  :root[data-look] {
+    --live: var(--live-dark);
+  }
+}
+
+@supports (color: light-dark(white, black)) {
+  :root[data-look] {
+    --live: light-dark(var(--live-light), var(--live-dark));
+  }
+}
+
+:root[data-look] ::selection {
   background: color-mix(in oklch, var(--color-accent-2) 30%, transparent);
 }
 
 /* Colour glows behind the top of the page. In the dark they dim and stars come out. */
-:root[data-look='warm'] main {
+:root[data-look] main {
   position: relative;
   isolation: isolate;
 }
 
-:root[data-look='warm'] main::before {
+:root[data-look] main::before {
   content: '';
   position: absolute;
   inset-block-start: 0;
@@ -107,25 +115,8 @@
   pointer-events: none;
 }
 
-/* The family name is drawn in the accent gradient. */
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  :root[data-look='warm'] h1 [data-name-part='last'] {
-    background-image: var(--warm-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
-
-@media (forced-colors: active) {
-  :root[data-look='warm'] h1 [data-name-part='last'] {
-    background-image: none;
-    color: CanvasText;
-  }
-}
-
 /* A squiggle under each section title, in the same gradient. */
-:root[data-look='warm'] .section-title::after {
+:root[data-look] .section-title::after {
   content: '';
   display: block;
   inline-size: var(--warm-squiggle-width);
@@ -139,73 +130,77 @@
 }
 
 /* The photo sits a little crooked in a thick frame, and straightens when pointed at. */
-:root[data-look='warm'] .photo img {
+:root[data-look] .photo img {
   border: var(--warm-photo-edge) solid var(--color-surface);
   rotate: var(--warm-tilt);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-look='warm'] .photo img {
+  :root[data-look] .photo img {
     transition:
       rotate var(--duration-base) var(--ease-spring),
       scale var(--duration-base) var(--ease-spring);
   }
 
-  :root[data-look='warm'] .photo img:hover {
+  :root[data-look] .photo img:hover {
     rotate: -1deg;
     scale: 1.02;
   }
 }
 
-/* The availability line: the dot hops twice, then rests. */
-:root[data-look='warm'] .looking-for {
+/* The availability line: a small green light that pings three times, then rests. */
+:root[data-look] .looking-for {
   border-color: transparent;
   background: var(--warm-tint-a);
 }
 
-:root[data-look='warm'] .looking-for::before {
-  background: var(--color-accent-2);
+:root[data-look] .looking-for::before {
+  background: var(--live);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-look='warm'] .looking-for::before {
-    animation: warm-hop var(--warm-bounce) var(--ease-out) 4 alternate;
+  :root[data-look] .looking-for::before {
+    animation: live-ping var(--live-ping) var(--ease-out) 3;
   }
 }
 
-@keyframes warm-hop {
+@keyframes live-ping {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--live) 60%, transparent);
+  }
+
   to {
-    translate: 0 var(--warm-hop);
+    box-shadow: 0 0 0 var(--live-ping-reach) transparent;
   }
 }
 
 /* Buttons are chunky pills that press down. */
-:root[data-look='warm'] .button {
+:root[data-look] .button {
   padding: var(--space-3) var(--space-5);
   border-color: var(--warm-button-edge);
   font-weight: var(--weight-bold);
   box-shadow: 0 var(--warm-button-depth) 0 0 var(--warm-button-edge);
 }
 
-:root[data-look='warm'] .links li:first-child .button {
-  --warm-button-edge: color-mix(in oklch, var(--color-accent) 62%, black);
+:root[data-look] .links li:first-child .button {
+  --warm-button-edge: color-mix(in oklab, var(--color-accent) 62%, black);
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
-:root[data-look='warm'] .button:active {
+:root[data-look] .button:active {
   box-shadow: 0 0 0 0 var(--warm-button-edge);
   translate: 0 var(--warm-button-depth);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-look='warm'] .button {
+  :root[data-look] .button {
     transition:
       translate var(--duration-fast) var(--ease-spring),
       box-shadow var(--duration-fast) var(--ease-out);
   }
 
-  :root[data-look='warm'] .button:hover:not(:active) {
+  :root[data-look] .button:hover:not(:active) {
     translate: 0 -0.125rem;
     box-shadow: 0 calc(var(--warm-button-depth) + 0.125rem) 0 0 var(--warm-button-edge);
   }
@@ -213,7 +208,7 @@
 
 /* Cards lean towards the mouse. */
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-look='warm'] .card {
+  :root[data-look] .card {
     transform: perspective(var(--warm-perspective))
       rotateX(calc(var(--pointer-dy, 0) * var(--warm-card-tilt) * -1))
       rotateY(calc(var(--pointer-dx, 0) * var(--warm-card-tilt)));
@@ -224,8 +219,8 @@
   }
 }
 
-:root[data-look='warm'] .card .award,
-:root[data-look='warm'] .project .award {
+:root[data-look] .card .award,
+:root[data-look] .project .award {
   inline-size: fit-content;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
@@ -234,57 +229,57 @@
 }
 
 /* Technologies and skills are soft coloured pills. */
-:root[data-look='warm'] .card .stack li,
-:root[data-look='warm'] .project .stack li,
-:root[data-look='warm'] .skills li {
+:root[data-look] .card .stack li,
+:root[data-look] .project .stack li,
+:root[data-look] .skills li {
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   background: var(--warm-tint-a);
   color: var(--color-text);
 }
 
-:root[data-look='warm'] .card .stack,
-:root[data-look='warm'] .project .stack {
+:root[data-look] .card .stack,
+:root[data-look] .project .stack {
   gap: var(--space-2);
 }
 
-:root[data-look='warm'] .skills li:nth-child(3n + 2) {
+:root[data-look] .skills li:nth-child(3n + 2) {
   background: var(--warm-tint-b);
 }
 
-:root[data-look='warm'] .skills li:nth-child(3n) {
+:root[data-look] .skills li:nth-child(3n) {
   background: var(--warm-tint-c);
 }
 
-:root[data-look='warm'] .skills ul {
+:root[data-look] .skills ul {
   gap: var(--space-2);
   padding-inline-end: var(--space-2);
 }
 
 /* The highlights strip: labels in the heading face. */
-:root[data-look='warm'] .proof .label {
+:root[data-look] .proof .label {
   font-family: var(--font-heading);
   font-size: var(--text-lg);
   font-weight: var(--weight-heading);
 }
 
 /* The theme button is round and its icon turns when pointed at. */
-:root[data-look='warm'] .theme-toggle {
+:root[data-look] .theme-toggle {
   border-radius: var(--radius-full);
   background: var(--color-surface);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-look='warm'] .theme-toggle svg {
+  :root[data-look] .theme-toggle svg {
     transition: rotate var(--duration-base) var(--ease-spring);
   }
 
-  :root[data-look='warm'] .theme-toggle:hover svg {
+  :root[data-look] .theme-toggle:hover svg {
     rotate: 30deg;
   }
 }
 
 /* Thicker, friendlier underlines on text links. */
-:root[data-look='warm'] main a:not(.button) {
+:root[data-look] main a:not(.button) {
   text-decoration-thickness: var(--indicator-width);
 }
