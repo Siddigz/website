@@ -415,8 +415,8 @@ Editorial are deleted. What the owner asked for on top of Warm:
 - Change: no pink and purple. The name is one colour. The availability dot is
   the green light from Crisp that pings three times.
 - Not carried over from Crisp: the dotted background and the light behind
-  cards. From Editorial the owner liked the section numbers, as an extra, not
-  yet added.
+  cards. From Editorial the owner liked the section numbers as an extra, then
+  decided on 2026-11-20 to leave them off.
 
 **Accent colour (owner, 2026-11-19): blue**, chosen from blue, teal and
 orange. A royal blue, with a cooler blue-green beside it in the squiggle and
@@ -433,8 +433,10 @@ Which optional details ship (from the backlog in section 8):
   a backdrop that changes with the theme (stars in the dark); a nav that
   marks the section being read.
 - Out: the light that follows the mouse across a card; small toggles inside
-  sentences (they need new text).
-- Not asked for yet: section numbers, which the owner liked as an extra.
+  sentences (they need new text); section numbers (owner, 2026-11-20).
+
+Section titles stay in sentence case, as in "Featured projects" (owner,
+2026-11-20).
 
 Movement rule in practice: nothing is switched off for reduced motion, because
 every animation, and every transition that moves, turns or resizes something,
