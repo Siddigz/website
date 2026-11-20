@@ -71,6 +71,12 @@
   --color-selection: color-mix(in oklab, var(--color-accent) 26%, transparent);
   --color-tap: color-mix(in oklab, var(--color-accent) 22%, transparent);
   --color-live-ring: color-mix(in oklab, var(--color-live) 60%, transparent);
+  /* The activity grid: an empty day, then four steps up to the full green. */
+  --color-heat-0: color-mix(in oklab, var(--color-text) 9%, var(--color-bg));
+  --color-heat-1: color-mix(in oklab, var(--color-live) 28%, var(--color-bg));
+  --color-heat-2: color-mix(in oklab, var(--color-live) 52%, var(--color-bg));
+  --color-heat-3: color-mix(in oklab, var(--color-live) 76%, var(--color-bg));
+  --color-heat-4: var(--color-live);
   --gradient-accent: linear-gradient(100deg, var(--color-accent), var(--color-accent-2));
 
   /* Type */
@@ -119,6 +125,8 @@
   --photo-edge: 0.375rem;
   --button-depth: 0.25rem;
   --button-rise: 0.125rem;
+  --heat-gap: clamp(0.0625rem, 0.3vw, 0.1875rem);
+  --radius-heat: 22%;
   --squiggle-width: 4.5rem;
   --squiggle-height: 0.5rem;
   --live-ping-reach: 0.375rem;

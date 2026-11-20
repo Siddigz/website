@@ -22,6 +22,8 @@ main:
   links:
     github: https://github.com/Siddigz
     linkedin: https://linkedin.com/in/siddigz
+  # This site's own repository. Its commits count towards the recent activity.
+  repository: https://github.com/Siddigz/website
   contactNote: The quickest way to reach me is a message on LinkedIn.
   # Used by the per-visitor greeting (stage 3).
   home:
