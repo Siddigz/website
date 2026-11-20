@@ -124,9 +124,6 @@ Decided by the owner on 2026-11-20:
 
 - No section numbers.
 - Section titles stay in sentence case ("Featured projects").
-
-Still open, for the owner:
-
-- Skill pills take one of three tints by position, so the colour says nothing about the skill. Keep it that way, or sort the skills into groups (languages, frameworks, data, tools) and give each group a tint. Grouping would change the order of an approved strip.
+- Skill pills keep their three tints by position. The colour stays decorative; the skills are not grouped.
 
 For stage 3: run the speed measurement in CI, and measure once more on the real preview address.
