@@ -61,6 +61,15 @@ test.describe('the switcher', () => {
     expect(await look(page)).toBe('editorial');
   });
 
+  test('a click wins over a look named in the address, also after a reload', async ({ page }) => {
+    await page.goto('/?look=warm');
+    await option(page, 'editorial').click();
+    expect(new URL(page.url()).searchParams.get('look')).toBe('editorial');
+    await page.reload();
+    expect(await look(page)).toBe('editorial');
+    await expect(option(page, 'editorial')).toHaveAttribute('aria-pressed', 'true');
+  });
+
   test('an unknown look in the address or in storage gives the default', async ({ page }) => {
     await page.goto('/?look=nope');
     expect(await look(page)).toBe(DEFAULT_LOOK);

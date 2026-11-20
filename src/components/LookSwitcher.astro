@@ -81,7 +81,7 @@ const onProduction = process.env.VERCEL_ENV === 'production';
 </style>
 
 <script>
-  import { LOOK_STORAGE_KEY, isLook, type Look } from '../lib/look';
+  import { LOOK_PARAM, LOOK_STORAGE_KEY, isLook, type Look } from '../lib/look';
   import { getStorage } from '../lib/theme';
 
   const root = document.documentElement;
@@ -102,6 +102,12 @@ const onProduction = process.env.VERCEL_ENV === 'production';
       const look = button.dataset.lookOption;
       if (!isLook(look)) return;
       show(look);
+      // A look named in the address would win again on reload, so keep it in step.
+      const address = new URL(window.location.href);
+      if (address.searchParams.has(LOOK_PARAM)) {
+        address.searchParams.set(LOOK_PARAM, look);
+        window.history.replaceState(window.history.state, '', address);
+      }
       try {
         getStorage()?.setItem(LOOK_STORAGE_KEY, look);
       } catch {
