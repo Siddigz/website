@@ -404,12 +404,28 @@ The three directions built (owner's choice of three, 2026-11-19):
 | Cards | flat, hairline, a light follows the mouse | big corners, tinted shadow, lean to the mouse | no boxes, ruled figures |
 | Photo | small corners, soft ring | tilted in a thick frame, straightens on hover | square, with a block of accent behind |
 
-A look is the value of `data-look` on `<html>`, with one stylesheet each in
-`src/styles/looks/`. A switcher at the bottom of every page changes it and
-remembers the choice; `?look=crisp`, `?look=warm` or `?look=editorial` in the
-address selects one directly. The switcher is never rendered on production
-and is deleted, with the two unchosen looks and their fonts, once the owner
-has chosen. All looks also get a nav that marks the section being read.
+**The owner's choice (2026-11-19): Warm and playful.** Ranked Warm first,
+Crisp second, Editorial a distant third, on laptop and phone. Crisp and
+Editorial are deleted. What the owner asked for on top of Warm:
+
+- Keep: the cream background, the navy dark mode, the heavy headings, the
+  buttons that press down, the squiggle under section titles, pills around
+  technologies and awards, cards that lean to the mouse, rounded pictures,
+  the tilted photo (also at full width on a phone).
+- Change: no pink and purple. The name is one colour. The availability dot is
+  the green light from Crisp that pings three times.
+- Not carried over from Crisp: the dotted background and the light behind
+  cards. From Editorial the owner liked the section numbers, as an extra, not
+  yet added.
+
+Still open: the accent colour. Three versions are on the preview: blue, teal
+and orange, each with a neighbouring second colour. The look is
+`src/styles/look.css`; a version is the value of `data-look` on `<html>`, with
+one small stylesheet each in `src/styles/looks/`. A switcher at the bottom of
+every page changes it and remembers the choice; `?look=blue`, `?look=teal` or
+`?look=orange` in the address selects one directly. The switcher is never
+rendered on production and is deleted, with the two unchosen colours, once
+the owner has chosen. The nav marks the section being read.
 
 ## 10. Rules
 
@@ -557,8 +573,8 @@ The owner reviews the list with the first content draft.
 
 ### Ship checklist
 
-0. One look is chosen. The look switcher, the unchosen looks and their font
-   packages are gone from the branch.
+0. One accent colour is chosen. The switcher and the unchosen colours are
+   gone from the branch.
 1. Owner approves the preview address on phone and laptop. This includes the
    text: the owner has read every line and said so. No comment on a piece of
    text means it has not been read, not that it is approved.

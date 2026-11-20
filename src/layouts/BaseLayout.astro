@@ -1,9 +1,10 @@
 ---
 import '../styles/tokens.css';
 import '../styles/base.css';
-import '../styles/looks/crisp.css';
-import '../styles/looks/warm.css';
-import '../styles/looks/editorial.css';
+import '../styles/look.css';
+import '../styles/looks/blue.css';
+import '../styles/looks/teal.css';
+import '../styles/looks/orange.css';
 import { Font } from 'astro:assets';
 import Nav from '../components/Nav.astro';
 import LookSwitcher from '../components/LookSwitcher.astro';
@@ -38,7 +39,7 @@ const canonical = new URL(path, Astro.site);
       } catch (error) {}
     </script>
     <script is:inline define:vars={{ looks: LOOKS, param: LOOK_PARAM, key: LOOK_STORAGE_KEY }}>
-      // Stage 2 preview: apply the chosen look before first paint. The address
+      // Stage 2 preview: apply the chosen accent colour before first paint. The address
       // wins over the stored choice, and is then remembered for the next page.
       var named = new URLSearchParams(location.search).get(param);
       var stored = null;
@@ -49,14 +50,9 @@ const canonical = new URL(path, Astro.site);
       var look = looks.includes(named) ? named : looks.includes(stored) ? stored : null;
       if (look) document.documentElement.dataset.look = look;
     </script>
-    {/* Self-hosted fonts. Only the default look's text font is fetched early. */}
-    <Font cssVariable="--font-geist" preload />
-    <Font cssVariable="--font-geist-mono" />
-    <Font cssVariable="--font-bricolage" />
-    <Font cssVariable="--font-figtree" />
-    <Font cssVariable="--font-fraunces" />
-    <Font cssVariable="--font-plex-sans" />
-    <Font cssVariable="--font-plex-mono" />
+    {/* Self-hosted fonts, both fetched early: the name at the top and the text under it. */}
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-figtree" preload />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

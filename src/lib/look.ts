@@ -1,24 +1,25 @@
 /*
- * The three visual directions built for the owner to choose from (stage 2).
- * A look is the value of `data-look` on <html>; each has a stylesheet in
- * src/styles/looks/. Once one is chosen this file and the switcher go away.
+ * Stage 2. The owner chose the warm look (src/styles/look.css) and is now
+ * choosing its accent colour from three versions. A version is the value of
+ * `data-look` on <html>; each has a stylesheet in src/styles/looks/. Once one
+ * is chosen this file and the switcher go away.
  */
-export const LOOKS = ['crisp', 'warm', 'editorial'] as const;
+export const LOOKS = ['blue', 'teal', 'orange'] as const;
 
 export type Look = (typeof LOOKS)[number];
 
-export const DEFAULT_LOOK: Look = 'crisp';
+export const DEFAULT_LOOK: Look = 'blue';
 
 /** Button text in the preview switcher. */
 export const LOOK_LABELS: Record<Look, string> = {
-  crisp: 'Crisp',
-  warm: 'Warm',
-  editorial: 'Editorial',
+  blue: 'Blue',
+  teal: 'Teal',
+  orange: 'Orange',
 };
 
 export const LOOK_STORAGE_KEY = 'look';
 
-/** Name of the address parameter that selects a look: `/?look=warm`. */
+/** Name of the address parameter that selects a version: `/?look=teal`. */
 export const LOOK_PARAM = 'look';
 
 export function isLook(value: unknown): value is Look {

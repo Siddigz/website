@@ -1,0 +1,14 @@
+/*
+ * Accent colours, version 2 of 3 (stage 2). Teal: a deep teal with a leaf green beside it.
+ * Everything else about the look is in ../look.css.
+ */
+:root[data-look='teal'] {
+  --color-accent-light: oklch(44% 0.095 190);
+  --color-accent-dark: oklch(82% 0.11 182);
+  --color-accent-2-light: oklch(54% 0.14 148);
+  --color-accent-2-dark: oklch(84% 0.14 142);
+  /* The tint in shadows, and the two colour glows behind the top of the page. */
+  --warm-shade: oklch(38% 0.08 200);
+  --warm-glow-a: light-dark(oklch(89% 0.07 185 / 0.55), oklch(42% 0.09 190 / 0.4));
+  --warm-glow-b: light-dark(oklch(92% 0.08 140 / 0.5), oklch(42% 0.09 150 / 0.26));
+}

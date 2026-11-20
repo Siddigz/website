@@ -32,9 +32,10 @@ describe('global stylesheets', () => {
   it.each([
     'src/styles/tokens.css',
     'src/styles/base.css',
-    'src/styles/looks/crisp.css',
-    'src/styles/looks/warm.css',
-    'src/styles/looks/editorial.css',
+    'src/styles/look.css',
+    'src/styles/looks/blue.css',
+    'src/styles/looks/teal.css',
+    'src/styles/looks/orange.css',
   ])('%s uses no nesting', (path) => {
     expect(nestedRules(readFileSync(path, 'utf8'))).toEqual([]);
   });

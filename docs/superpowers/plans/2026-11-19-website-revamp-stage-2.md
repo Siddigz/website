@@ -99,11 +99,22 @@ New tokens with neutral defaults, read by the components in place of the generic
 - [ ] `npm run check`, `npm test`, `npm run build && npm run test:build`, `npm run test:e2e`.
 - [ ] Screenshots of all three, light and dark, phone and desktop. Push. Give the owner the preview address.
 
-## Part B: after the owner chooses (not in this pass)
+## Part A2: the owner chose Warm; three accent colours (2026-11-19)
+
+Done in one pass after the owner's review of Part A.
+
+- Warm became the one look: `src/styles/looks/warm.css` moved to `src/styles/look.css`, its rules now under `:root[data-look]`. Crisp and Editorial and their five font packages are deleted.
+- Changes the owner asked for: the name in one colour; the availability dot is green and pings three times.
+- `LOOKS` is now `['blue', 'teal', 'orange']`. Each has a file in `src/styles/looks/` that sets only its accents, the shadow tint and two glows. The switcher is labelled "Colour".
+- Two colours are mixed in oklab, not oklch: with white or black on one side, oklch drifts the hue through pink.
+- Tests follow: contrast is worked out from the shared values plus each version's accents; the photo test measures the photo itself, because the tilt widens the box drawn around it.
+
+## Part B: after the owner chooses the colour (not in this pass)
 
 Depends on the choice, so it is only listed here.
 
-- Fold the chosen look's values into `tokens.css`; delete the other looks, the switcher, the `look` helper and the unused font packages.
+- Fold `look.css` and the chosen colour into `tokens.css` and the components; delete the other colours, the switcher and the `look` helper.
+- Ask the owner about section numbers (liked in Editorial, as an extra).
 - Add WebKit and Firefox to the browser tests.
 - The items stage 1 left for the real look: a `theme-color` meta that matches the background, curly quotes, an intentional tap-highlight colour, the Title Case question.
 - Decide which optional interactive details ship (design section 8, "Interactive detail backlog").

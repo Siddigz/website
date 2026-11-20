@@ -1,6 +1,6 @@
 /*
- * Stage 2: three looks to choose from, and the preview-only switcher.
- * This file goes when one look is chosen.
+ * Stage 2: the chosen look in three accent colours, and the preview-only
+ * switcher. This file goes when one colour is chosen.
  */
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -9,22 +9,21 @@ import { featuredSlugs } from '../content/helpers';
 
 const projectPath = `/projects/${featuredSlugs()[0]}`;
 const look = (page: Page) => page.evaluate(() => document.documentElement.dataset.look);
-const background = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-const switcher = (page: Page) => page.getByRole('group', { name: 'Preview look' });
+// The accent as the browser paints it: the colour of the first text link in the page.
+const accent = (page: Page) => page.evaluate(() => getComputedStyle(document.querySelector('#contact a')!).color);
+const switcher = (page: Page) => page.getByRole('group', { name: 'Preview colour' });
 const option = (page: Page, name: Look) => switcher(page).getByRole('button', { name: LOOK_LABELS[name], exact: true });
 
 // A family name as the browser reports it, without quotes or Astro's hash suffix.
 const headingFamily = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.querySelector('h1')!).fontFamily.split(',')[0]!.replace(/["']/g, '').replace(/-[0-9a-f]{16}$/, ''));
 
-const HEADING_FONT: Record<Look, string> = {
-  crisp: 'Geist',
-  warm: 'Bricolage Grotesque',
-  editorial: 'Fraunces',
-};
+const HEADING_FONT = 'Bricolage Grotesque';
+const OTHER: Look = LOOKS.find((name) => name !== DEFAULT_LOOK)!;
+const THIRD: Look = LOOKS.find((name) => name !== DEFAULT_LOOK && name !== OTHER)!;
 
 test.describe('the switcher', () => {
-  test('offers the three looks and starts on the default', async ({ page }) => {
+  test('offers the three colours and starts on the default', async ({ page }) => {
     await page.goto('/');
     await expect(switcher(page).getByRole('button')).toHaveText(LOOKS.map((name) => LOOK_LABELS[name]));
     expect(await look(page)).toBe(DEFAULT_LOOK);
@@ -33,41 +32,41 @@ test.describe('the switcher', () => {
 
   test('a click changes the look, and the choice survives a reload and a new page', async ({ page }) => {
     await page.goto('/');
-    const before = await background(page);
-    await option(page, 'warm').click();
-    expect(await look(page)).toBe('warm');
-    await expect(option(page, 'warm')).toHaveAttribute('aria-pressed', 'true');
+    const before = await accent(page);
+    await option(page, OTHER).click();
+    expect(await look(page)).toBe(OTHER);
+    await expect(option(page, OTHER)).toHaveAttribute('aria-pressed', 'true');
     await expect(option(page, DEFAULT_LOOK)).toHaveAttribute('aria-pressed', 'false');
-    expect(await background(page)).not.toBe(before);
+    expect(await accent(page)).not.toBe(before);
     await page.reload();
-    expect(await look(page)).toBe('warm');
-    await expect(option(page, 'warm')).toHaveAttribute('aria-pressed', 'true');
+    expect(await look(page)).toBe(OTHER);
+    await expect(option(page, OTHER)).toHaveAttribute('aria-pressed', 'true');
     await page.goto(projectPath);
-    expect(await look(page)).toBe('warm');
+    expect(await look(page)).toBe(OTHER);
   });
 
   test('works from the keyboard', async ({ page }) => {
     await page.goto('/');
-    await option(page, 'editorial').focus();
+    await option(page, THIRD).focus();
     await page.keyboard.press('Enter');
-    expect(await look(page)).toBe('editorial');
+    expect(await look(page)).toBe(THIRD);
   });
 
   test('the address can name a look, and that choice carries to the next page', async ({ page }) => {
-    await page.goto('/?look=editorial');
-    expect(await look(page)).toBe('editorial');
-    await expect(option(page, 'editorial')).toHaveAttribute('aria-pressed', 'true');
+    await page.goto(`/?look=${THIRD}`);
+    expect(await look(page)).toBe(THIRD);
+    await expect(option(page, THIRD)).toHaveAttribute('aria-pressed', 'true');
     await page.goto(projectPath);
-    expect(await look(page)).toBe('editorial');
+    expect(await look(page)).toBe(THIRD);
   });
 
   test('a click wins over a look named in the address, also after a reload', async ({ page }) => {
-    await page.goto('/?look=warm');
-    await option(page, 'editorial').click();
-    expect(new URL(page.url()).searchParams.get('look')).toBe('editorial');
+    await page.goto(`/?look=${OTHER}`);
+    await option(page, THIRD).click();
+    expect(new URL(page.url()).searchParams.get('look')).toBe(THIRD);
     await page.reload();
-    expect(await look(page)).toBe('editorial');
-    await expect(option(page, 'editorial')).toHaveAttribute('aria-pressed', 'true');
+    expect(await look(page)).toBe(THIRD);
+    await expect(option(page, THIRD)).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('an unknown look in the address or in storage gives the default', async ({ page }) => {
@@ -86,8 +85,8 @@ test.describe('the switcher', () => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('/');
-    await option(page, 'warm').click();
-    expect(await look(page)).toBe('warm');
+    await option(page, OTHER).click();
+    expect(await look(page)).toBe(OTHER);
     expect(errors).toEqual([]);
   });
 
@@ -103,7 +102,7 @@ test.describe('the switcher', () => {
   test('with JavaScript off the default look renders', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    await page.goto('/?look=warm');
+    await page.goto(`/?look=${OTHER}`);
     await expect(page.locator('html')).toHaveAttribute('data-look', DEFAULT_LOOK);
     await expect(page.locator('h1')).toBeVisible();
     await context.close();
@@ -130,15 +129,15 @@ test.describe('the nav shows the current section', () => {
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 for (const name of LOOKS) {
-  test.describe(`look: ${name}`, () => {
-    test('uses its own heading font, served by this site', async ({ page }) => {
+  test.describe(`colour: ${name}`, () => {
+    test('uses the look\'s heading font, served by this site', async ({ page }) => {
       const fontRequests: string[] = [];
       page.on('request', (request) => {
         if (request.resourceType() === 'font') fontRequests.push(request.url());
       });
       await page.goto(`/?look=${name}`);
       await page.evaluate(() => document.fonts.ready);
-      expect(await headingFamily(page)).toBe(HEADING_FONT[name]);
+      expect(await headingFamily(page)).toBe(HEADING_FONT);
       const loaded = await page.evaluate(() => {
         const family = getComputedStyle(document.querySelector('h1')!).fontFamily.split(',')[0]!.trim();
         return document.fonts.check(`700 32px ${family}`);
@@ -148,13 +147,24 @@ for (const name of LOOKS) {
       for (const url of fontRequests) expect(new URL(url).origin).toBe(new URL(page.url()).origin);
     });
 
-    test('differs from the other looks', async ({ page }) => {
+    test('has its own accent colour', async ({ page }) => {
       await page.goto(`/?look=${name}`);
-      const mine = await background(page);
+      const mine = await accent(page);
       for (const other of LOOKS.filter((candidate) => candidate !== name)) {
         await page.goto(`/?look=${other}`);
-        expect(await background(page), `${name} vs ${other}`).not.toBe(mine);
+        expect(await accent(page), `${name} vs ${other}`).not.toBe(mine);
       }
+    });
+
+    test('the name is one colour, the same as the text', async ({ page }) => {
+      await page.goto(`/?look=${name}`);
+      const colours = await page.evaluate(() => ({
+        body: getComputedStyle(document.body).color,
+        parts: [...document.querySelectorAll('h1 [data-name-part]')].map((part) => getComputedStyle(part).color),
+        images: [...document.querySelectorAll('h1 [data-name-part]')].map((part) => getComputedStyle(part).backgroundImage),
+      }));
+      expect(colours.parts).toEqual([colours.body, colours.body]);
+      expect(colours.images).toEqual(['none', 'none']);
     });
 
     test('nothing overflows sideways', async ({ page }) => {
