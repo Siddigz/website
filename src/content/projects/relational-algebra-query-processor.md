@@ -1,6 +1,6 @@
 ---
 title: Relational Algebra Query Processor
-oneLiner: A query engine that parses and evaluates nested relational algebra.
+oneLiner: A query engine in Python that parses nested relational algebra and evaluates it bottom-up, with selection, projection, joins, union, intersection and difference.
 category: ai-data
 stack: [Python]
 date: 2025-09

@@ -971,3 +971,6 @@ above. Later plans should build on this section, not on the task text.
 - The two hackathon awards in the proof strip, the lecture in About, and the
   cuRiding and EcoCart pages link to the owner's own posts about them. A
   project's post is `links.post`; an activity's is `link`.
+- The one-liners for Markit, Relational Algebra Query Processor and Student
+  Management System say what each program does, at about the length of the
+  other rows. Each claim is checkable in the repository's README or code.
