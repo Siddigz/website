@@ -44,7 +44,7 @@ describe('projects', () => {
   });
 
   it('words the two awards exactly', () => {
-    expect(bySlug('curiding').data.award).toEqual({ name: "People's Choice", event: 'cuHacking 7' });
+    expect(bySlug('curiding').data.award).toEqual({ name: 'People’s Choice', event: 'cuHacking 7' });
     expect(bySlug('ecocart').data.award).toEqual({
       name: 'Best AI for Environmental Impact',
       event: 'AGI Ventures Canada Hackathon 3.0',

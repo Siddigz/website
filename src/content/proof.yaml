@@ -1,6 +1,6 @@
 # The proof strip. Awards are worded exactly as given.
 peoples-choice:
-  label: People's Choice
+  label: People’s Choice
   detail: cuHacking 7
   link: https://www.linkedin.com/feed/update/urn:li:activity:7484996503888101377/
   order: 1
@@ -17,7 +17,7 @@ scholarship:
     - Jacob Freedman Scholarship, 2025 & 2026
   order: 3
 honour-list:
-  label: Deans' Honour List
+  label: Deans’ Honour List
   # A list shows each entry on its own line.
   detail:
     - 2024–25

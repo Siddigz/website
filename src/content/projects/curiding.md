@@ -11,9 +11,9 @@ links:
   video: https://www.youtube.com/shorts/Ubc34F7nnvk
   post: https://www.linkedin.com/feed/update/urn:li:activity:7484996503888101377/
 featured: 1
-result: Won People's Choice at cuHacking 7.
+result: Won People’s Choice at cuHacking 7.
 award:
-  name: People's Choice
+  name: People’s Choice
   event: cuHacking 7
 cover: ../../assets/projects/curiding/cover.jpg
 coverAlt: A hand holding a small camera wired to a Raspberry Pi, with a laptop behind it showing the live camera view.

@@ -67,7 +67,7 @@ describe('copy', () => {
     expect(scholarship.detail).toEqual(['Faculty Scholarship, 2024', 'Jacob Freedman Scholarship, 2025 & 2026']);
   });
 
-  it("lists only the confirmed Deans' Honour List years", () => {
+  it('lists only the confirmed Deans’ Honour List years', () => {
     const proof = readYaml('src/content/proof.yaml');
     expect(proof['honour-list'].detail).toEqual(['2024–25', '2025–26']);
   });
@@ -91,5 +91,22 @@ describe('copy', () => {
     expect(readYaml('src/content/skills.yaml').main.items.slice(0, 4)).toEqual([
       'Python', 'TypeScript', 'JavaScript', 'Java',
     ]);
+  });
+});
+
+describe('typography', () => {
+  it('text shown to visitors uses curly apostrophes and quotes, not straight ones', () => {
+    // Markdown bodies are converted when the site is built; these are the plain strings.
+    const strings: string[] = [];
+    const collect = (value: unknown) => {
+      if (typeof value === 'string') strings.push(value);
+      else if (Array.isArray(value)) value.forEach(collect);
+      else if (value && typeof value === 'object') Object.values(value).forEach(collect);
+    };
+    for (const file of ['site', 'proof', 'experience']) collect(readYaml(`src/content/${file}.yaml`));
+    collect(readMarkdown('src/content/about.md').data);
+    for (const project of readProjects()) collect(project.data);
+    const straight = strings.filter((text) => /['"]/.test(text) && !/^(https?:|\.\.\/)/.test(text));
+    expect(straight).toEqual([]);
   });
 });

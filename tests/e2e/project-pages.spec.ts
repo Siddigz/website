@@ -59,7 +59,7 @@ test('cuRiding links both repositories and the demo', async ({ page }) => {
     'href',
     'https://www.youtube.com/shorts/Ubc34F7nnvk',
   );
-  await expect(page.getByText("People's Choice · cuHacking 7")).toBeVisible();
+  await expect(page.getByText('People’s Choice · cuHacking 7')).toBeVisible();
 });
 
 test('a project with a post about it links to that post, and the others do not', async ({ page }) => {

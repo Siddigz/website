@@ -137,7 +137,7 @@ test('the photo fills the width on a phone and is large on a wide screen', async
 
 test('a proof item with several details shows each on its own line', async ({ page }) => {
   await page.goto('/');
-  const lines = page.locator('#proof li', { hasText: "Deans' Honour List" }).locator('[data-detail-line]');
+  const lines = page.locator('#proof li', { hasText: 'Deans’ Honour List' }).locator('[data-detail-line]');
   const years: string[] = parse(readFileSync('src/content/proof.yaml', 'utf8'))['honour-list'].detail;
   expect(years.length).toBeGreaterThan(1);
   await expect(lines).toHaveText(years);
@@ -165,7 +165,7 @@ test('experience lists three roles and no descriptions', async ({ page }) => {
 test('proof strip shows the awards as worded', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#proof li')).toHaveCount(5);
-  await expect(page.locator('#proof li').nth(0)).toContainText("People's Choice");
+  await expect(page.locator('#proof li').nth(0)).toContainText('People’s Choice');
   await expect(page.locator('#proof li').nth(0)).toContainText('cuHacking 7');
   await expect(page.locator('#proof li').nth(1)).toContainText('Best AI for Environmental Impact');
 });
@@ -221,8 +221,11 @@ test('skills strip moves, and the pause control stops it', async ({ page }) => {
   const pause = page.getByRole('checkbox', { name: 'Pause the skills strip' });
   await pause.check();
   expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('paused');
-  // Unchecking resumes at once, while the checkbox still has focus.
-  await pause.uncheck();
+  // Unchecking resumes at once, while the checkbox still has focus. Done from
+  // the keyboard, because Safari does not focus a checkbox that is clicked.
+  await pause.focus();
+  await page.keyboard.press('Space');
+  await expect(pause).not.toBeChecked();
   await expect(pause).toBeFocused();
   expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('running');
 });
