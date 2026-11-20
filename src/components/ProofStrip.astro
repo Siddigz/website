@@ -34,9 +34,8 @@ const items = (await getCollection('proof')).sort((a, b) => a.data.order - b.dat
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
     gap: var(--space-4);
     padding: var(--space-5);
-    border: var(--border-width) solid var(--color-card-border);
     border-radius: var(--radius-card);
-    background: var(--color-card-bg);
+    background: var(--color-surface);
     box-shadow: var(--shadow-card);
   }
 
@@ -48,7 +47,9 @@ const items = (await getCollection('proof')).sort((a, b) => a.data.order - b.dat
 
   .label {
     color: var(--color-text);
-    font-weight: var(--weight-bold);
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-heading);
     line-height: var(--leading-tight);
   }
 

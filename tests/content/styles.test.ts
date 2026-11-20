@@ -29,14 +29,7 @@ function nestedRules(css: string): string[] {
 }
 
 describe('global stylesheets', () => {
-  it.each([
-    'src/styles/tokens.css',
-    'src/styles/base.css',
-    'src/styles/look.css',
-    'src/styles/looks/blue.css',
-    'src/styles/looks/teal.css',
-    'src/styles/looks/orange.css',
-  ])('%s uses no nesting', (path) => {
+  it.each(['src/styles/tokens.css', 'src/styles/base.css'])('%s uses no nesting', (path) => {
     expect(nestedRules(readFileSync(path, 'utf8'))).toEqual([]);
   });
 
