@@ -126,4 +126,6 @@ Decided by the owner on 2026-11-20:
 - Section titles stay in sentence case ("Featured projects").
 - Skill pills keep their three tints by position. The colour stays decorative; the skills are not grouped.
 
+The owner approved the finished look on 2026-11-20, from pictures of the home page (laptop and phone, light and dark) and one project page. Stage 2 is complete.
+
 For stage 3: run the speed measurement in CI, and measure once more on the real preview address.
