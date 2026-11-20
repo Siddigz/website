@@ -66,9 +66,10 @@ test('unknown address shows the not-found page', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Back to home' })).toBeVisible();
 });
 
-test('skip link jumps to the main content', async ({ page }) => {
+test('skip link jumps to the main content', async ({ page, browserName }) => {
   await page.goto('/');
-  await page.keyboard.press('Tab');
+  // Safari only tabs to links with Option held, unless the visitor changes a setting.
+  await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   await expect(page.locator('main#main')).toHaveCount(1);
 });
