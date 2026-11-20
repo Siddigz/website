@@ -120,9 +120,13 @@ Done.
 - The blanket reduced-motion rule from stage 1 is removed. Safari reported its 0.01 ms transitions as still running, and nothing needs it: all movement is opt-in.
 - Speed, on Lighthouse's simulated mid-range phone, three runs, local build served compressed: home page score 100, largest content at 1.66 s (budget 1.8 s), layout shift 0. A project page: score 100, 0.61 s, shift 0. To get there the stylesheets are now inlined in each page (`build.inlineStylesheets: 'always'`), and the test server compresses text as a host does. Before both changes the home page measured 2.03 s.
 
+Decided by the owner on 2026-11-20:
+
+- No section numbers.
+- Section titles stay in sentence case ("Featured projects").
+
 Still open, for the owner:
 
-- Section numbers (liked in the Editorial look, as an extra).
-- Whether section titles stay in sentence case ("Featured projects") or become Title Case. They are in sentence case everywhere now, which is consistent.
+- Skill pills take one of three tints by position, so the colour says nothing about the skill. Keep it that way, or sort the skills into groups (languages, frameworks, data, tools) and give each group a tint. Grouping would change the order of an approved strip.
 
 For stage 3: run the speed measurement in CI, and measure once more on the real preview address.
