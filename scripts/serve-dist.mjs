@@ -1,9 +1,10 @@
-// Serves the built site in dist/ for browser tests.
-// Mirrors static hosting: clean URLs resolve to index.html, and unknown
-// paths return dist/404.html with status 404.
+// Serves the built site in dist/ for browser tests and speed measurements.
+// Mirrors static hosting: clean URLs resolve to index.html, unknown paths
+// return dist/404.html with status 404, and text is sent compressed.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
+import { gzipSync } from 'node:zlib';
 
 const root = resolve('dist');
 const port = Number(process.argv[2] ?? 4321);
@@ -44,8 +45,12 @@ createServer(async (request, response) => {
   const file = await resolveFile(pathname);
   const target = file ?? join(root, '404.html');
   const body = await readFile(target).catch(() => Buffer.from('Not found'));
+  const type = types[extname(target)] ?? 'application/octet-stream';
+  // Hosts compress text; without it, measured page weight is several times too high.
+  const compress = /^(text\/|application\/(json|xml)|image\/svg)/.test(type) && /\bgzip\b/.test(request.headers['accept-encoding'] ?? '');
   response.writeHead(file ? 200 : 404, {
-    'content-type': types[extname(target)] ?? 'application/octet-stream',
+    'content-type': type,
+    ...(compress ? { 'content-encoding': 'gzip', vary: 'Accept-Encoding' } : {}),
   });
-  response.end(body);
+  response.end(compress ? gzipSync(body) : body);
 }).listen(port, () => console.log(`Serving dist/ at http://localhost:${port}`));

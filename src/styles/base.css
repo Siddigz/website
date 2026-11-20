@@ -268,16 +268,12 @@ li:first-child > .button {
   display: inline-flex;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+/*
+ * Reduced motion: nothing here switches movement off, because nothing moves
+ * unless the visitor allows it. Every animation and every transition that
+ * moves, turns or resizes something is declared inside
+ * `@media (prefers-reduced-motion: no-preference)`. Colour and shadow fades stay.
+ */
 
 /*
  * Show an element in only one colour scheme, for images that cannot use
