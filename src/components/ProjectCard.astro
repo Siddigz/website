@@ -49,21 +49,68 @@ const contain = data.coverFit === 'contain';
   </div>
 </article>
 
+<script>
+  // Tells each card where the mouse is, so a look can light or tilt it.
+  // Values are fractions of the card: 0 to 1 across, and -1 to 1 from the centre.
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    for (const card of document.querySelectorAll<HTMLElement>('.card')) {
+      let frame = 0;
+      card.addEventListener('pointermove', (event) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const box = card.getBoundingClientRect();
+          const x = (event.clientX - box.left) / box.width;
+          const y = (event.clientY - box.top) / box.height;
+          card.style.setProperty('--pointer-x', `${(x * 100).toFixed(1)}%`);
+          card.style.setProperty('--pointer-y', `${(y * 100).toFixed(1)}%`);
+          card.style.setProperty('--pointer-dx', (x * 2 - 1).toFixed(3));
+          card.style.setProperty('--pointer-dy', (y * 2 - 1).toFixed(3));
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--pointer-dx', '0');
+        card.style.setProperty('--pointer-dy', '0');
+      });
+    }
+  }
+</script>
+
 <style>
   .card {
     position: relative;
     display: grid;
     align-content: start;
     overflow: clip;
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    transition: border-color var(--duration-fast) var(--ease-out);
+    border: var(--border-width) solid var(--color-card-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card-bg);
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
   }
 
   .card:hover,
   .card:focus-within {
-    border-color: var(--color-accent);
+    border-color: var(--color-card-border-hover);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* A look may lift the card on hover. Movement only for visitors who allow it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      transition:
+        border-color var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out),
+        translate var(--duration-base) var(--ease-spring),
+        rotate var(--duration-base) var(--ease-spring);
+    }
+
+    .card:hover,
+    .card:focus-within {
+      translate: 0 calc(var(--lift-card) * -1);
+    }
   }
 
   .cover {
@@ -110,6 +157,7 @@ const contain = data.coverFit === 'contain';
   }
 
   .result {
+    font-style: var(--style-result);
     font-weight: var(--weight-medium);
   }
 
@@ -120,5 +168,8 @@ const contain = data.coverFit === 'contain';
     margin-block-start: var(--space-2);
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: var(--transform-label);
   }
 </style>

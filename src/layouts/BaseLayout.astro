@@ -1,7 +1,13 @@
 ---
 import '../styles/tokens.css';
 import '../styles/base.css';
+import '../styles/looks/crisp.css';
+import '../styles/looks/warm.css';
+import '../styles/looks/editorial.css';
+import { Font } from 'astro:assets';
 import Nav from '../components/Nav.astro';
+import LookSwitcher from '../components/LookSwitcher.astro';
+import { DEFAULT_LOOK, LOOKS, LOOK_PARAM, LOOK_STORAGE_KEY } from '../lib/look';
 
 interface Props {
   title: string;
@@ -17,7 +23,7 @@ const canonical = new URL(path, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-look={DEFAULT_LOOK}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,6 +37,26 @@ const canonical = new URL(path, Astro.site);
         }
       } catch (error) {}
     </script>
+    <script is:inline define:vars={{ looks: LOOKS, param: LOOK_PARAM, key: LOOK_STORAGE_KEY }}>
+      // Stage 2 preview: apply the chosen look before first paint. The address
+      // wins over the stored choice, and is then remembered for the next page.
+      var named = new URLSearchParams(location.search).get(param);
+      var stored = null;
+      try {
+        if (looks.includes(named)) localStorage.setItem(key, named);
+        else stored = localStorage.getItem(key);
+      } catch (error) {}
+      var look = looks.includes(named) ? named : looks.includes(stored) ? stored : null;
+      if (look) document.documentElement.dataset.look = look;
+    </script>
+    {/* Self-hosted fonts. Only the default look's text font is fetched early. */}
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-geist-mono" />
+    <Font cssVariable="--font-bricolage" />
+    <Font cssVariable="--font-figtree" />
+    <Font cssVariable="--font-fraunces" />
+    <Font cssVariable="--font-plex-sans" />
+    <Font cssVariable="--font-plex-mono" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -42,5 +68,6 @@ const canonical = new URL(path, Astro.site);
     <main id="main">
       <slot />
     </main>
+    <LookSwitcher />
   </body>
 </html>

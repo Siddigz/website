@@ -49,6 +49,17 @@ describe('built site', () => {
     expect(external).toEqual([]);
   });
 
+  it('fonts are files on this site, and only one is fetched early', () => {
+    const html = readFileSync(join(DIST, 'index.html'), 'utf8');
+    const fontUrls = [...html.matchAll(/url\("([^"]+\.woff2)"\)/g)].map((match) => match[1]!);
+    expect(fontUrls.length).toBeGreaterThanOrEqual(3);
+    for (const url of fontUrls) {
+      expect(url, url).toMatch(/^\/_astro\//);
+      expect(existsSync(join(DIST, url)), url).toBe(true);
+    }
+    expect(html.match(/<link rel="preload"[^>]*as="font"/g)?.length).toBe(1);
+  });
+
   it('no built file contains an email address', () => {
     const hits = built.flatMap(([path, text]) =>
       (text.match(EMAIL_PATTERN) ?? []).map((hit) => `${path}: ${hit}`),

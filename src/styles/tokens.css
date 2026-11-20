@@ -22,6 +22,12 @@
   --color-accent-dark: oklch(80% 0.12 265);
   --color-border-light: oklch(89% 0.005 250);
   --color-border-dark: oklch(31% 0.01 250);
+  /* A second accent for looks that use two; the same as the first here. */
+  --color-accent-2-light: var(--color-accent-light);
+  --color-accent-2-dark: var(--color-accent-dark);
+  /* Text on a solid accent or solid text-coloured fill. */
+  --color-on-accent-light: oklch(100% 0 0);
+  --color-on-accent-dark: oklch(16% 0.006 250);
 
   /* Colour tokens. Fallback first, for browsers without light-dark(). */
   --color-bg: var(--color-bg-light);
@@ -30,10 +36,18 @@
   --color-text-muted: var(--color-text-muted-light);
   --color-accent: var(--color-accent-light);
   --color-border: var(--color-border-light);
+  --color-accent-2: var(--color-accent-2-light);
+  --color-on-accent: var(--color-on-accent-light);
+  --color-card-border: var(--color-border);
+  --color-card-border-hover: var(--color-accent);
+  --color-card-bg: var(--color-surface);
+  --color-header-bg: var(--color-bg);
 
   /* Type */
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-heading: var(--font-sans);
+  --font-switcher: system-ui, sans-serif;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
@@ -45,6 +59,13 @@
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-bold: 700;
+  --weight-heading: var(--weight-bold);
+  --weight-label: var(--weight-normal);
+  --tracking-heading: 0em;
+  --tracking-display: 0em;
+  --tracking-label: 0em;
+  --transform-label: none;
+  --style-result: normal;
 
   /* Space */
   --space-1: 0.25rem;
@@ -60,14 +81,31 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
+  --radius-full: 999px;
+  --radius-card: var(--radius-lg);
+  --radius-button: var(--radius-md);
+  --radius-photo: var(--radius-lg);
+  --radius-thumb: var(--radius-md);
+  --radius-pill: var(--radius-lg);
+  --radius-media: var(--radius-lg);
   --border-width: 1px;
+  --indicator-width: 2px;
   --focus-width: 2px;
+
+  /* Depth */
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-photo: none;
+  --shadow-button: none;
+  --shadow-switcher: 0 0.5rem 1.5rem oklch(0% 0 0 / 0.25);
 
   /* Motion */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-marquee: 60s;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lift-card: 0rem;
 
   /* Layout */
   --content-width: 72rem;
@@ -82,7 +120,18 @@
   --media-width: 56rem;
   --aside-width: 28rem;
   --layer-header: 5;
+  --layer-switcher: 8;
   --layer-skip-link: 10;
+
+  /* The preview switcher (stage 2 only). One plain style in every look. */
+  --switcher-space: 4.5rem;
+  --radius-switcher: 1rem;
+  --radius-switcher-button: 0.75rem;
+  --color-switcher-bg: oklch(22% 0.01 250);
+  --color-switcher-text: oklch(97% 0 0);
+  --color-switcher-muted: oklch(78% 0.01 250);
+  --color-switcher-hover: oklch(34% 0.01 250);
+  --color-switcher-border: oklch(40% 0.01 250);
 }
 
 :root:has(> head > meta[name='color-scheme'][content='dark']) {
@@ -102,6 +151,8 @@
     --color-text-muted: var(--color-text-muted-dark);
     --color-accent: var(--color-accent-dark);
     --color-border: var(--color-border-dark);
+    --color-accent-2: var(--color-accent-2-dark);
+    --color-on-accent: var(--color-on-accent-dark);
   }
 }
 
@@ -114,5 +165,7 @@
     --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
     --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
     --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
+    --color-accent-2: light-dark(var(--color-accent-2-light), var(--color-accent-2-dark));
+    --color-on-accent: light-dark(var(--color-on-accent-light), var(--color-on-accent-dark));
   }
 }

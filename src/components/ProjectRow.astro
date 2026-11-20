@@ -61,7 +61,7 @@ const { data } = Astro.props.project;
     inline-size: var(--thumb-width);
     block-size: var(--thumb-size);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-thumb);
     background: var(--color-surface);
     object-fit: cover;
   }
@@ -102,6 +102,9 @@ const { data } = Astro.props.project;
   .stack,
   .category {
     font-family: var(--font-mono);
+    font-weight: var(--weight-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: var(--transform-label);
   }
 
   .award {
