@@ -72,7 +72,7 @@ test.describe('the nav shows the current section', () => {
 });
 
 test.describe('movement', () => {
-  test('a card leans towards the mouse and settles when it leaves', async ({ page, isMobile }, testInfo) => {
+  test('a card leans towards the mouse and settles when it leaves', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name.includes('phone'), 'a phone has no mouse');
     await page.goto('/');
     const card = page.locator('.card').first();

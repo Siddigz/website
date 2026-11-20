@@ -3,7 +3,7 @@ import { pagePaths } from '../content/helpers';
 
 // Every page a visitor can reach, plus the not-found page and the test-only page.
 const pages = [...pagePaths(), '/does-not-exist', '/dev/no-looking-for'];
-const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'about', 'contact'];
+const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'activity', 'about', 'contact'];
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });

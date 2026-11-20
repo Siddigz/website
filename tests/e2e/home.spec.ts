@@ -249,10 +249,10 @@ test('skills strip is still under reduced motion', async ({ page }) => {
   await expect(page.getByRole('list', { name: 'Skills' }).getByRole('listitem').last()).toBeVisible();
 });
 
-test('all eight sections are in order', async ({ page }) => {
+test('every section is in order', async ({ page }) => {
   await page.goto('/');
   const ids = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.id));
-  expect(ids).toEqual(['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'about', 'contact']);
+  expect(ids).toEqual(['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'activity', 'about', 'contact']);
 });
 
 test('featured cards appear in order, each linking to its page', async ({ page }) => {

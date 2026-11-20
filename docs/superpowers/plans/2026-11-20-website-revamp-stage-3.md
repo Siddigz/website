@@ -13,10 +13,10 @@
 ## What the owner does or decides
 
 1. **New text.** Every new sentence, label and button is listed under "New text". None of it is approved until the owner says so. It can be approved from this list or on the preview, part by part.
-2. **Vercel settings.** One is done (`GITHUB_ACTIVITY_TOKEN`). Four more are needed; Task 17 writes the checklist.
+2. **Vercel settings.** The owner sets every one himself; the builder only names them. One is done (`GITHUB_ACTIVITY_TOKEN`). Four more are needed; Task 17 writes the checklist.
 3. **Two recordings** of the name, whenever convenient. Placeholder tones stand in until then.
-4. **How the builder sees the real preview.** The preview address is behind a Vercel login, so the builder cannot open it. Three ways, owner's choice when Task 18 is reached: sign in to Vercel in the app's browser pane; turn off the login on preview addresses for the last stretch; or leave it and do those checks on the live site right after ship.
-5. **One wording change in an explainer** (see "Decisions made here", item 7).
+4. **How the builder sees the real preview.** Settled on 2026-11-20: the owner signed in to Vercel in the app's browser pane, so the builder can open the preview there. A speed measurement cannot run in that pane, so the one on the real address happens on the live site right after ship.
+5. **One wording change in an explainer** (see "Decisions made here", item 7). Approved on 2026-11-20.
 6. **At ship:** merge the pull request, make `siddigz.com` the primary domain, the private history steps, the six pinned repositories, LinkedIn.
 
 ## Global constraints
@@ -38,6 +38,7 @@
 ## Facts checked before writing (2026-11-20)
 
 - With `@astrojs/vercel` 11.0.22 the prebuilt pages land in `dist/client/`, not `dist/`. The `/projects` redirect becomes a host rule in `.vercel/output/config.json` and no longer has a page of its own. There is one function, on Node 24. The adapter must be listed in `package.json`, or the build fails.
+- The owner's public GitHub graph already counts private work, as numbers only (1,400 in the last year, 1,054 of them private). The site shows the same graph. No private repository or commit is ever named.
 - One GitHub GraphQL request returns the contribution calendar (53 weeks, a count and a level per day) and recent commits per repository. Checked with a signed-in command-line client, not with the new token, so whether a token with no permissions is enough is still open (Task 9).
 - The two explainer source files are self-contained (about 15 KB and 19 KB, no outside requests). One names a company (see decision 7).
 - Astro 7 has a built-in content security policy option (`security.csp`). It does not work with Astro's own client router, which this site does not use.
@@ -45,13 +46,15 @@
 
 ## Decisions made here (the spec left them to the builder)
 
+The owner said yes to items 4 to 8 on 2026-11-20.
+
 1. **Server functions** run on Vercel through the adapter. Everything else stays prebuilt.
 2. **Daily rebuild:** a Vercel cron job calls `/api/rebuild` once a day, which calls a Vercel deploy hook. Both addresses are private settings.
 3. **Real resume, if ever turned on:** a private file address in a setting (`RESUME_URL`) that the function fetches. The file itself never enters the repo.
 4. **Recent commits come only from repositories this site already links, plus the site's own.** A commit to any other public repository is not shown. This keeps the projects that are deliberately left off the site out of the activity list without naming them here.
 5. **If GitHub cannot be reached while building,** the section is left out and the build still succeeds.
 6. **"Welcome back"** means a new browser session after an earlier one. Reloading, or going to a project and back, does not count.
-7. **Explainer wording:** the packet explainer's source says the packet travels to a "Google server" and uses a real address of that company. Rule 6 keeps company names out of explainers. Proposed: "Web server", "Edge router", and an address from the range reserved for examples (`198.51.100.7`). Needs the owner's yes.
+7. **Explainer wording:** the packet explainer's source says the packet travels to a "Google server" and uses a real address of that company. Rule 6 keeps company names out of explainers. It becomes "Web server", "Edge router", and an address from the range reserved for examples (`198.51.100.7`). Both source files were searched on 2026-11-20 for the employer's name and its product names and hold neither.
 8. **Placeholder sounds** are two short soft tones made by a script.
 9. **The filter** is written into the address as `?filter=systems`.
 10. **Preview images** are drawn while the site is built, from the same text and covers the pages use.
@@ -300,6 +303,8 @@ Off: 404. On with `RESUME_URL`: that file's bytes as `application/pdf`, shown in
 ## Part D: more to read
 
 ### Task 9: GitHub activity and the daily rebuild
+
+**Built first, on 2026-11-20, because the owner asked to see it:** the data, the section, its tests and the `build:test` script. Still to do here: the daily rebuild (it needs Task 1's adapter) and the check on the first preview build. Differences from what is written below: the site's own repository is `repository` in `site.yaml`; the squares are green, like GitHub's own graph, stepping up to the availability light's green; three commits are shown, one line each, so the list is as tall as the year beside it; month names sit above the grid where there is room.
 
 **Files:** `src/lib/github-activity.ts`, `src/lib/rebuild.ts`, `src/pages/api/rebuild.ts`, `src/components/GitHubActivity.astro`, `src/pages/index.astro`, `src/content/site.yaml` (`links.siteRepo`), `src/content/schemas.ts`, `vercel.json` (`crons`), tokens (`--color-heat-0` to `--color-heat-4`), `tests/fixtures/github-activity.json` (made-up data), `tests/unit/github-activity.test.ts`, `tests/unit/rebuild.test.ts`, `tests/e2e/activity.spec.ts`, `tests/build/budget.test.ts`.
 

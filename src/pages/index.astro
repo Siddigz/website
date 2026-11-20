@@ -7,13 +7,27 @@ import SkillsStrip from '../components/SkillsStrip.astro';
 import Experience from '../components/Experience.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ProjectRow from '../components/ProjectRow.astro';
+import GitHubActivity from '../components/GitHubActivity.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import { featuredProjects, moreProjects } from '../lib/projects';
 import { getSite } from '../lib/site';
+import { allowedRepos, loadActivity } from '../lib/github-activity';
+import { ACTIVITY_FIXTURE, fixtures } from '../lib/build-env';
 
 const site = await getSite();
 const projects = await getCollection('projects');
+
+// Fetched now, while the site is built. Null (no token, GitHub unreachable)
+// leaves the section out; the rest of the page does not depend on it.
+const activity = await loadActivity({
+  token: process.env.GITHUB_ACTIVITY_TOKEN,
+  login: new URL(site.links.github).pathname.replaceAll('/', ''),
+  repos: allowedRepos(projects, site.repository),
+  fixture: fixtures ? ACTIVITY_FIXTURE : undefined,
+  // Three sit level with the year beside them.
+  limit: 3,
+});
 ---
 
 <BaseLayout title={site.fullName} description={site.pitch} path="/">
@@ -36,6 +50,7 @@ const projects = await getCollection('projects');
     </ul>
   </section>
 
+  {activity && <GitHubActivity activity={activity} />}
   <About />
   <Contact />
 </BaseLayout>

@@ -95,6 +95,7 @@ describe('siteSchema', () => {
       gpa: 'g',
       expectedGraduation: 'e',
       links: { github: 'https://github.com/Siddigz', linkedin: 'https://linkedin.com/in/x' },
+      repository: 'https://github.com/Siddigz/website',
       contactNote: 'Say hello.',
       home: { city: 'Ottawa', timeZone: 'America/Toronto' },
     };

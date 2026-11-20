@@ -77,6 +77,14 @@ describe('built site', () => {
     expect(linking).toEqual([]);
   });
 
+  it('a build with no GitHub token leaves the activity section out, and nothing points at it', () => {
+    // `npm run build` is the build that ships. Test builds (`npm run build:test`) add sample data.
+    const html = readFileSync(join(DIST, 'index.html'), 'utf8');
+    if (process.env.GITHUB_ACTIVITY_TOKEN) return;
+    expect(html, 'run `npm run build` first, not the test build').not.toContain('id="activity"');
+    expect(html).not.toContain('#activity');
+  });
+
   it('every page has one h1, a description and a canonical address from site.yaml', () => {
     const origin = new URL(readYaml('src/content/site.yaml').main.url).origin;
     expect(origin).toBe('https://siddigz.com');

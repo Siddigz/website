@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { formatMonth, formatRange } from '../../src/lib/dates';
+import { formatDay, formatMonth, formatRange } from '../../src/lib/dates';
 
 it('formats a year-month', () => {
   expect(formatMonth('2026-09')).toBe('Sep 2026');
@@ -17,4 +17,9 @@ it('formats a finished range', () => {
 
 it('shows Present when there is no end', () => {
   expect(formatRange('2026-09')).toBe('Sep 2026 – Present');
+});
+
+it('formats a day as month and day', () => {
+  expect(formatDay('2026-11-18')).toBe('Nov 18');
+  expect(formatDay('2026-01-01')).toBe('Jan 1');
 });

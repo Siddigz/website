@@ -115,6 +115,8 @@ export const siteSchema = z.object({
   /** The photo at the top of the home page. Without one, a generic figure is shown. */
   photo: z.object({ src: z.string().min(1), alt: z.string().min(1) }).optional(),
   links: z.object({ github: z.url(), linkedin: z.url() }),
+  /** This site's own repository. */
+  repository: ownerRepo,
   /** The sentence in the Contact section. */
   contactNote: z.string().min(1),
   home: z.object({ city: z.string().min(1), timeZone: z.string().min(1) }),
