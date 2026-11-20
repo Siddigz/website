@@ -1,6 +1,6 @@
 ---
 title: Student Management System
-oneLiner: A Python program that lists, adds, updates and deletes student records in PostgreSQL through parameterized SQL queries, and creates its own table and sample rows on first run.
+oneLiner: A Python program that lists, adds, updates and deletes student records in PostgreSQL with parameterized queries.
 category: web-apps
 stack: [Python, PostgreSQL]
 date: 2025-10
