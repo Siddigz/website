@@ -329,7 +329,8 @@ A contribution heatmap for the past year and the most recent public commits.
 Data is fetched when the site is built, not in the visitor's browser, and the
 site rebuilds once a day. If the fetch fails, the build still succeeds and the
 section shows the last good data or hides itself. The access token is
-read-only, lives in a private Vercel setting, and is created by the owner.
+read-only, lives in a private Vercel setting, and is created by the owner. The
+setting is named `GITHUB_ACTIVITY_TOKEN`, set for Production and Preview.
 
 ### Explainers
 
