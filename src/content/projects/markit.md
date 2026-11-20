@@ -1,6 +1,6 @@
 ---
 title: Markit
-oneLiner: An assignment submission server and autograder in C++ that timestamps each submission, rejects any past the late due date and marks the rest against a marking scheme.
+oneLiner: An assignment submission server in C++ that timestamps submissions and autogrades them against a marking scheme.
 category: systems
 stack: [C++]
 date: 2025-09
