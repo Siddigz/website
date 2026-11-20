@@ -109,13 +109,20 @@ Done in one pass after the owner's review of Part A.
 - Two colours are mixed in oklab, not oklch: with white or black on one side, oklch drifts the hue through pink.
 - Tests follow: contrast is worked out from the shared values plus each version's accents; the photo test measures the photo itself, because the tilt widens the box drawn around it.
 
-## Part B: after the owner chooses the colour (not in this pass)
+## Part B: the owner chose blue; the look becomes the site's own (2026-11-19)
 
-Depends on the choice, so it is only listed here.
+Done.
 
-- Fold `look.css` and the chosen colour into `tokens.css` and the components; delete the other colours, the switcher and the `look` helper.
-- Ask the owner about section numbers (liked in Editorial, as an extra).
-- Add WebKit and Firefox to the browser tests.
-- The items stage 1 left for the real look: a `theme-color` meta that matches the background, curly quotes, an intentional tap-highlight colour, the Title Case question.
-- Decide which optional interactive details ship (design section 8, "Interactive detail backlog").
-- Measure the speed budget on a simulated mid-range phone.
+- `look.css` and the blue values are folded into `tokens.css`, `base.css` and the components. The other colours, the switcher, the `look` helper, the `data-look` attribute and their tests are deleted. The tokens that only existed to let looks differ (`--color-card-*`, `--color-header-bg`, `--tracking-label`, `--transform-label`, `--style-result`, `--font-mono`) are gone.
+- `.button` and `.pill` are shared classes in `base.css`. The first button in a list is the filled one.
+- Browser tests run in Chrome (laptop and phone size), Firefox (laptop) and Safari's engine (laptop and phone size): 478 tests. Two tests were adjusted for Safari's habits (a clicked checkbox is not focused; Tab reaches links only with Option held).
+- Left from stage 1 and now done: a `theme-color` meta that takes the page background from the tokens (`src/lib/colour.ts`) and follows a pinned theme; a tap-highlight colour; curly apostrophes in the plain content strings, with a test that keeps them.
+- The blanket reduced-motion rule from stage 1 is removed. Safari reported its 0.01 ms transitions as still running, and nothing needs it: all movement is opt-in.
+- Speed, on Lighthouse's simulated mid-range phone, three runs, local build served compressed: home page score 100, largest content at 1.66 s (budget 1.8 s), layout shift 0. A project page: score 100, 0.61 s, shift 0. To get there the stylesheets are now inlined in each page (`build.inlineStylesheets: 'always'`), and the test server compresses text as a host does. Before both changes the home page measured 2.03 s.
+
+Still open, for the owner:
+
+- Section numbers (liked in the Editorial look, as an extra).
+- Whether section titles stay in sentence case ("Featured projects") or become Title Case. They are in sentence case everywhere now, which is consistent.
+
+For stage 3: run the speed measurement in CI, and measure once more on the real preview address.

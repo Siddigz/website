@@ -897,8 +897,8 @@ above. Later plans should build on this section, not on the task text.
   email in any tracked file; the owner's name is not hard-coded in components.
 - **Global stylesheets use no CSS nesting**, so older Safari still gets every token.
 - **Categories** follow the GitHub profile README.
-- **Not yet done:** tests run in Chromium only. Add WebKit and Firefox when the
-  real look lands in stage 2.
+- Tests ran in Chromium only during stage 1. WebKit and Firefox were added in
+  stage 2 (2026-11-19).
 
 ### Changes after the owner's first review (2026-11-18)
 

@@ -418,14 +418,27 @@ Editorial are deleted. What the owner asked for on top of Warm:
   cards. From Editorial the owner liked the section numbers, as an extra, not
   yet added.
 
-Still open: the accent colour. Three versions are on the preview: blue, teal
-and orange, each with a neighbouring second colour. The look is
-`src/styles/look.css`; a version is the value of `data-look` on `<html>`, with
-one small stylesheet each in `src/styles/looks/`. A switcher at the bottom of
-every page changes it and remembers the choice; `?look=blue`, `?look=teal` or
-`?look=orange` in the address selects one directly. The switcher is never
-rendered on production and is deleted, with the two unchosen colours, once
-the owner has chosen. The nav marks the section being read.
+**Accent colour (owner, 2026-11-19): blue**, chosen from blue, teal and
+orange. A royal blue, with a cooler blue-green beside it in the squiggle and
+the pill tints. The switcher and the other two colours are deleted.
+
+Where the look lives: every value in `src/styles/tokens.css`; the rules shared
+by all pages (buttons, pills, the squiggle, the glow behind the top of the
+page) in `src/styles/base.css`; the rest in each component. Fonts are
+Bricolage Grotesque for headings and Figtree for text, both self-hosted.
+
+Which optional details ship (from the backlog in section 8):
+
+- In: cards that lean towards the mouse; the photo that straightens on hover;
+  a backdrop that changes with the theme (stars in the dark); a nav that
+  marks the section being read.
+- Out: the light that follows the mouse across a card; small toggles inside
+  sentences (they need new text).
+- Not asked for yet: section numbers, which the owner liked as an extra.
+
+Movement rule in practice: nothing is switched off for reduced motion, because
+every animation, and every transition that moves, turns or resizes something,
+is declared only inside `@media (prefers-reduced-motion: no-preference)`.
 
 ## 10. Rules
 
@@ -573,8 +586,6 @@ The owner reviews the list with the first content draft.
 
 ### Ship checklist
 
-0. One accent colour is chosen. The switcher and the unchosen colours are
-   gone from the branch.
 1. Owner approves the preview address on phone and laptop. This includes the
    text: the owner has read every line and said so. No comment on a piece of
    text means it has not been read, not that it is approved.
