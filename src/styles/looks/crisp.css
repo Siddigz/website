@@ -1,0 +1,202 @@
+/*
+ * Look 1 of 3 (stage 2): Crisp product.
+ * Feels like a well-made developer tool's site: one sans, one blue, hairlines,
+ * small corners, precise small movements. Values first, then the few rules
+ * that only this look has. No CSS nesting (see tests/content/styles.test.ts).
+ */
+:root[data-look='crisp'] {
+  /* Colour */
+  --color-bg-light: oklch(99% 0.002 260);
+  --color-bg-dark: oklch(14% 0.004 260);
+  --color-surface-light: oklch(100% 0 0);
+  --color-surface-dark: oklch(17.5% 0.006 260);
+  --color-text-light: oklch(19% 0.01 260);
+  --color-text-dark: oklch(96% 0.003 260);
+  --color-text-muted-light: oklch(45% 0.012 260);
+  --color-text-muted-dark: oklch(73% 0.01 260);
+  --color-accent-light: oklch(50% 0.21 262);
+  --color-accent-dark: oklch(77% 0.12 255);
+  --color-accent-2-light: var(--color-accent-light);
+  --color-accent-2-dark: var(--color-accent-dark);
+  --color-border-light: oklch(91% 0.004 260);
+  --color-border-dark: oklch(27% 0.008 260);
+  --color-on-accent-light: oklch(99% 0.002 260);
+  --color-on-accent-dark: oklch(14% 0.004 260);
+  --color-card-border-hover: var(--color-text-muted);
+  --color-header-bg: color-mix(in oklch, var(--color-bg) 78%, transparent);
+
+  /* Type */
+  --font-sans: var(--font-geist);
+  --font-heading: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+  --weight-heading: 600;
+  --tracking-heading: -0.02em;
+  --tracking-display: -0.045em;
+  --text-2xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --text-3xl: clamp(2.5rem, 1.5rem + 4.4vw, 4.5rem);
+
+  /* Shape and depth */
+  --radius-card: 0.625rem;
+  --radius-button: 0.5rem;
+  --radius-photo: 0.75rem;
+  --radius-thumb: 0.375rem;
+  --radius-pill: var(--radius-full);
+  --radius-media: 0.625rem;
+  --shadow-card-hover: 0 1px 2px oklch(0% 0 0 / 0.06), 0 0.75rem 1.75rem -1rem oklch(0% 0 0 / 0.28);
+  --shadow-photo: 0 0 0 0.375rem color-mix(in oklch, var(--color-border) 55%, transparent);
+  --lift-card: 0.125rem;
+
+  /* Only this look */
+  --crisp-blur: 0.75rem;
+  --crisp-grid: 1.5rem;
+  --crisp-dot: color-mix(in oklch, var(--color-text) 16%, transparent);
+  --crisp-dot-size: 1px;
+  --crisp-backdrop-height: 34rem;
+  --crisp-glow: color-mix(in oklch, var(--color-accent) 14%, transparent);
+  --crisp-glow-size: 20rem;
+  --crisp-live-light: oklch(58% 0.17 150);
+  --crisp-live-dark: oklch(78% 0.19 150);
+  --crisp-live: var(--crisp-live-light);
+  --crisp-ping: 1.6s;
+  --crisp-ping-reach: 0.375rem;
+  --crisp-selection: color-mix(in oklch, var(--color-accent) 24%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-look='crisp'] {
+    --crisp-live: var(--crisp-live-dark);
+  }
+}
+
+@supports (color: light-dark(white, black)) {
+  :root[data-look='crisp'] {
+    --crisp-live: light-dark(var(--crisp-live-light), var(--crisp-live-dark));
+  }
+}
+
+:root[data-look='crisp'] ::selection {
+  background: var(--crisp-selection);
+}
+
+/* The header lets the page show through, softly. */
+:root[data-look='crisp'] .site-header {
+  -webkit-backdrop-filter: blur(var(--crisp-blur)) saturate(1.6);
+  backdrop-filter: blur(var(--crisp-blur)) saturate(1.6);
+}
+
+/* A faint dot grid behind the top of the page, fading out downwards. */
+:root[data-look='crisp'] main {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-look='crisp'] main::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: -1;
+  block-size: var(--crisp-backdrop-height);
+  background-image: radial-gradient(circle, var(--crisp-dot) var(--crisp-dot-size), transparent var(--crisp-dot-size));
+  background-size: var(--crisp-grid) var(--crisp-grid);
+  background-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 75% 100% at 50% 0%, black 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 100% at 50% 0%, black 20%, transparent 78%);
+  pointer-events: none;
+}
+
+/* The availability line: a small green light that pings three times, then rests. */
+:root[data-look='crisp'] .looking-for::before {
+  background: var(--crisp-live);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-look='crisp'] .looking-for::before {
+    animation: crisp-ping var(--crisp-ping) var(--ease-out) 3;
+  }
+}
+
+@keyframes crisp-ping {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--crisp-live) 60%, transparent);
+  }
+
+  to {
+    box-shadow: 0 0 0 var(--crisp-ping-reach) transparent;
+  }
+}
+
+/* The first button in a group is the solid one. */
+:root[data-look='crisp'] .links li:first-child .button {
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+:root[data-look='crisp'] .links li:first-child .button:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* Cards: a soft light follows the mouse across the text area. */
+:root[data-look='crisp'] .card {
+  isolation: isolate;
+}
+
+:root[data-look='crisp'] .card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    var(--crisp-glow-size) circle at var(--pointer-x, 50%) var(--pointer-y, 100%),
+    var(--crisp-glow),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
+  pointer-events: none;
+}
+
+:root[data-look='crisp'] .card:hover::before {
+  opacity: 1;
+}
+
+/* Highlights read as one row of cells divided by hairlines. */
+:root[data-look='crisp'] .proof ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--border-width);
+  overflow: clip;
+  padding: 0;
+  background: var(--color-border);
+}
+
+:root[data-look='crisp'] .proof li {
+  flex: 1 1 12rem;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+}
+
+/* Skills are small outlined chips. */
+:root[data-look='crisp'] .skills li {
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+}
+
+:root[data-look='crisp'] .skills ul {
+  gap: var(--space-2);
+  padding-inline-end: var(--space-2);
+}
+
+/* Rows answer the mouse with a faint wash. */
+:root[data-look='crisp'] .row {
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+:root[data-look='crisp'] .row:hover {
+  background: color-mix(in oklch, var(--color-surface) 70%, transparent);
+}

@@ -82,6 +82,9 @@ const roles = (await getCollection('experience')).sort((a, b) => a.data.order - 
   .dates {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: var(--transform-label);
     white-space: nowrap;
   }
 

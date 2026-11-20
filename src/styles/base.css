@@ -33,12 +33,16 @@ figure {
 h1,
 h2,
 h3 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-heading);
   line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-heading);
   text-wrap: balance;
 }
 
 h1 {
   font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-display);
 }
 
 h2 {

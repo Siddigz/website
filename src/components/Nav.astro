@@ -4,11 +4,12 @@ import { getSite } from '../lib/site';
 
 const site = await getSite();
 
-// Same order as the sections on the home page.
+// Same order as the sections on the home page. `sections` are the ids that
+// count as "being in" this link's part of the page.
 const links = [
-  { href: '/#experience', label: 'Experience' },
-  { href: '/#projects', label: 'Projects' },
-  { href: '/#about', label: 'About' },
+  { href: '/#experience', label: 'Experience', sections: ['experience'] },
+  { href: '/#projects', label: 'Projects', sections: ['projects', 'more-projects'] },
+  { href: '/#about', label: 'About', sections: ['about'] },
 ];
 ---
 
@@ -16,7 +17,7 @@ const links = [
   <nav class="nav container" aria-label="Main">
     <a class="home" href="/">{site.fullName}</a>
     <ul class="links" role="list">
-      {links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+      {links.map((link) => <li><a href={link.href} data-spy={link.sections.join(' ')}>{link.label}</a></li>)}
     </ul>
     <ThemeToggle />
   </nav>
@@ -28,7 +29,7 @@ const links = [
     inset-block-start: 0;
     z-index: var(--layer-header);
     border-block-end: var(--border-width) solid var(--color-border);
-    background: var(--color-bg);
+    background: var(--color-header-bg);
   }
 
   .nav {
@@ -58,8 +59,58 @@ const links = [
     transition: color var(--duration-fast) var(--ease-out);
   }
 
-  .links a:hover {
+  .links a:hover,
+  .links a[aria-current='true'] {
     color: var(--color-text);
+  }
+
+  /*
+   * A mark under the link of the section being read. Where the browser can
+   * tie one element's position to another's, a single mark slides between
+   * links; elsewhere the current link is simply underlined.
+   */
+  @supports (position-anchor: --nav-current) {
+    .links {
+      position: relative;
+    }
+
+    .links a[aria-current='true'] {
+      anchor-name: --nav-current;
+    }
+
+    .links::before {
+      content: '';
+      position: absolute;
+      position-anchor: --nav-current;
+      inset-block-start: calc(anchor(bottom) + var(--space-1));
+      inset-inline-start: anchor(left);
+      inset-inline-end: anchor(right);
+      border-block-end: var(--indicator-width) solid var(--color-accent);
+      border-radius: var(--radius-full);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .links:has(a[aria-current='true'])::before {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .links::before {
+        transition:
+          inset var(--duration-base) var(--ease-out),
+          opacity var(--duration-fast) var(--ease-out);
+      }
+    }
+  }
+
+  @supports not (position-anchor: --nav-current) {
+    .links a[aria-current='true'] {
+      text-decoration: underline;
+      text-decoration-color: var(--color-accent);
+      text-decoration-thickness: var(--indicator-width);
+      text-underline-offset: var(--space-2);
+    }
   }
 
   /* On narrow screens the links drop to their own row. */
@@ -70,3 +121,36 @@ const links = [
     }
   }
 </style>
+
+<script>
+  // Marks the nav link of the section that sits under the middle of the screen.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.site-header a[data-spy]')];
+  const linkFor = new Map<Element, HTMLAnchorElement>();
+  for (const link of links) {
+    for (const id of (link.dataset.spy ?? '').split(' ')) {
+      const section = document.getElementById(id);
+      if (section) linkFor.set(section, link);
+    }
+  }
+
+  if (linkFor.size > 0) {
+    const inView = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) inView.add(entry.target);
+          else inView.delete(entry.target);
+        }
+        const [section] = inView;
+        const current = section ? linkFor.get(section) : undefined;
+        for (const link of links) {
+          if (link === current) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        }
+      },
+      // A line just above the middle of the screen: one section crosses it at a time.
+      { rootMargin: '-45% 0px -55% 0px' },
+    );
+    for (const section of linkFor.keys()) observer.observe(section);
+  }
+</script>

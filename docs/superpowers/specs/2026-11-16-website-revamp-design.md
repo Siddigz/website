@@ -394,6 +394,23 @@ Claude builds two or three visual directions as live variants of that page.
 The owner picks one or mixes them. Only then is the look applied everywhere.
 This is why all colour, type, spacing and motion values must be tokens.
 
+The three directions built (owner's choice of three, 2026-11-19):
+
+| | Crisp product | Warm and playful | Editorial engineer |
+|---|---|---|---|
+| Feels like | a well-made developer tool's site | the reference site named above | a well-set technical magazine |
+| Type | Geist, Geist Mono | Bricolage Grotesque, Figtree | Fraunces, IBM Plex Sans, IBM Plex Mono |
+| Colour | near-white and near-black, one blue | cream and deep navy, violet to pink | warm paper and ink, vermilion |
+| Cards | flat, hairline, a light follows the mouse | big corners, tinted shadow, lean to the mouse | no boxes, ruled figures |
+| Photo | small corners, soft ring | tilted in a thick frame, straightens on hover | square, with a block of accent behind |
+
+A look is the value of `data-look` on `<html>`, with one stylesheet each in
+`src/styles/looks/`. A switcher at the bottom of every page changes it and
+remembers the choice; `?look=crisp`, `?look=warm` or `?look=editorial` in the
+address selects one directly. The switcher is never rendered on production
+and is deleted, with the two unchosen looks and their fonts, once the owner
+has chosen. All looks also get a nav that marks the section being read.
+
 ## 10. Rules
 
 These also go into the repository's `CLAUDE.md` so every future session
@@ -540,6 +557,8 @@ The owner reviews the list with the first content draft.
 
 ### Ship checklist
 
+0. One look is chosen. The look switcher, the unchosen looks and their font
+   packages are gone from the branch.
 1. Owner approves the preview address on phone and laptop. This includes the
    text: the owner has read every line and said so. No comment on a piece of
    text means it has not been read, not that it is approved.
