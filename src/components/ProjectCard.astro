@@ -35,7 +35,7 @@ const contain = data.coverFit === 'contain';
   <div class="body">
     {
       data.award && (
-        <p class="award">
+        <p class="award pill">
           {data.award.name} · {data.award.event}
         </p>
       )
@@ -44,14 +44,14 @@ const contain = data.coverFit === 'contain';
     <p class="muted">{data.oneLiner}</p>
     {data.result && <p class="result">{data.result}</p>}
     <ul class="stack muted" role="list" aria-label="Built with" translate="no">
-      {data.stack.map((item) => <li>{item}</li>)}
+      {data.stack.map((item) => <li class="pill">{item}</li>)}
     </ul>
   </div>
 </article>
 
 <script>
-  // Tells each card where the mouse is, so a look can light or tilt it.
-  // Values are fractions of the card: 0 to 1 across, and -1 to 1 from the centre.
+  // Tells each card where the mouse is, so it can lean that way.
+  // Values run from -1 to 1, measured from the centre of the card.
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     for (const card of document.querySelectorAll<HTMLElement>('.card')) {
       let frame = 0;
@@ -62,8 +62,6 @@ const contain = data.coverFit === 'contain';
           const box = card.getBoundingClientRect();
           const x = (event.clientX - box.left) / box.width;
           const y = (event.clientY - box.top) / box.height;
-          card.style.setProperty('--pointer-x', `${(x * 100).toFixed(1)}%`);
-          card.style.setProperty('--pointer-y', `${(y * 100).toFixed(1)}%`);
           card.style.setProperty('--pointer-dx', (x * 2 - 1).toFixed(3));
           card.style.setProperty('--pointer-dy', (y * 2 - 1).toFixed(3));
         });
@@ -82,29 +80,31 @@ const contain = data.coverFit === 'contain';
     display: grid;
     align-content: start;
     overflow: clip;
-    border: var(--border-width) solid var(--color-card-border);
     border-radius: var(--radius-card);
-    background: var(--color-card-bg);
+    background: var(--color-surface);
     box-shadow: var(--shadow-card);
-    transition:
-      border-color var(--duration-fast) var(--ease-out),
-      box-shadow var(--duration-base) var(--ease-out);
+    transition: box-shadow var(--duration-base) var(--ease-out);
   }
 
   .card:hover,
   .card:focus-within {
-    border-color: var(--color-card-border-hover);
     box-shadow: var(--shadow-card-hover);
   }
 
-  /* A look may lift the card on hover. Movement only for visitors who allow it. */
+  /*
+   * The card lifts when pointed at and leans towards the mouse, like a card
+   * held in the hand. The script above says where the mouse is. Movement is
+   * only for visitors who allow it.
+   */
   @media (prefers-reduced-motion: no-preference) {
     .card {
+      transform: perspective(var(--perspective-card))
+        rotateX(calc(var(--pointer-dy, 0) * var(--tilt-card) * -1))
+        rotateY(calc(var(--pointer-dx, 0) * var(--tilt-card)));
       transition:
-        border-color var(--duration-fast) var(--ease-out),
         box-shadow var(--duration-base) var(--ease-out),
         translate var(--duration-base) var(--ease-spring),
-        rotate var(--duration-base) var(--ease-spring);
+        transform var(--duration-fast) var(--ease-out);
     }
 
     .card:hover,
@@ -151,25 +151,21 @@ const contain = data.coverFit === 'contain';
   }
 
   .award {
-    color: var(--color-accent);
+    background: var(--color-tint-b);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
   }
 
   .result {
-    font-style: var(--style-result);
     font-weight: var(--weight-medium);
   }
 
   .stack {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-1) var(--space-3);
+    gap: var(--space-2);
     margin-block-start: var(--space-2);
-    font-family: var(--font-mono);
     font-size: var(--text-sm);
     font-weight: var(--weight-label);
-    letter-spacing: var(--tracking-label);
-    text-transform: var(--transform-label);
   }
 </style>

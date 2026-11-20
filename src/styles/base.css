@@ -7,6 +7,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* The flash on a tapped link or button, in the accent instead of the browser's grey. */
+  -webkit-tap-highlight-color: var(--color-tap);
   /* Keeps anchored sections and focused elements clear of the sticky header. */
   scroll-padding-block-start: var(--header-offset);
 }
@@ -65,7 +67,12 @@ ol[role='list'] {
 
 a {
   color: var(--color-accent);
+  text-decoration-thickness: var(--indicator-width);
   text-underline-offset: 0.2em;
+}
+
+::selection {
+  background: var(--color-selection);
 }
 
 img,
@@ -106,6 +113,105 @@ input {
 
 .section-title {
   margin-block-end: var(--space-5);
+}
+
+/* A squiggle under each section title, in the accent gradient. */
+.section-title::after {
+  content: '';
+  display: block;
+  inline-size: var(--squiggle-width);
+  block-size: var(--squiggle-height);
+  margin-block-start: var(--space-2);
+  background-image: var(--gradient-accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 8'%3E%3Cpath d='M0 4c3-4 5-4 6 0s3 4 6 0 5-4 6 0 3 4 6 0' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+    left center / auto 100% repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 8'%3E%3Cpath d='M0 4c3-4 5-4 6 0s3 4 6 0 5-4 6 0 3 4 6 0' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+    left center / auto 100% repeat-x;
+}
+
+/*
+ * Colour glows behind the top of every page. In the dark they dim and a few
+ * stars come out. Decoration only: it never takes a click.
+ */
+main {
+  position: relative;
+  isolation: isolate;
+}
+
+main::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: -1;
+  block-size: var(--backdrop-height);
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1px 1px at 27% 62%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(2px 2px at 44% 12%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 44%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 71% 22%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1px 1px at 83% 58%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(2px 2px at 92% 14%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 48%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 36% 34%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 70%, var(--color-star) 50%, transparent 51%),
+    radial-gradient(40rem 26rem at 12% 0%, var(--color-glow-a), transparent 70%),
+    radial-gradient(36rem 24rem at 88% 8%, var(--color-glow-b), transparent 70%),
+    radial-gradient(30rem 20rem at 55% 30%, var(--color-glow-c), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+  pointer-events: none;
+}
+
+/*
+ * Buttons are chunky pills with a solid edge under them. Pointing at one
+ * lifts it; pressing pushes it down onto the edge. The first button in a
+ * list is the main one, filled with the accent.
+ */
+.button {
+  display: inline-flex;
+  padding: var(--space-3) var(--space-5);
+  border: var(--border-width) solid var(--color-button-edge);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  box-shadow: 0 var(--button-depth) 0 0 var(--color-button-edge);
+}
+
+li:first-child > .button {
+  --color-button-edge: var(--color-button-edge-main);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button:active {
+  box-shadow: 0 0 0 0 var(--color-button-edge);
+  translate: 0 var(--button-depth);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition:
+      translate var(--duration-fast) var(--ease-spring),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .button:hover:not(:active) {
+    translate: 0 calc(var(--button-rise) * -1);
+    box-shadow: 0 calc(var(--button-depth) + var(--button-rise)) 0 0 var(--color-button-edge);
+  }
+}
+
+/* A small rounded label: an award, a technology, a skill. */
+.pill {
+  inline-size: fit-content;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-tint-a);
+  color: var(--color-text);
 }
 
 .muted {

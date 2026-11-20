@@ -18,10 +18,10 @@ const { items } = (await getEntry('skills', 'main'))!.data;
       <div class="viewport" data-skills-viewport>
         <div class="track" data-track>
           <ul aria-label="Skills" role="list" translate="no">
-            {items.map((skill) => <li>{skill}</li>)}
+            {items.map((skill) => <li class="pill">{skill}</li>)}
           </ul>
           <ul class="copy" aria-hidden="true" role="list" translate="no">
-            {items.map((skill) => <li>{skill}</li>)}
+            {items.map((skill) => <li class="pill">{skill}</li>)}
           </ul>
         </div>
       </div>
@@ -42,17 +42,22 @@ const { items } = (await getEntry('skills', 'main'))!.data;
   ul {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
+    gap: var(--space-2);
   }
 
   li {
-    font-family: var(--font-mono);
     font-size: var(--text-sm);
     font-weight: var(--weight-label);
-    letter-spacing: var(--tracking-label);
-    text-transform: var(--transform-label);
-    color: var(--color-text-muted);
     white-space: nowrap;
+  }
+
+  /* Three tints in turn, for variety. The colour carries no meaning. */
+  li:nth-child(3n + 2) {
+    background: var(--color-tint-b);
+  }
+
+  li:nth-child(3n) {
+    background: var(--color-tint-c);
   }
 
   /* Static by default: no second copy and nothing to pause. */
@@ -90,7 +95,7 @@ const { items } = (await getEntry('skills', 'main'))!.data;
 
     ul {
       flex-wrap: nowrap;
-      padding-inline-end: var(--space-5);
+      padding-inline-end: var(--space-2);
     }
 
     .copy {

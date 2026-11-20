@@ -1,7 +1,7 @@
 /*
  * Design tokens. Every colour, type, spacing and motion value used by a
- * component comes from here. This is the neutral placeholder look; the
- * visual direction chosen in stage 2 replaces these values, not the names.
+ * component comes from here. The look is the one the owner chose in stage 2:
+ * warm and playful, cream and navy, with a blue accent.
  */
 :root {
   /* Follow the system by default. The theme toggle pins a scheme by changing
@@ -9,25 +9,40 @@
      This file uses no CSS nesting on purpose (see tests/content/styles.test.ts). */
   color-scheme: light dark;
 
-  /* Raw colour values */
-  --color-bg-light: oklch(98.5% 0.003 250);
-  --color-bg-dark: oklch(16% 0.006 250);
+  /* Raw colour values, light and dark */
+  --color-bg-light: oklch(97.5% 0.014 85);
+  --color-bg-dark: oklch(19% 0.04 275);
   --color-surface-light: oklch(100% 0 0);
-  --color-surface-dark: oklch(20.5% 0.008 250);
-  --color-text-light: oklch(22% 0.01 250);
-  --color-text-dark: oklch(94% 0.005 250);
-  --color-text-muted-light: oklch(45% 0.012 250);
-  --color-text-muted-dark: oklch(74% 0.01 250);
-  --color-accent-light: oklch(46% 0.19 265);
-  --color-accent-dark: oklch(80% 0.12 265);
-  --color-border-light: oklch(89% 0.005 250);
-  --color-border-dark: oklch(31% 0.01 250);
-  /* A second accent for looks that use two; the same as the first here. */
-  --color-accent-2-light: var(--color-accent-light);
-  --color-accent-2-dark: var(--color-accent-dark);
-  /* Text on a solid accent or solid text-coloured fill. */
-  --color-on-accent-light: oklch(100% 0 0);
-  --color-on-accent-dark: oklch(16% 0.006 250);
+  --color-surface-dark: oklch(24% 0.045 275);
+  --color-text-light: oklch(25% 0.05 275);
+  --color-text-dark: oklch(95% 0.012 85);
+  --color-text-muted-light: oklch(43% 0.045 275);
+  --color-text-muted-dark: oklch(81% 0.03 275);
+  /* The accent is a royal blue; the second accent is a cooler blue-green used beside it. */
+  --color-accent-light: oklch(47% 0.2 262);
+  --color-accent-dark: oklch(81% 0.1 255);
+  --color-accent-2-light: oklch(54% 0.12 225);
+  --color-accent-2-dark: oklch(83% 0.1 210);
+  --color-border-light: oklch(89% 0.028 85);
+  --color-border-dark: oklch(34% 0.05 275);
+  /* Text on a solid accent fill. */
+  --color-on-accent-light: oklch(99% 0.005 85);
+  --color-on-accent-dark: oklch(19% 0.04 275);
+  /* The "available" light. */
+  --color-live-light: oklch(58% 0.17 150);
+  --color-live-dark: oklch(78% 0.19 150);
+  /* A third pill tint, beside the two mixed from the accents further down. */
+  --color-tint-warm-light: oklch(93% 0.07 95);
+  --color-tint-warm-dark: oklch(34% 0.06 95);
+  /* Behind the top of the page: three soft glows, and stars that only show in the dark. */
+  --color-glow-a-light: oklch(88% 0.07 255 / 0.55);
+  --color-glow-a-dark: oklch(42% 0.14 262 / 0.4);
+  --color-glow-b-light: oklch(91% 0.06 205 / 0.5);
+  --color-glow-b-dark: oklch(42% 0.09 220 / 0.28);
+  --color-glow-c-light: oklch(93% 0.11 95 / 0.55);
+  --color-glow-c-dark: oklch(40% 0.1 250 / 0.3);
+  --color-star-light: transparent;
+  --color-star-dark: oklch(96% 0.05 95 / 0.85);
 
   /* Colour tokens. Fallback first, for browsers without light-dark(). */
   --color-bg: var(--color-bg-light);
@@ -35,37 +50,47 @@
   --color-text: var(--color-text-light);
   --color-text-muted: var(--color-text-muted-light);
   --color-accent: var(--color-accent-light);
-  --color-border: var(--color-border-light);
   --color-accent-2: var(--color-accent-2-light);
+  --color-border: var(--color-border-light);
   --color-on-accent: var(--color-on-accent-light);
-  --color-card-border: var(--color-border);
-  --color-card-border-hover: var(--color-accent);
-  --color-card-bg: var(--color-surface);
-  --color-header-bg: var(--color-bg);
+  --color-live: var(--color-live-light);
+  --color-tint-warm: var(--color-tint-warm-light);
+  --color-glow-a: var(--color-glow-a-light);
+  --color-glow-b: var(--color-glow-b-light);
+  --color-glow-c: var(--color-glow-c-light);
+  --color-star: var(--color-star-light);
+
+  /* Colours worked out from the ones above. Two colours are mixed in oklab:
+     in oklch the hue drifts through pink when one of them is white or black. */
+  --color-shade: oklch(40% 0.14 262);
+  --color-tint-a: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
+  --color-tint-b: color-mix(in oklab, var(--color-accent-2) 13%, var(--color-surface));
+  --color-tint-c: var(--color-tint-warm);
+  --color-button-edge: color-mix(in oklab, var(--color-text) 22%, var(--color-border));
+  --color-button-edge-main: color-mix(in oklab, var(--color-accent) 62%, black);
+  --color-selection: color-mix(in oklab, var(--color-accent) 26%, transparent);
+  --color-tap: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  --color-live-ring: color-mix(in oklab, var(--color-live) 60%, transparent);
+  --gradient-accent: linear-gradient(100deg, var(--color-accent), var(--color-accent-2));
 
   /* Type */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  --font-heading: var(--font-sans);
-  --font-switcher: system-ui, sans-serif;
+  --font-sans: var(--font-figtree);
+  --font-heading: var(--font-bricolage);
   --text-sm: 0.875rem;
-  --text-base: 1rem;
+  --text-base: 1.0625rem;
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
   --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
-  --text-3xl: clamp(2.25rem, 1.5rem + 3.6vw, 3.75rem);
+  --text-3xl: clamp(2.75rem, 1.6rem + 5vw, 4.75rem);
   --leading-tight: 1.15;
   --leading-normal: 1.6;
   --weight-normal: 400;
   --weight-medium: 500;
+  --weight-label: 600;
   --weight-bold: 700;
-  --weight-heading: var(--weight-bold);
-  --weight-label: var(--weight-normal);
-  --tracking-heading: 0em;
-  --tracking-display: 0em;
-  --tracking-label: 0em;
-  --transform-label: none;
-  --style-result: normal;
+  --weight-heading: 800;
+  --tracking-heading: -0.02em;
+  --tracking-display: -0.035em;
 
   /* Space */
   --space-1: 0.25rem;
@@ -82,30 +107,41 @@
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-full: 999px;
-  --radius-card: var(--radius-lg);
-  --radius-button: var(--radius-md);
-  --radius-photo: var(--radius-lg);
-  --radius-thumb: var(--radius-md);
-  --radius-pill: var(--radius-lg);
-  --radius-media: var(--radius-lg);
+  --radius-card: 1.5rem;
+  --radius-button: var(--radius-full);
+  --radius-photo: 2.25rem;
+  --radius-thumb: 0.875rem;
+  --radius-pill: var(--radius-full);
+  --radius-media: 1.5rem;
   --border-width: 1px;
   --indicator-width: 2px;
   --focus-width: 2px;
+  --photo-edge: 0.375rem;
+  --button-depth: 0.25rem;
+  --button-rise: 0.125rem;
+  --squiggle-width: 4.5rem;
+  --squiggle-height: 0.5rem;
+  --live-ping-reach: 0.375rem;
 
-  /* Depth */
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-photo: none;
-  --shadow-button: none;
-  --shadow-switcher: 0 0.5rem 1.5rem oklch(0% 0 0 / 0.25);
+  /* Depth: shadows carry a little of the accent. */
+  --shadow-card: 0 1px 2px color-mix(in oklab, var(--color-shade) 8%, transparent), 0 1rem 2rem -1rem color-mix(in oklab, var(--color-shade) 28%, transparent);
+  --shadow-card-hover: 0 2px 4px color-mix(in oklab, var(--color-shade) 10%, transparent), 0 1.75rem 3rem -1.25rem color-mix(in oklab, var(--color-shade) 42%, transparent);
+  --shadow-photo: 0 1.5rem 3rem -1.25rem color-mix(in oklab, var(--color-shade) 50%, transparent);
 
   /* Motion */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-marquee: 60s;
+  --duration-ping: 1.6s;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --lift-card: 0rem;
+  --lift-card: 0.375rem;
+  --tilt-card: 2deg;
+  --perspective-card: 60rem;
+  --tilt-photo: 2.5deg;
+  --tilt-photo-hover: -1deg;
+  --scale-photo-hover: 1.02;
+  --turn-icon: 30deg;
 
   /* Layout */
   --content-width: 72rem;
@@ -119,19 +155,9 @@
   --header-offset: 7rem;
   --media-width: 56rem;
   --aside-width: 28rem;
+  --backdrop-height: 46rem;
   --layer-header: 5;
-  --layer-switcher: 8;
   --layer-skip-link: 10;
-
-  /* The preview switcher (stage 2 only). One plain style in every look. */
-  --switcher-space: 4.5rem;
-  --radius-switcher: 1rem;
-  --radius-switcher-button: 0.75rem;
-  --color-switcher-bg: oklch(22% 0.01 250);
-  --color-switcher-text: oklch(97% 0 0);
-  --color-switcher-muted: oklch(78% 0.01 250);
-  --color-switcher-hover: oklch(34% 0.01 250);
-  --color-switcher-border: oklch(40% 0.01 250);
 }
 
 :root:has(> head > meta[name='color-scheme'][content='dark']) {
@@ -150,9 +176,15 @@
     --color-text: var(--color-text-dark);
     --color-text-muted: var(--color-text-muted-dark);
     --color-accent: var(--color-accent-dark);
-    --color-border: var(--color-border-dark);
     --color-accent-2: var(--color-accent-2-dark);
+    --color-border: var(--color-border-dark);
     --color-on-accent: var(--color-on-accent-dark);
+    --color-live: var(--color-live-dark);
+    --color-tint-warm: var(--color-tint-warm-dark);
+    --color-glow-a: var(--color-glow-a-dark);
+    --color-glow-b: var(--color-glow-b-dark);
+    --color-glow-c: var(--color-glow-c-dark);
+    --color-star: var(--color-star-dark);
   }
 }
 
@@ -164,8 +196,14 @@
     --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
     --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
     --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
-    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
     --color-accent-2: light-dark(var(--color-accent-2-light), var(--color-accent-2-dark));
+    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
     --color-on-accent: light-dark(var(--color-on-accent-light), var(--color-on-accent-dark));
+    --color-live: light-dark(var(--color-live-light), var(--color-live-dark));
+    --color-tint-warm: light-dark(var(--color-tint-warm-light), var(--color-tint-warm-dark));
+    --color-glow-a: light-dark(var(--color-glow-a-light), var(--color-glow-a-dark));
+    --color-glow-b: light-dark(var(--color-glow-b-light), var(--color-glow-b-dark));
+    --color-glow-c: light-dark(var(--color-glow-c-light), var(--color-glow-c-dark));
+    --color-star: light-dark(var(--color-star-light), var(--color-star-dark));
   }
 }

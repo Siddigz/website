@@ -31,14 +31,20 @@
     justify-content: center;
     padding: var(--space-2);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: transparent;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
     cursor: pointer;
-    transition: background-color var(--duration-fast) var(--ease-out);
   }
 
-  .theme-toggle:hover {
-    background: var(--color-surface);
+  /* The icon turns a little when pointed at. */
+  @media (prefers-reduced-motion: no-preference) {
+    .theme-toggle svg {
+      transition: rotate var(--duration-base) var(--ease-spring);
+    }
+
+    .theme-toggle:hover svg {
+      rotate: var(--turn-icon);
+    }
   }
 
   .to-dark {
@@ -64,6 +70,11 @@
 
   function apply(override: Scheme | null) {
     if (meta) meta.content = override ?? 'light dark';
+    // The browser-bar colour follows a pinned theme, and the system otherwise.
+    for (const bar of document.querySelectorAll<HTMLMetaElement>('meta[data-bar]')) {
+      const scheme = bar.dataset.bar;
+      bar.media = override ? (scheme === override ? 'all' : 'not all') : `(prefers-color-scheme: ${scheme})`;
+    }
   }
 
   document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
