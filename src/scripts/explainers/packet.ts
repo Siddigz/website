@@ -1,8 +1,9 @@
 /*
  * Steps the packet explainer through its eleven stops. The page as built
  * already shows the first stop and holds every history row; this script
- * changes the values, the sentences and which rows show. Movement is left to
- * CSS, so with reduced motion everything simply changes.
+ * changes the values, the sentences, which rows show and which stop on the
+ * route the packet is beside. Movement is left to CSS, so with reduced motion
+ * everything simply changes.
  */
 import { HOPS, LAST_STEP, NEW_HEADER_AT, changeLine, changedFields, stateAt, stepLine } from '../../lib/explainers/packet';
 
@@ -10,7 +11,8 @@ const root = document.querySelector<HTMLElement>('[data-packet]');
 
 if (root) {
   const find = <T extends Element = HTMLElement>(selector: string) => root.querySelector<T>(selector);
-  const stops: number[] = JSON.parse(root.dataset.stops ?? '[]');
+  const stops = [...root.querySelectorAll<HTMLElement>('[data-stop]')];
+  const token = find('[data-token]');
   const values = [...root.querySelectorAll<HTMLElement>('[data-f]')];
   const rows = [...root.querySelectorAll<HTMLTableRowElement>('tbody tr')];
   const previous = find('[data-previous]');
@@ -21,6 +23,14 @@ if (root) {
 
   const enable = (button: HTMLElement | null, on: boolean) => button?.setAttribute('aria-disabled', String(!on));
   const usable = (button: HTMLElement | null) => button?.getAttribute('aria-disabled') !== 'true';
+
+  /** Moves the packet down to the stop it is at. Stops differ in height where their words wrap, so this is measured. */
+  function place(): void {
+    const top = (stop?: HTMLElement) => stop?.querySelector('.mark')?.getBoundingClientRect().top;
+    const first = top(stops[0]);
+    const here = top(stops[step]);
+    if (first !== undefined && here !== undefined) token?.style.setProperty('--packet-y', `${Math.round(here - first)}px`);
+  }
 
   function show(to: number): void {
     const forward = to === step + 1;
@@ -53,7 +63,11 @@ if (root) {
       row.toggleAttribute('data-current', index === step);
     });
 
-    find<SVGGElement>('[data-token]')?.style.setProperty('--packet-x', String(stops[step] ?? 0));
+    stops.forEach((stop, index) => {
+      if (index === step) stop.setAttribute('aria-current', 'step');
+      else stop.removeAttribute('aria-current');
+    });
+    place();
 
     // At the server, the Ethernet and IP headers have been read and removed.
     const ethernet = find('[data-seg="eth"]');
@@ -76,4 +90,8 @@ if (root) {
   previous?.addEventListener('click', () => usable(previous) && show(step - 1));
   next?.addEventListener('click', () => usable(next) && show(step + 1));
   reset?.addEventListener('click', () => show(0));
+
+  // Words wrap differently at another width, so the stops move: the packet follows its stop.
+  const route = find('[data-route]');
+  if (route) new ResizeObserver(place).observe(route);
 }

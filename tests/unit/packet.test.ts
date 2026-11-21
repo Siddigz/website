@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DESTINATION_IP, HOPS, PORT, changeLine, changedFields, historyRows, stateAt, stepLine } from '../../src/lib/explainers/packet';
+import { DESTINATION_IP, HOPS, PORT, ROUTE_LABEL, STRETCHES, changeLine, changedFields, historyRows, longestStepLine, stateAt, stepLine, stretchOf } from '../../src/lib/explainers/packet';
 
 describe('the packet’s journey', () => {
   it('has eleven stops, from the laptop to the web server', () => {
@@ -95,5 +95,46 @@ describe('the lines of text under the drawing', () => {
     expect(changeLine(1)).toBe('Changed at this step: Ethernet dst MAC, Ethernet src MAC, IP src, TTL.');
     expect(changeLine(2)).toBe('Changed at this step: Ethernet dst MAC, Ethernet src MAC, TTL.');
     expect(changeLine(4)).toBe('Nothing in the packet changed at this step.');
+  });
+});
+
+describe('the route as drawn', () => {
+  it('gives every stop a kind of device, and routers are exactly where a hop of life is lost', () => {
+    expect(HOPS.map((hop) => hop.kind)).toEqual(['laptop', 'router', 'router', 'modem', 'amplifier', 'amplifier', 'modem', 'router', 'router', 'switch', 'server']);
+    HOPS.forEach((hop, index) => {
+      const lost = index > 0 && hop.ttl < HOPS[index - 1]!.ttl;
+      expect(hop.kind === 'router', hop.name).toBe(lost);
+    });
+  });
+
+  it('says under each end of the journey which addresses it has', () => {
+    expect(HOPS[0]!.detail).toEqual(['MAC AA', 'IP 192.168.1.10']);
+    expect(HOPS[10]!.detail).toEqual(['MAC 99', `IP ${DESTINATION_IP}`]);
+    // Every router is named by its MAC address, which is what the Ethernet header points at.
+    for (const hop of HOPS.filter((each) => each.kind === 'router')) expect(hop.detail.join(' ')).toContain('MAC');
+    for (const hop of HOPS) for (const line of hop.detail) expect(line.length).toBeLessThanOrEqual(24);
+  });
+
+  it('groups the stops into the two local networks and the long fiber between them', () => {
+    expect(STRETCHES.map((stretch) => [stretch.tone, stretch.from, stretch.to])).toEqual([
+      ['home', 0, 1],
+      ['fiber', 3, 6],
+      ['dc', 8, 10],
+    ]);
+    for (const stretch of STRETCHES) expect(stretch.label.length).toBeGreaterThan(3);
+    expect(stretchOf(0)?.tone).toBe('home');
+    expect(stretchOf(4)?.tone).toBe('fiber');
+    expect(stretchOf(10)?.tone).toBe('dc');
+    // The two routers at the ends of the fiber link stand between networks.
+    expect(stretchOf(2)).toBeUndefined();
+    expect(stretchOf(7)).toBeUndefined();
+    expect(stretchOf(11)).toBeUndefined();
+  });
+
+  it('has a name for the whole route, and knows its longest step line', () => {
+    expect(ROUTE_LABEL.length).toBeGreaterThan(10);
+    const longest = longestStepLine();
+    for (let step = 0; step <= 10; step += 1) expect(longest.length).toBeGreaterThanOrEqual(stepLine(step).length);
+    expect(longest).toBe(stepLine(6));
   });
 });

@@ -39,5 +39,17 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/projects/",
+      "destination": "/#projects",
+      "permanent": true
+    },
+    {
+      "source": "/explainers/",
+      "destination": "/#explainers",
+      "permanent": true
+    }
   ]
 }

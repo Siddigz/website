@@ -183,11 +183,18 @@ test('a proof item with several details shows each on its own line', async ({ pa
   expect(new Set(tops).size).toBe(years.length);
 });
 
-test('/projects leads to the projects section of the home page', async ({ page }) => {
-  await page.goto('/projects');
-  await expect(page).toHaveURL(/\/#projects$/);
-  await expect(page.locator('#projects')).toBeVisible();
-});
+for (const [address, section] of [
+  ['/projects', 'projects'],
+  ['/projects/', 'projects'],
+  ['/explainers', 'explainers'],
+  ['/explainers/', 'explainers'],
+] as const) {
+  test(`${address} leads to that section of the home page`, async ({ page }) => {
+    await page.goto(address);
+    await expect(page).toHaveURL(new RegExp(`/#${section}$`));
+    await expect(page.locator(`#${section}`)).toBeInViewport();
+  });
+}
 
 test('experience lists three roles and no descriptions', async ({ page }) => {
   await page.goto('/');

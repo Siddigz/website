@@ -7,8 +7,13 @@
  * named after a company.
  */
 export type Field = 'eDst' | 'eSrc' | 'ipSrc' | 'ttl';
+export type Kind = 'laptop' | 'router' | 'modem' | 'amplifier' | 'switch' | 'server';
 export type Hop = {
   name: string;
+  /** What sort of device it is: picks its drawing on the route. */
+  kind: Kind;
+  /** Short lines shown under its name on the route. */
+  detail: string[];
   /** A shorter name, for the history table. */
   short: string;
   caption: string;
@@ -26,6 +31,8 @@ const PUBLIC_IP = '203.0.113.5';
 export const HOPS: readonly Hop[] = [
   {
     name: 'Laptop',
+    kind: 'laptop',
+    detail: ['MAC AA', 'IP 192.168.1.10'],
     short: 'Laptop',
     caption: `Leaving the laptop. Ethernet is addressed to the home router (MAC BB). IP is addressed to the web server, ${DESTINATION_IP}, and that will not change end to end.`,
     eDst: 'BB',
@@ -35,6 +42,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Home router',
+    kind: 'router',
+    detail: ['home side MAC BB', 'ISP side MAC CC'],
     short: 'Home router',
     caption: `Home router: peels off the old Ethernet header and attaches a new one for the ISP link. NAT swaps your private source IP for public ${PUBLIC_IP}. TTL drops to 63.`,
     eDst: 'DD',
@@ -44,6 +53,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'ISP router',
+    kind: 'router',
+    detail: ['MAC DD'],
     short: 'ISP router',
     caption: 'ISP router: a brand-new Ethernet header addressed to the carrier router (MAC EE). TTL drops to 62. The IP destination is still the web server.',
     eDst: 'EE',
@@ -53,6 +64,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Optical modem (ISP end)',
+    kind: 'modem',
+    detail: ['fiber end'],
     short: 'Modem (ISP end)',
     caption: 'Modem: carries the bits, reads nothing, changes nothing.',
     eDst: 'EE',
@@ -62,6 +75,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Amplifier 1',
+    kind: 'amplifier',
+    detail: [],
     short: 'Amp 1',
     caption: 'Amplifier: boosts the light, doesn’t even decode bits.',
     eDst: 'EE',
@@ -71,6 +86,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Amplifier 2',
+    kind: 'amplifier',
+    detail: [],
     short: 'Amp 2',
     caption: 'Amplifier: boosts the light, doesn’t even decode bits.',
     eDst: 'EE',
@@ -80,6 +97,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Optical modem (carrier end)',
+    kind: 'modem',
+    detail: ['fiber end'],
     short: 'Modem (carrier end)',
     caption: 'Modem: carries the bits, reads nothing, changes nothing.',
     eDst: 'EE',
@@ -89,6 +108,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Carrier router',
+    kind: 'router',
+    detail: ['MAC EE'],
     short: 'Carrier router',
     caption: 'Carrier router: new Ethernet header addressed to the edge router (MAC FF). TTL drops to 61.',
     eDst: 'FF',
@@ -98,6 +119,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Edge router',
+    kind: 'router',
+    detail: ['MAC FF'],
     short: 'Edge router',
     caption: 'Edge router: new Ethernet header addressed to the server itself (MAC 99), because the server is on this router’s local network. TTL drops to 60.',
     eDst: '99',
@@ -107,6 +130,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Data-centre switch',
+    kind: 'switch',
+    detail: ['flat, many ports'],
     short: 'DC switch',
     caption: 'Switch: reads dst MAC 99, picks the port that leads to that device, changes nothing.',
     eDst: '99',
@@ -116,6 +141,8 @@ export const HOPS: readonly Hop[] = [
   },
   {
     name: 'Web server',
+    kind: 'server',
+    detail: ['MAC 99', `IP ${DESTINATION_IP}`],
     short: 'Web server',
     caption: `Server: peels every layer. Ethernet MAC 99 = me, accept. IP ${DESTINATION_IP} = me. TCP port ${PORT} → hand the data to the web server program.`,
     eDst: '99',
@@ -126,6 +153,22 @@ export const HOPS: readonly Hop[] = [
 ];
 
 export const LAST_STEP = HOPS.length - 1;
+
+/** The route's name, for screen readers. */
+export const ROUTE_LABEL = 'Network path from a laptop to a web server';
+
+/** A run of stops drawn as one band on the route: a local network, or the long fiber. */
+export type Stretch = { label: string; tone: 'home' | 'fiber' | 'dc'; from: number; to: number };
+export const STRETCHES: readonly Stretch[] = [
+  { label: 'Home LAN', tone: 'home', from: 0, to: 1 },
+  { label: '~450 km fiber', tone: 'fiber', from: 3, to: 6 },
+  { label: 'Data-centre LAN', tone: 'dc', from: 8, to: 10 },
+];
+
+/** The band a stop sits in, if any. The routers between networks sit in none. */
+export function stretchOf(step: number): Stretch | undefined {
+  return STRETCHES.find((stretch) => step >= stretch.from && step <= stretch.to);
+}
 /** What the server concludes when the packet arrives. */
 export const VERDICT = `Ethernet: dst MAC 99 = this server → accept the frame. IP: dst ${DESTINATION_IP} = this server → accept the packet. TCP: port ${PORT} → pass the data up to the web server program.`;
 export const FIELD_LABELS: Record<Field, string> = { eDst: 'Ethernet dst MAC', eSrc: 'Ethernet src MAC', ipSrc: 'IP src', ttl: 'TTL' };
@@ -167,6 +210,11 @@ export function historyRows(step: number): { link: string; eDst: string; eSrc: s
 export function stepLine(step: number): string {
   const at = clamp(step);
   return `Step ${at} of ${LAST_STEP} · now at: ${HOPS[at]!.name}`;
+}
+
+/** The longest of those lines: the page keeps room for it, so nothing jumps between steps. */
+export function longestStepLine(): string {
+  return HOPS.map((_, step) => stepLine(step)).reduce((longest, line) => (line.length > longest.length ? line : longest));
 }
 
 /** What changed at a stop, as a sentence. */

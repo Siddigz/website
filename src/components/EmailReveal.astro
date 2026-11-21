@@ -14,11 +14,16 @@ const { email } = await getSite();
 
 <span class="email" data-email data-copy={email.copy} data-copied={email.copied} data-failed={email.failed}>
   <button type="button" class:list={[look === 'button' ? 'button' : 'plain']} data-email-reveal>{email.button}</button>
-  {/* Once the address has arrived, the script puts a link to it here, before the Copy button. */}
-  <span class="result" data-email-result hidden>
+  {/*
+    A small box that opens under the button, floating over the page so nothing moves.
+    Once the address has arrived, the script puts a link to it here, above the Copy button.
+    `hidden` keeps it away in a browser too old to open it this way; the script takes over from there.
+  */}
+  <span class="result" data-email-result popover="auto" hidden>
     <button type="button" class="copy" data-email-copy>{email.copy}</button>
+    <span class="problem" data-email-problem hidden></span>
   </span>
-  {/* Says what happened, to everyone: a failure stays on screen; "Copied" is also on the button. */}
+  {/* Read out when something happens: a failure, or "Copied". What is shown is in the box and on the button. */}
   <span class="status" role="status" data-email-status></span>
 </span>
 
@@ -55,21 +60,52 @@ const { email } = await getSite();
   }
 
   /*
-   * Once revealed: one small box in two halves. The address on top, and under
-   * it a Copy button exactly as wide, so the two read as a single piece.
+   * Once revealed: one small box in two halves, hanging under the button. The
+   * address on top, and under it a Copy button exactly as wide. The script
+   * says where the button is (--email-x, --email-y); the box floats over the
+   * page there, so opening it moves nothing.
    */
   .result {
-    display: inline-grid;
+    position: absolute;
+    inset: auto;
+    inset-block-start: var(--email-y, 0);
+    inset-inline-start: var(--email-x, 0);
+    margin: 0;
+    padding: 0;
     overflow: clip;
+    max-inline-size: calc(100vw - 2 * var(--gutter));
     border: var(--border-width) solid var(--color-button-edge);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card-hover);
   }
 
-  /* The rule above would otherwise keep the empty result on screen. */
+  /* Only while open: a closed box must stay out of the page. */
+  .result:popover-open {
+    display: inline-grid;
+  }
+
+  /* In a browser that cannot float it, the script shows it in line instead. */
+  .result.in-line {
+    position: static;
+    box-shadow: none;
+  }
+
+  .result.in-line:not([hidden]) {
+    display: inline-grid;
+  }
+
   .result[hidden],
-  [data-email-reveal][hidden] {
+  .result [hidden] {
     display: none;
+  }
+
+  /* When the address could not be fetched, the box holds one line saying so. */
+  .problem {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
   }
 
   .result :global(a) {
@@ -113,11 +149,20 @@ const { email } = await getSite();
    * down out from under the address. Only for visitors who allow motion.
    */
   @media (prefers-reduced-motion: no-preference) {
-    .result:not([hidden]) {
+    .result:popover-open {
       animation: email-open var(--duration-base) var(--ease-spring);
     }
 
-    .result:not([hidden]) .copy {
+    .result:popover-open .copy {
+      animation: email-copy-drop var(--duration-base) var(--ease-out);
+    }
+
+    /* The in-line kind gets the same, written apart so a browser that does not know the rules above still reads these. */
+    .result.in-line:not([hidden]) {
+      animation: email-open var(--duration-base) var(--ease-spring);
+    }
+
+    .result.in-line:not([hidden]) .copy {
       animation: email-copy-drop var(--duration-base) var(--ease-out);
     }
   }
@@ -136,22 +181,13 @@ const { email } = await getSite();
     }
   }
 
+  /* Only ever read out: what is shown is in the box and on the Copy button. */
   .status {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-  }
-
-  /* "Copied" is already on the button, so here it is only read out. */
-  .status[data-kind='copied'] {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  .status:empty {
-    display: none;
   }
 </style>

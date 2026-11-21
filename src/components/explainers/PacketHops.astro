@@ -1,125 +1,122 @@
 ---
-// "One packet, hop by hop": a drawing of the path, the packet's headers, and
-// a history table. The page is built showing the first stop, with the whole
-// journey already in the table; the script (src/scripts/explainers/packet.ts)
-// steps through it. Data and sentences come from src/lib/explainers/packet.ts.
-import { DELIVERED, HOPS, LAST_STEP, VERDICT, changeLine, historyRows, stateAt, stepLine } from '../../lib/explainers/packet';
+// "One packet, hop by hop": the route from top to bottom with the packet beside
+// the stop it is at, the packet's headers, and a history table. The page is
+// built showing the first stop, with the whole journey already in the table;
+// the script (src/scripts/explainers/packet.ts) steps through it. Data and
+// sentences come from src/lib/explainers/packet.ts.
+import { DELIVERED, HOPS, LAST_STEP, ROUTE_LABEL, VERDICT, changeLine, historyRows, longestStepLine, stateAt, stepLine, stretchOf, type Kind } from '../../lib/explainers/packet';
 
 const start = stateAt(0);
 const rows = historyRows(LAST_STEP);
+// Every caption is laid out, unseen, in the caption's box: the box is as tall as the longest, so nothing below it moves.
+const captions = [...new Set(HOPS.map((hop) => hop.caption))];
+const longestStep = longestStepLine();
 
-// Where each stop sits along the drawing, in the drawing's own units.
-const X = [50, 160, 270, 380, 460, 540, 620, 735, 845, 975, 1100];
-const TOKEN_Y = 92;
-
-type Box = { x: number; width: number; lines: string[]; under: string[]; kind?: 'router' | 'modem' | 'server' };
-const boxes: Box[] = [
-  { x: 50, width: 84, lines: ['Laptop'], under: ['MAC AA', `IP ${HOPS[0]!.ipSrc}`] },
-  { x: 160, width: 84, lines: ['Home', 'router'], under: ['home side MAC BB', 'ISP side MAC CC'], kind: 'router' },
-  { x: 270, width: 84, lines: ['ISP', 'router'], under: ['MAC DD'], kind: 'router' },
-  { x: 380, width: 76, lines: ['Optical', 'modem'], under: ['fiber end'], kind: 'modem' },
-  { x: 620, width: 76, lines: ['Optical', 'modem'], under: ['fiber end'], kind: 'modem' },
-  { x: 735, width: 84, lines: ['Carrier', 'router'], under: ['MAC EE'], kind: 'router' },
-  { x: 845, width: 84, lines: ['Edge', 'router'], under: ['MAC FF'], kind: 'router' },
-  { x: 1100, width: 84, lines: ['Web', 'server'], under: ['MAC 99', `IP ${start.ipDst}`], kind: 'server' },
-];
-const regions = [
-  { x: 2, width: 204, label: 'Home LAN', at: 104, kind: 'home' },
-  { x: 208, width: 18, label: 'link 1', at: 217, kind: 'link' },
-  { x: 314, width: 376, label: 'link 2 (fiber)', at: 502, kind: 'link' },
-  { x: 779, width: 22, label: 'link 3', at: 790, kind: 'link' },
-  { x: 842, width: 310, label: 'Data-centre LAN', at: 997, kind: 'dc' },
-];
-const wires = [[92, 118], [202, 228], [312, 342], [658, 693], [777, 803], [887, 925], [1025, 1058]];
-const amplifiers = [460, 540];
-const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
+// A small drawing for each kind of device, in a 24 by 24 box.
+const GLYPHS: Record<Kind, string> = {
+  laptop: '<rect x="5" y="6" width="14" height="9" rx="1.5"/><path d="M3 18.5h18"/>',
+  router: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M7.5 12h9"/>',
+  modem: '<rect x="4.5" y="7" width="15" height="10" rx="2"/><circle cx="12" cy="12" r="1.5"/>',
+  amplifier: '<path d="M5.5 7h13L12 18z"/>',
+  switch: '<rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M6 13h1.5M9.5 13H11M13 13h1.5M16.5 13H18"/>',
+  server: '<rect x="6.5" y="3" width="11" height="18" rx="1.5"/><path d="M9.5 8h5M9.5 12h5"/>',
+};
 ---
 
-<div class="packet" data-packet data-stops={JSON.stringify(X)}>
-  {/* Read out when it changes, so a screen reader follows the packet too. */}
-  <p class="caption" role="status" data-caption>
-    <span class="step" data-step>{stepLine(0)}</span>
-    <span data-caption-text>{HOPS[0]!.caption}</span>
-  </p>
-
-  {/* Wider than a phone: it scrolls inside this box, which the keyboard can reach. One picture to a screen reader: its words repeat the captions and the table. */}
-  <div class="diagram" role="img" aria-label="Network path from a laptop to a web server" tabindex="0">
-    <svg viewBox="0 0 1160 245" aria-hidden="true">
-      {regions.map((region) => <rect class={`region ${region.kind}`} x={region.x} y="58" width={region.width} height="180" rx="10" />)}
-      {regions.map((region) => <text class="small" x={region.at} y="232">{region.label}</text>)}
-      <line class="fiber" x1="418" y1="125" x2="582" y2="125"></line>
-      <path class="span" d="M342 66H658M342 60v12M658 60v12"></path>
-      <text class="distance" x="500" y="54">~450 km fiber</text>
-      {wires.map(([from, to]) => <line class="wire" x1={from} y1="125" x2={to} y2="125" />)}
+<div class="packet" data-packet>
+  {/* What is said about the packet: on a wide screen this stays in view beside the route. */}
+  <div class="side">
+    <div class="caption-box">
+      {/* Read out when it changes, so a screen reader follows the packet too. */}
+      <p class="caption" role="status" data-caption>
+        <span class="step" data-step>{stepLine(0)}</span>
+        <span data-caption-text>{HOPS[0]!.caption}</span>
+      </p>
       {
-        boxes.map((box) => (
-          <g>
-            <rect class={`node ${box.kind ?? ''}`} x={box.x - box.width / 2} y="100" width={box.width} height="50" rx="6" />
-            {box.lines.map((line, index) => (
-              <text class="name" x={box.x} y={box.lines.length === 1 ? 129 : 119 + index * 14}>
-                {line}
-              </text>
-            ))}
-            {box.under.map((line, index) => (
-              <text class="small" x={box.x} y={168 + index * 13}>
-                {line}
-              </text>
-            ))}
-          </g>
+        captions.map((caption) => (
+          <p class="caption sizer" aria-hidden="true">
+            <span class="step">{longestStep}</span>
+            <span>{caption}</span>
+          </p>
         ))
       }
-      {
-        amplifiers.map((x) => (
-          <g>
-            <polygon class="amplifier" points={`${x - 14},110 ${x - 14},140 ${x + 14},125`} />
-            <text class="small" x={x} y="168">amplifier</text>
-          </g>
-        ))
-      }
-      <rect class="node switch" x="925" y="110" width="100" height="30" rx="3"></rect>
-      <text class="name small-name" x="975" y="124">Switch</text>
-      {ports.map((x) => <rect class="port" x={x} y="130" width="6" height="6" />)}
-      <text class="small" x="975" y="168">Data-centre switch</text>
-      <text class="small" x="975" y="181">(flat, many ports)</text>
-      {/* The packet. The script moves it by setting --packet-x; CSS does the gliding. */}
-      <g class="token" data-token transform={`translate(0 ${TOKEN_Y})`}>
-        <rect class="eth" x="-22" y="-7" width="11" height="14"></rect>
-        <rect class="ip" x="-11" y="-7" width="11" height="14"></rect>
-        <rect class="tcp" x="0" y="-7" width="11" height="14"></rect>
-        <rect class="dat" x="11" y="-7" width="11" height="14"></rect>
-        <rect class="outline" x="-22" y="-7" width="44" height="14"></rect>
-        <text class="name small-name" x="0" y="-11">packet</text>
-      </g>
-    </svg>
+    </div>
+
+    <div class="controls">
+      <button type="button" data-previous aria-disabled="true">Previous</button>
+      <button type="button" class="main" data-next>Next hop</button>
+      <button type="button" data-reset>Reset</button>
+      <span class="info muted" data-info data-delivered={DELIVERED}></span>
+    </div>
+
+    <div class="bar">
+      <div class="seg eth" data-seg="eth">
+        <span class="label">Ethernet header</span>
+        <span>dst MAC <span class="v" data-f="eDst">{start.eDst}</span> src MAC <span class="v" data-f="eSrc">{start.eSrc}</span></span>
+      </div>
+      <div class="seg ip" data-seg="ip">
+        <span class="label">IP header</span>
+        <span>
+          dst IP <span class="v" data-f="ipDst">{start.ipDst}</span> src IP <span class="v" data-f="ipSrc">{start.ipSrc}</span> TTL <span class="v" data-f="ttl">{start.ttl}</span>
+        </span>
+      </div>
+      <div class="seg tcp">
+        <span class="label">TCP header</span>
+        <span>dst port <span class="v" data-f="port">{start.port}</span></span>
+      </div>
+      <div class="seg dat">
+        <span class="label">Data</span>
+        <span>your web request (payload)</span>
+      </div>
+    </div>
+
+    <p class="changed" data-changed-line>{changeLine(0)}</p>
+    <p class="verdict" data-verdict hidden>{VERDICT}</p>
   </div>
 
-  <div class="bar">
-    <div class="seg eth" data-seg="eth">
-      <span class="label">Ethernet header</span>
-      <span>dst MAC <span class="v" data-f="eDst">{start.eDst}</span> src MAC <span class="v" data-f="eSrc">{start.eSrc}</span></span>
-    </div>
-    <div class="seg ip" data-seg="ip">
-      <span class="label">IP header</span>
-      <span>
-        dst IP <span class="v" data-f="ipDst">{start.ipDst}</span> src IP <span class="v" data-f="ipSrc">{start.ipSrc}</span> TTL <span class="v" data-f="ttl">{start.ttl}</span>
-      </span>
-    </div>
-    <div class="seg tcp">
-      <span class="label">TCP header</span>
-      <span>dst port <span class="v" data-f="port">{start.port}</span></span>
-    </div>
-    <div class="seg dat">
-      <span class="label">Data</span>
-      <span>your web request (payload)</span>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button type="button" data-previous aria-disabled="true">Previous</button>
-    <button type="button" class="main" data-next>Next hop</button>
-    <button type="button" data-reset>Reset</button>
-    <span class="info muted" data-info data-delivered={DELIVERED}></span>
-  </div>
+  {/* The path, top to bottom. Real text, so it reads at any width; the packet glides down beside it. */}
+  <ol class="route" role="list" aria-label={ROUTE_LABEL} data-route>
+    {
+      HOPS.map((hop, index) => {
+        const stretch = stretchOf(index);
+        const inFiber = stretch?.tone === 'fiber';
+        return (
+          <li
+            class:list={[
+              'stop',
+              hop.kind,
+              stretch?.tone,
+              { first: stretch?.from === index, last: stretch?.to === index, 'fiber-in': inFiber && index > stretch.from, 'fiber-out': inFiber && index < stretch.to },
+            ]}
+            data-stop
+            aria-current={index === 0 ? 'step' : undefined}
+          >
+            {
+              index === 0 && (
+                <span class="token" data-token aria-hidden="true">
+                  <span class="layers">
+                    <span class="eth" />
+                    <span class="ip" />
+                    <span class="tcp" />
+                    <span class="dat" />
+                  </span>
+                  <span class="token-label">packet</span>
+                </span>
+              )
+            }
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true" set:html={GLYPHS[hop.kind]} />
+            </span>
+            {stretch?.from === index && <span class="stretch">{stretch.label}</span>}
+            <span class="text">
+              <span class="name">{hop.name}</span>
+              {hop.detail.map((line) => <span class="detail">{line}</span>)}
+            </span>
+          </li>
+        );
+      })
+    }
+  </ol>
 
   <div class="cards">
     <div class="card eth">
@@ -170,9 +167,8 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
     </div>
   </div>
 
-  <p class="changed" data-changed-line>{changeLine(0)}</p>
-  <p class="verdict" data-verdict hidden>{VERDICT}</p>
 
+  <div class="history">
   <h2 class="history-title" id="packet-history">History: one row per hop</h2>
   {/* On a narrow screen the table scrolls inside this box, which the keyboard can reach. */}
   <div class="table-scroll" role="group" aria-labelledby="packet-history" tabindex="0">
@@ -195,6 +191,7 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
       }
     </tbody>
   </table>
+  </div>
   </div>
 </div>
 
@@ -226,16 +223,62 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
     --layer: var(--color-layer-data);
   }
 
-  .caption {
+  .side,
+  .history {
     display: grid;
-    gap: var(--space-1);
-    /* Room for the longest caption, so the drawing below does not jump between steps. */
-    min-block-size: calc(var(--text-base) * var(--leading-normal) * 4);
-    padding: var(--space-3) var(--space-4);
+    align-content: start;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+
+  /* From a tablet up, the route stands on the left and what is said about the packet is beside it. */
+  @media (min-width: 48rem) {
+    .packet {
+      grid-template-columns: minmax(0, min(var(--route-width), var(--route-share))) minmax(0, 1fr);
+      column-gap: var(--space-6);
+    }
+
+    .route {
+      grid-area: 1 / 1;
+    }
+
+    .side {
+      grid-area: 1 / 2;
+      align-self: start;
+    }
+
+    .cards,
+    .history {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Where the screen is tall enough to hold it, that side stays put while the route scrolls past. */
+  @media (min-width: 48rem) and (min-height: 40rem) {
+    .side {
+      position: sticky;
+      inset-block-start: var(--sticky-top);
+    }
+  }
+
+  /* The caption and its unseen copies share one cell, so the box is always as tall as the longest. */
+  .caption-box {
+    display: grid;
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-surface);
+  }
+
+  .caption {
+    display: grid;
+    grid-area: 1 / 1;
     align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .sizer {
+    visibility: hidden;
   }
 
   .step {
@@ -244,100 +287,181 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
     font-weight: var(--weight-label);
   }
 
-  .diagram {
-    overflow-x: auto;
-    border-radius: var(--radius-md);
+  .route {
+    display: grid;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  svg {
+  /* One stop: room for the packet, the stop's drawing on the line, then its words. */
+  .stop {
+    --stop-pad: var(--space-2);
+    --rail-at: calc(var(--space-3) + var(--packet-width) + var(--space-3) + var(--route-mark) / 2);
+    --mark-at: calc(var(--stop-pad) + var(--route-mark) / 2);
+
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--packet-width) var(--route-mark) minmax(0, 1fr);
+    column-gap: var(--space-3);
+    align-items: start;
+    padding: var(--stop-pad) var(--space-3);
+  }
+
+  /* The two local networks and the long fiber are shaded bands. */
+  .stop.home {
+    background: var(--color-tint-a);
+  }
+
+  .stop.fiber {
+    background: var(--color-tint-c);
+  }
+
+  .stop.dc {
+    background: var(--color-tint-b);
+  }
+
+  /* The first stop of a band carries the band's name on a line of its own, above the stop. */
+  .stop.first {
+    --mark-at: calc(var(--stop-pad) + var(--route-label) + var(--route-mark) / 2);
+
+    border-start-start-radius: var(--radius-md);
+    border-start-end-radius: var(--radius-md);
+  }
+
+  .stop.last {
+    border-end-start-radius: var(--radius-md);
+    border-end-end-radius: var(--radius-md);
+  }
+
+  /* The line between stops: one piece from the stop above, one to the stop below. */
+  .stop::before,
+  .stop::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(var(--rail-at) - var(--rail) / 2);
+    inline-size: var(--rail);
+    background: var(--color-text-muted);
+
+    --rail: var(--rail-width);
+  }
+
+  .stop::before {
+    inset-block-start: 0;
+    block-size: var(--mark-at);
+  }
+
+  .stop::after {
+    inset-block: var(--mark-at) 0;
+  }
+
+  .stop:first-child::before,
+  .stop:last-child::after {
+    content: none;
+  }
+
+  /* The fiber itself: thicker, and the colour of light. */
+  .stop.fiber-in::before,
+  .stop.fiber-out::after {
+    --rail: var(--rail-width-fiber);
+
+    background: var(--color-amber);
+  }
+
+  .stretch {
+    grid-area: 1 / 3;
+    display: flex;
+    align-items: center;
+    block-size: var(--route-label);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    white-space: nowrap;
+  }
+
+  .stop.first > :is(.token, .mark, .text) {
+    grid-row: 2;
+  }
+
+  .mark {
+    position: relative;
+    z-index: 1;
+    grid-column: 2;
     display: block;
-    inline-size: 100%;
-    min-inline-size: var(--diagram-width);
-    block-size: auto;
+    block-size: var(--route-mark);
   }
 
-  /* Sizes inside the drawing are in the drawing's own units: it scales as a whole. */
-  text {
-    fill: var(--color-text);
-    font-family: var(--font-sans);
-    text-anchor: middle;
-  }
-
-  .name {
-    font-size: 11px;
-    font-weight: var(--weight-bold);
-  }
-
-  .small-name {
-    font-size: 10px;
-  }
-
-  .small {
-    fill: var(--color-text-muted);
-    font-size: 10px;
-  }
-
-  .distance {
-    font-size: 12px;
-    font-weight: var(--weight-bold);
-  }
-
-  .region.home {
-    fill: var(--color-tint-a);
-  }
-
-  .region.link {
-    fill: var(--color-tint-c);
-  }
-
-  .region.dc {
-    fill: var(--color-tint-b);
-  }
-
-  .node {
+  .mark svg {
+    display: block;
+    inline-size: var(--route-mark);
+    block-size: var(--route-mark);
     fill: var(--color-surface);
     stroke: var(--color-text-muted);
     stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .wire {
-    stroke: var(--color-text-muted);
+  .amplifier .mark svg {
+    stroke: var(--color-amber);
+  }
+
+  /* The stop the packet is at. */
+  .stop[aria-current] .mark svg {
+    stroke: var(--color-text);
     stroke-width: 2;
   }
 
-  .fiber {
-    stroke: var(--color-amber);
-    stroke-width: 4;
+  .text {
+    grid-column: 3;
+    display: grid;
+    min-inline-size: 0;
   }
 
-  .span {
-    fill: none;
-    stroke: var(--color-text-muted);
-    stroke-width: 1.2;
+  .name {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--route-mark);
+    font-weight: var(--weight-label);
+    line-height: var(--leading-tight);
   }
 
-  .amplifier {
-    fill: var(--color-surface);
-    stroke: var(--color-amber);
-    stroke-width: 1.5;
+  /* Each address has a line to itself, so none is ever broken in two. */
+  .detail {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
   }
 
-  .port {
-    fill: var(--color-text-muted);
-  }
-
-  .token rect {
-    fill: var(--layer);
-  }
-
-  .token .outline {
-    fill: none;
-    stroke: var(--color-text);
-  }
-
-  /* The packet sits over the stop it is at. */
+  /* The packet. It starts beside the first stop; the script sets how far down it has travelled, and CSS does the gliding. */
   .token {
-    translate: calc(var(--packet-x, 50) * 1px) 0;
+    position: relative;
+    z-index: 2;
+    grid-column: 1;
+    display: grid;
+    justify-items: center;
+    padding-block-start: calc((var(--route-mark) - var(--packet-height)) / 2);
+    translate: 0 var(--packet-y, 0);
+  }
+
+  .layers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    box-sizing: border-box;
+    inline-size: var(--packet-width);
+    block-size: var(--packet-height);
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-text);
+    border-radius: var(--radius-sm);
+  }
+
+  .layers span {
+    background: var(--layer);
+  }
+
+  .token-label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-label);
+    line-height: var(--leading-tight);
   }
 
   .bar {
@@ -420,7 +544,7 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr));
     gap: var(--space-3);
   }
 

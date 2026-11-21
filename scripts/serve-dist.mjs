@@ -40,6 +40,12 @@ const redirects = JSON.parse(readFileSync(join(output, 'config.json'), 'utf8'))
   .routes.filter((route) => route.src && route.status >= 300 && route.status < 400 && route.headers?.Location)
   .map((route) => ({ pattern: new RegExp(route.src), status: route.status, location: route.headers.Location }));
 
+// vercel.json adds a few more, written as exact addresses.
+for (const rule of JSON.parse(readFileSync('vercel.json', 'utf8')).redirects ?? []) {
+  const exact = new RegExp(`^${rule.source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+  redirects.push({ pattern: exact, status: rule.permanent ? 308 : 307, location: rule.destination });
+}
+
 async function resolveFile(pathname) {
   const safe = normalize(decodeURIComponent(pathname)).replace(/^(\.\.[/\\])+/, '');
   const candidates = [join(root, safe), join(root, safe, 'index.html'), join(root, `${safe}.html`)];

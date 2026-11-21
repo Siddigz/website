@@ -106,6 +106,7 @@
   --font-heading: var(--font-bricolage);
   /* Addresses and numbers in the explainers. Fonts every device already has. */
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1.0625rem;
   --text-lg: 1.125rem;
@@ -198,11 +199,22 @@
   --avatar-size: clamp(9rem, 2rem + 25vw, 22rem);
   --avatar-size-narrow: 28rem;
   --header-offset: 7rem;
+  /* Where something that stays in view while the page scrolls sits: just under the header. */
+  --sticky-top: 5rem;
   --media-width: 56rem;
   --aside-width: 28rem;
   --backdrop-height: 46rem;
-  /* Wide enough that the drawing's smallest labels stay a readable size. */
-  --diagram-width: 80rem;
+  /* The route in the packet explainer: its column, a stop's drawing, the packet, and the line between stops. */
+  --route-width: 24rem;
+  --route-share: 40%;
+  --route-label: 1.5rem;
+  /* The narrowest a header card in that explainer may be. */
+  --card-min: 10rem;
+  --route-mark: 1.75rem;
+  --packet-width: 2.75rem;
+  --packet-height: 0.875rem;
+  --rail-width: 0.125rem;
+  --rail-width-fiber: 0.25rem;
   --drawing-height: 17rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;

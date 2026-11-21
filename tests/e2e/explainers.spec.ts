@@ -254,13 +254,168 @@ test.describe('one packet, hop by hop', () => {
     await expect(rows(page)).toHaveCount(2);
   });
 
-  test('the packet in the drawing moves to the stop it is at', async ({ page }) => {
+  const route = (page: Page) => page.getByRole('list', { name: 'Network path from a laptop to a web server' });
+  /** How far the packet's middle is from the middle of a stop's drawing, up and down. */
+  const offBy = (page: Page, stop: number) =>
+    page.locator('[data-packet]').evaluate((widget, index) => {
+      const middle = (element: Element) => {
+        const box = element.getBoundingClientRect();
+        return box.top + box.height / 2;
+      };
+      const mark = widget.querySelectorAll('[data-stop]')[index]!.querySelector('.mark')!;
+      return Math.abs(middle(widget.querySelector('[data-token] .layers')!) - middle(mark));
+    }, stop);
+
+  test('the route is a list of the eleven stops, top to bottom, with real text', async ({ page }) => {
     await open(page);
-    const x = () => page.locator('[data-packet] [data-token]').evaluate((token) => token.getBoundingClientRect().x);
-    const start = await x();
-    await next(page).click();
-    await expect.poll(x).toBeGreaterThan(start + 5);
+    const stops = route(page).getByRole('listitem');
+    await expect(stops).toHaveCount(11);
+    await expect(stops.first()).toContainText('Laptop');
+    await expect(stops.nth(3)).toContainText('Optical modem (ISP end)');
+    await expect(stops.last()).toContainText('Web server');
+    await expect(route(page)).toContainText('~450 km fiber');
+    const boxes = await stops.evaluateAll((items) => items.map((item) => item.getBoundingClientRect()).map((box) => ({ top: box.top, left: box.left })));
+    for (let index = 1; index < boxes.length; index += 1) {
+      expect(boxes[index]!.top).toBeGreaterThan(boxes[index - 1]!.top);
+      expect(boxes[index]!.left).toBe(boxes[0]!.left);
+    }
+    // The little drawings and the packet are decoration: the words carry everything.
+    expect(await route(page).locator('svg:not([aria-hidden="true"])').count()).toBe(0);
+    await expect(route(page).locator('[data-token]')).toHaveAttribute('aria-hidden', 'true');
   });
+
+  test('the packet sits beside the stop it is at, and that stop is marked as the current one', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open(page);
+    const current = route(page).locator('[aria-current="step"]');
+    for (let step = 0; step <= 10; step += 1) {
+      await expect(caption(page)).toContainText(`Step ${step} of 10`);
+      await expect(current).toHaveCount(1);
+      expect(await route(page).getByRole('listitem').evaluateAll((items) => items.findIndex((item) => item.getAttribute('aria-current') === 'step'))).toBe(step);
+      expect(await offBy(page, step)).toBeLessThanOrEqual(2);
+      if (step < 10) await next(page).click();
+    }
+    await previous(page).click();
+    expect(await offBy(page, 9)).toBeLessThanOrEqual(2);
+    await reset(page).click();
+    expect(await offBy(page, 0)).toBeLessThanOrEqual(2);
+    await expect(current).toContainText('Laptop');
+  });
+
+  test('the packet glides down to the next stop, in no more than 300 ms', async ({ page }) => {
+    await open(page);
+    const token = page.locator('[data-packet] [data-token]');
+    const y = () => token.evaluate((element) => element.getBoundingClientRect().y);
+    const start = await y();
+    await next(page).click();
+    await expect.poll(y).toBeGreaterThan(start + 20);
+    await expect.poll(() => offBy(page, 1)).toBeLessThanOrEqual(2);
+    const duration = await token.evaluate((element) => parseFloat(getComputedStyle(element).transitionDuration));
+    expect(duration).toBeGreaterThan(0);
+    expect(duration).toBeLessThanOrEqual(0.3);
+  });
+
+  test('the packet stays with its stop when the screen changes width', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page);
+    for (let step = 0; step < 6; step += 1) await next(page).click();
+    expect(await offBy(page, 6)).toBeLessThanOrEqual(2);
+    await page.setViewportSize({ width: 320, height: 640 });
+    await expect.poll(() => offBy(page, 6)).toBeLessThanOrEqual(2);
+  });
+
+  for (const width of [320, 390, 768, 1280]) {
+    test(`nothing has to be scrolled sideways to follow the packet (${width} wide)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await open(page);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+      // Nothing in the explainer is wider than the room it has. On a phone the history table alone may scroll in its own box.
+      const wide = await page.locator('[data-packet]').evaluate((widget, phone) => {
+        const table = widget.querySelector('.table-scroll')!;
+        return [widget, ...widget.querySelectorAll('*')]
+          .filter((element) => !(phone && (element === table || table.contains(element))))
+          .filter((element) => element.scrollWidth > element.clientWidth + 1 && getComputedStyle(element).overflowX !== 'visible')
+          .map((element) => element.className);
+      }, width < 768);
+      expect(wide).toEqual([]);
+      const edges = await page.locator('[data-packet]').evaluate((widget) => {
+        const outer = widget.getBoundingClientRect();
+        return [...widget.querySelectorAll('.route *, .caption *, .bar *, .cards *')].filter((element) => {
+          const box = element.getBoundingClientRect();
+          return box.width > 0 && (box.left < outer.left - 1 || box.right > outer.right + 1);
+        }).length;
+      });
+      expect(edges).toBe(0);
+      // The route's smallest words are still a readable size.
+      const smallest = await route(page).locator('.name, .detail, .stretch').evaluateAll((words) => Math.min(...words.map((word) => parseFloat(getComputedStyle(word).fontSize))));
+      expect(smallest).toBeGreaterThanOrEqual(12);
+    });
+  }
+
+  test('on a wide screen the route stands beside the words; on a phone they are stacked', async ({ page }) => {
+    const boxes = async () => ({
+      route: (await route(page).boundingBox())!,
+      caption: (await caption(page).boundingBox())!,
+      next: (await next(page).boundingBox())!,
+      bar: (await page.locator('[data-packet] .bar').boundingBox())!,
+    });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page);
+    let at = await boxes();
+    expect(at.route.x + at.route.width).toBeLessThanOrEqual(at.caption.x);
+    expect(Math.abs(at.route.y - at.caption.y)).toBeLessThanOrEqual(2);
+    expect(at.bar.x).toBeGreaterThan(at.route.x + at.route.width);
+    await page.setViewportSize({ width: 390, height: 800 });
+    at = await boxes();
+    // In reading order: what is happening, the buttons, the packet's headers, then the route.
+    expect(at.caption.y + at.caption.height).toBeLessThanOrEqual(at.next.y);
+    expect(at.next.y + at.next.height).toBeLessThanOrEqual(at.bar.y);
+    expect(at.bar.y + at.bar.height).toBeLessThanOrEqual(at.route.y);
+    expect(Math.abs(at.route.x - at.caption.x)).toBeLessThanOrEqual(2);
+  });
+
+  for (const size of [{ width: 1280, height: 680 }, { width: 1440, height: 800 }, { width: 768, height: 1024 }]) {
+    test(`on a ${size.width} by ${size.height} screen the caption, the buttons and the headers stay in view all the way down the route`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.setViewportSize(size);
+      await open(page);
+      const header = (await page.locator('.site-header').boundingBox())!;
+      // Past the page's title, to where the explainer itself starts.
+      await page.locator('[data-packet]').evaluate((widget) => widget.scrollIntoView({ block: 'start' }));
+      for (let step = 0; step <= 10; step += 1) {
+        // Follow the packet, as a visitor would: bring the stop it is at into view.
+        await route(page).getByRole('listitem').nth(step).evaluate((stop) => stop.scrollIntoView({ block: 'nearest' }));
+        await expect(route(page).locator('[data-token] .layers')).toBeInViewport({ ratio: 1 });
+        for (const part of [caption(page), next(page), page.locator('[data-packet] .bar')]) {
+          await expect(part).toBeInViewport({ ratio: 1 });
+          // And not tucked under the header.
+          expect((await part.boundingBox())!.y).toBeGreaterThanOrEqual(header.y + header.height);
+        }
+        if (step < 10) await next(page).click();
+      }
+    });
+  }
+
+  test('on a short, wide screen nothing is pinned, so everything can still be reached', async ({ page }) => {
+    await page.setViewportSize({ width: 844, height: 390 });
+    await open(page);
+    expect(await page.locator('[data-packet] .side').evaluate((side) => getComputedStyle(side).position)).not.toBe('sticky');
+  });
+
+  for (const width of [320, 1280]) {
+    test(`the buttons never move as the caption changes (${width} wide)`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.setViewportSize({ width, height: 800 });
+      await open(page);
+      const places = new Set<number>();
+      for (let step = 0; step <= 10; step += 1) {
+        places.add(Math.round((await next(page).boundingBox())!.y + (await page.evaluate(() => scrollY))));
+        if (step < 10) await next(page).click();
+      }
+      expect([...places]).toHaveLength(1);
+    });
+  }
 
   for (const colorScheme of ['light', 'dark'] as const) {
     for (const steps of [1, 10]) {
@@ -305,25 +460,15 @@ test.describe('one packet, hop by hop', () => {
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
   });
 
-  test('on a narrow screen the drawing scrolls inside its own box, which the keyboard can reach', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 640 });
-    await open(page);
-    // One picture to a screen reader, named in words; its details are in the captions and the table.
-    const box = page.getByRole('img', { name: 'Network path from a laptop to a web server' });
-    await expect(box).toHaveAttribute('tabindex', '0');
-    expect(await box.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
-    // Its smallest labels are still a readable size.
-    const smallest = await box.locator('text').evaluateAll((labels) => Math.min(...labels.map((label) => label.getBoundingClientRect().height)));
-    expect(smallest).toBeGreaterThanOrEqual(11);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
-  });
-
   test('with scripts off the whole journey is in the table, and the buttons are not offered', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto('/explainers/one-packet-hop-by-hop');
     await expect(page.locator('[data-packet] tbody tr:visible')).toHaveCount(11);
     await expect(page.locator('[data-packet] .controls')).toBeHidden();
+    // The route still reads, with the packet at the laptop.
+    await expect(page.getByRole('list', { name: 'Network path from a laptop to a web server' }).getByRole('listitem')).toHaveCount(11);
+    await expect(page.locator('[data-packet] [aria-current="step"]')).toContainText('Laptop');
     await context.close();
   });
 });
