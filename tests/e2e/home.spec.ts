@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
@@ -234,29 +234,94 @@ test('skills strip lists every skill once for assistive tech', async ({ page }) 
   await expect(page.locator('#skills [aria-hidden="true"]')).toHaveCount(1);
 });
 
+/** Where the moving strip is, and how fast it is running (1 is full speed, 0 is stopped). */
+const stripState = (page: Page) =>
+  page.locator('#skills [data-track]').evaluate((track) => {
+    const animation = track.getAnimations()[0];
+    return { x: track.getBoundingClientRect().x, rate: animation?.playbackRate ?? null, state: animation?.playState ?? null };
+  });
+const stopped = async (page: Page) => {
+  const { state, rate } = await stripState(page);
+  return state === 'paused' || rate === 0;
+};
+/** Records the strip's speed on every frame for a while, so a test can see how it changed. */
+const recordRates = (page: Page, forMs: number) =>
+  page.evaluate((duration) => {
+    const animation = document.querySelector('#skills [data-track]')!.getAnimations()[0]!;
+    const rates: number[] = [];
+    (window as any).rates = rates;
+    const end = performance.now() + duration;
+    const sample = () => {
+      rates.push(animation.playState === 'paused' ? 0 : animation.playbackRate);
+      if (performance.now() < end) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }, forMs);
+
 test('skills strip moves, and the pause control stops it', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   const track = page.locator('#skills [data-track]');
   expect(await track.evaluate((e) => getComputedStyle(e).animationName)).not.toBe('none');
-  expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('running');
+  const before = await stripState(page);
+  expect(before.state).toBe('running');
+  await expect.poll(async () => (await stripState(page)).x).not.toBe(before.x);
   const pause = page.getByRole('checkbox', { name: 'Pause the skills strip' });
   await pause.check();
-  expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('paused');
-  // Unchecking resumes at once, while the checkbox still has focus. Done from
+  await expect.poll(() => stopped(page)).toBe(true);
+  const held = (await stripState(page)).x;
+  await page.waitForTimeout(300);
+  expect((await stripState(page)).x).toBe(held);
+  // Unchecking resumes, while the checkbox still has focus. Done from
   // the keyboard, because Safari does not focus a checkbox that is clicked.
   await pause.focus();
   await page.keyboard.press('Space');
   await expect(pause).not.toBeChecked();
   await expect(pause).toBeFocused();
-  expect(await track.evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('running');
+  await expect.poll(async () => (await stripState(page)).rate).toBe(1);
+  await expect.poll(async () => (await stripState(page)).x).not.toBe(held);
 });
 
-test('skills strip pauses while the pointer is over it', async ({ page }) => {
+test('skills strip stops while the pointer is over it, and carries on when it leaves', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   await page.locator('[data-skills-viewport]').hover();
+  await expect.poll(() => stopped(page)).toBe(true);
+  await page.mouse.move(5, 5);
+  await expect.poll(async () => (await stripState(page)).rate).toBe(1);
+  expect((await stripState(page)).state).toBe('running');
+});
+
+test('skills strip eases to a stop and back up to speed, rather than jerking', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  await page.locator('#skills').scrollIntoViewIfNeeded();
+  await recordRates(page, 900);
+  await page.locator('[data-skills-viewport]').hover();
+  await expect.poll(() => stopped(page)).toBe(true);
+  await page.waitForTimeout(950);
+  const slowing: number[] = await page.evaluate(() => (window as any).rates);
+  // Full speed, then some speeds in between, then stopped: never straight from one to the other.
+  expect(slowing[0]).toBe(1);
+  expect(slowing.at(-1)).toBe(0);
+  expect(slowing.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(3);
+  for (let index = 1; index < slowing.length; index += 1) expect(slowing[index]!).toBeLessThanOrEqual(slowing[index - 1]!);
+
+  await recordRates(page, 900);
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(950);
+  const rising: number[] = await page.evaluate(() => (window as any).rates);
+  expect(rising.at(-1)).toBe(1);
+  expect(rising.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(3);
+});
+
+test('with scripts off the skills strip still pauses under the pointer', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, reducedMotion: 'no-preference' });
+  const page = await context.newPage();
+  await page.goto('/');
+  await page.locator('[data-skills-viewport]').hover();
   expect(await page.locator('#skills [data-track]').evaluate((e) => getComputedStyle(e).animationPlayState)).toBe('paused');
+  await context.close();
 });
 
 test('skills strip is still under reduced motion', async ({ page }) => {
