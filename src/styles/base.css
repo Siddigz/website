@@ -300,3 +300,38 @@ li:first-child > .button {
 :root:has(> head > meta[name='color-scheme'][content='dark']) .only-dark {
   display: revert;
 }
+
+/*
+ * The project filter. While it changes, the page as a whole stays still and
+ * only the rows move: those that stay slide to their new place, the others fade.
+ */
+:root[data-filtering] {
+  view-transition-name: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(.filter-row) {
+    animation-duration: var(--duration-base);
+    animation-timing-function: var(--ease-out);
+  }
+
+  ::view-transition-old(.filter-row):only-child {
+    animation: fade-out var(--duration-fast) var(--ease-out) both;
+  }
+
+  ::view-transition-new(.filter-row):only-child {
+    animation: fade-in var(--duration-base) var(--ease-out) both;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}

@@ -49,5 +49,11 @@ main:
     times: It’s {yours} for you and {mine} in {city}.
     # When the visitor's clock reads the same as mine.
     sameTime: It’s {time} for both of us.
+  # The buttons above "More projects". The category names come from the projects themselves.
+  filter:
+    all: All
+    # Read to screen reader users: the name of the group of buttons, and what changed.
+    label: Filter projects
+    status: Showing {n} of {total} projects.
   # Shown on a featured project's card once its page has been opened.
   seenLabel: Seen

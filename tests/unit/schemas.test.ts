@@ -103,6 +103,7 @@ describe('siteSchema', () => {
         times: '{yours} {mine} {city}', sameTime: '{time}',
       },
       seenLabel: 'Seen',
+      filter: { all: 'All', label: 'Filter', status: '{n} of {total}' },
     };
     expect(siteSchema.safeParse(site).success).toBe(false);
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' } }).success).toBe(true);
