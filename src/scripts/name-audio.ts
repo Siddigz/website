@@ -12,6 +12,9 @@ const countsSiblings = CSS.supports('animation-delay: calc(sibling-index() * 0.1
 
 const players = new Map<HTMLButtonElement, HTMLAudioElement>();
 const words = new Map<HTMLButtonElement, string>();
+/** How long a recording is taken to last when its length is not known, and the wait after its end. */
+const FALLBACK_SECONDS = 3;
+const GRACE_MS = 1000;
 // Each press gets a number, so a late answer from an earlier press is ignored.
 let press = 0;
 
@@ -81,7 +84,14 @@ function play(button: HTMLButtonElement): void {
   button.setAttribute('data-playing', '');
   audio.play().then(
     () => {
-      if (mine === press && motionAllowed.matches) ripple(button);
+      if (mine !== press) return;
+      if (motionAllowed.matches) ripple(button);
+      // A browser that stalls may never say the recording ended. The mark is
+      // lifted a moment after it should be over, unless a later press took its place.
+      const seconds = Number.isFinite(audio.duration) ? audio.duration : FALLBACK_SECONDS;
+      window.setTimeout(() => {
+        if (mine === press) stop(button);
+      }, seconds * 1000 + GRACE_MS);
     },
     // Refused or failed: the word simply goes back to rest.
     () => {

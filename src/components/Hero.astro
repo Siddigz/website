@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
 import { longestGreeting } from '../lib/greeting';
+import { resumeEnabled } from '../lib/resume';
 import Speaker from './Speaker.astro';
 import EmailReveal from './EmailReveal.astro';
 
@@ -10,11 +11,15 @@ interface Props {
   lookingForOverride?: boolean;
   /** Test-only: false shows the placeholder figure even when site.yaml has a photo. */
   photoOverride?: boolean;
+  /** Test-only: show the Resume link whatever the host's switch says. */
+  resumeOverride?: boolean;
 }
 
 const site = await getSite();
 const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled;
 const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
+// Read while the site is built: the link appears with the next build after the switch is turned on.
+const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
 ---
 
 <section id="top" class="hero section container">
@@ -43,6 +48,7 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     <ul class="links" role="list">
       {site.profileLinks.map((link) => <li><a class="button" href={link.href}>{link.label}</a></li>)}
       <li><EmailReveal /></li>
+      {showResume && <li><a class="button" href="/resume.pdf">{site.resumeLabel}</a></li>}
     </ul>
   </div>
   {/* The photo from site.yaml. Without one, a generic figure: decorative, so hidden from screen readers. */}
