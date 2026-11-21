@@ -103,7 +103,7 @@ describe('siteSchema', () => {
         times: '{yours} {mine} {city}', sameTime: '{time}',
       },
       seenLabel: 'Seen',
-      explainers: { title: 'Explainers', back: 'Back' },
+      explainers: { title: 'Explainers', back: 'Back', noScript: 'Needs scripts.' },
       resumeLabel: 'Resume',
       email: { button: 'Email', copy: 'Copy', copied: 'Copied', failed: 'f', noScript: 'n' },
       menu: { open: 'o', title: 't', search: 's', empty: 'e', groups: { sections: 'a', projects: 'b', explainers: 'c', links: 'd', theme: 'e' } },

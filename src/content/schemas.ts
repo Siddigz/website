@@ -141,7 +141,7 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
-  explainers: z.object({ title: z.string().min(1), back: z.string().min(1) }),
+  explainers: z.object({ title: z.string().min(1), back: z.string().min(1), noScript: z.string().min(1) }),
   resumeLabel: z.string().min(1),
   email: z.object({
     button: z.string().min(1),

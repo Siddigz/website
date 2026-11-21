@@ -83,5 +83,7 @@ main:
   explainers:
     title: Explainers
     back: Back to explainers
+    # Shown on an explainer page only when the visitor's browser runs no scripts.
+    noScript: The interactive part of this page needs JavaScript, which is switched off in your browser.
   # Shown on a featured project's card once its page has been opened.
   seenLabel: Seen

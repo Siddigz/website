@@ -30,6 +30,8 @@ if (!Widget) {
       <h1>{title}</h1>
       <p class="summary">{summary}</p>
     </header>
+    {/* Without scripts the buttons are hidden, so this says why nothing can be pressed. Shown only then. */}
+    <p class="no-script">{site.explainers.noScript}</p>
     <Widget />
     <footer>
       <a href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>
@@ -61,6 +63,21 @@ if (!Widget) {
   .summary {
     font-size: var(--text-xl);
     line-height: var(--leading-tight);
+  }
+
+  .no-script {
+    display: none;
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-tint-c);
+    font-weight: var(--weight-medium);
+  }
+
+  @media (scripting: none) {
+    .no-script {
+      display: block;
+    }
   }
 
   .back,

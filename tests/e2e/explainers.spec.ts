@@ -25,6 +25,28 @@ test('the home page lists every explainer, between the projects and the activity
   }
 });
 
+test('the top-right links include Explainers, in page order, and it lights up when that section is on screen', async ({ page }) => {
+  await page.goto('/');
+  const links = page.locator('.site-header .links a');
+  await expect(links).toHaveText(['Experience', 'Projects', site.explainers.title, 'About']);
+  await expect(links.nth(2)).toHaveAttribute('href', '/#explainers');
+  await links.nth(2).click();
+  await expect(page).toHaveURL(/\/#explainers$/);
+  await expect(page.locator('#explainers')).toBeInViewport();
+  await page.locator('#explainers').evaluate((section) => section.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('.site-header a[aria-current="true"]')).toHaveText(site.explainers.title);
+});
+
+for (const width of [320, 375]) {
+  test(`the top-right links fit on one row and never push the page sideways (${width} wide)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 700 });
+    await page.goto('/');
+    const tops = await page.locator('.site-header .links a').evaluateAll((links) => links.map((link) => Math.round(link.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  });
+}
+
 for (const explainer of explainers) {
   test(`${explainer.slug}: the page has its title, its summary and a way back`, async ({ page }) => {
     const response = await page.goto(`/explainers/${explainer.slug}`);
@@ -45,7 +67,8 @@ for (const explainer of explainers) {
       const article = document.querySelector('article.explainer')!;
       const style = getComputedStyle(article);
       const outer = article.getBoundingClientRect();
-      const widget = article.querySelector('header')!.nextElementSibling!.getBoundingClientRect();
+      // The interactive part is the one block directly inside the article, between the header and the footer.
+      const widget = article.querySelector(':scope > div')!.getBoundingClientRect();
       return {
         left: Math.round(widget.left - (outer.left + parseFloat(style.paddingLeft))),
         right: Math.round(outer.right - parseFloat(style.paddingRight) - widget.right),
@@ -53,6 +76,16 @@ for (const explainer of explainers) {
     });
     expect(Math.abs(edges.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(edges.right)).toBeLessThanOrEqual(1);
+  });
+
+  test(`${explainer.slug}: with scripts off a line says why nothing moves; with scripts on it is not shown`, async ({ page, browser }) => {
+    await page.goto(`/explainers/${explainer.slug}`);
+    await expect(page.getByText(site.explainers.noScript)).toBeHidden();
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const plain = await context.newPage();
+    await plain.goto(`/explainers/${explainer.slug}`);
+    await expect(plain.getByText(site.explainers.noScript)).toBeVisible();
+    await context.close();
   });
 
   test(`${explainer.slug}: the menu lists it`, async ({ page }) => {
