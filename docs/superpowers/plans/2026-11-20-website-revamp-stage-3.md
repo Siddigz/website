@@ -128,6 +128,8 @@ Not approved until the owner says so. `{…}` marks a value filled in.
 
 ### Task 1: Vercel adapter, build layout, test builds
 
+**Built on 2026-11-21.** One difference from what is written below: the adapter only moves the pages to `dist/client/` once a request-time address exists, so the tests and the local server read `.vercel/output/static` instead. That is the folder the host serves, and it is the same either way.
+
 **Files:** `package.json`, `astro.config.mjs`, `vercel.json`, `scripts/serve-dist.mjs`, `src/lib/build-env.ts`, `src/pages/dev/[page].astro` (replaces `no-looking-for.astro`), `.env.example`, `tests/build/budget.test.ts`, `tests/content/helpers.ts`, `.github/workflows/ci.yml`.
 
 **Produces:**

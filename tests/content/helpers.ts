@@ -2,6 +2,9 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { parse } from 'yaml';
 
+/** Where a build leaves the files the host serves. */
+export const BUILT = '.vercel/output/static';
+
 export type ProjectFile = { slug: string; data: Record<string, any>; body: string };
 
 /** Splits a Markdown file into its YAML frontmatter and body. */

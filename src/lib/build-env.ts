@@ -7,3 +7,6 @@ export const fixtures = process.env.SITE_FIXTURES === '1';
 
 /** Saved GitHub data for test builds. */
 export const ACTIVITY_FIXTURE = 'tests/fixtures/github-activity.json';
+
+/** True while Vercel builds the site, so local and CI builds can leave host-only pieces out. */
+export const onVercel = process.env.VERCEL === '1';

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { defineConfig, fontProviders } from 'astro/config';
+import vercel from '@astrojs/vercel';
 import { parse } from 'yaml';
 
 // The site address lives in one place: src/content/site.yaml.
@@ -21,6 +22,9 @@ const sans = ['system-ui', 'sans-serif'];
 const variable = '@fontsource-variable';
 
 export default defineConfig({
+  // Pages are still built ahead of time. The adapter is only for the few
+  // addresses that must answer at request time (email, resume, daily rebuild).
+  adapter: vercel(),
   fonts: [
     font('Bricolage Grotesque', '--font-bricolage', sans, [
       [`${variable}/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2`, '200 800'],

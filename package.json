@@ -17,6 +17,7 @@
     "test:e2e": "npm run build:test && playwright test"
   },
   "dependencies": {
+    "@astrojs/vercel": "^11.0.22",
     "astro": "^7.4.13"
   },
   "devDependencies": {
