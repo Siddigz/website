@@ -1,0 +1,188 @@
+import { test, expect, type Page } from '@playwright/test';
+import { readYaml } from '../content/helpers';
+
+const site = readYaml('src/content/site.yaml').main;
+const first = (page: Page) => page.locator('h1 button[data-name-part="first"]');
+const last = (page: Page) => page.locator('h1 button[data-name-part="last"]');
+
+/** Every address ending in an audio extension that the page asks for. */
+function audioRequests(page: Page): string[] {
+  const seen: string[] = [];
+  page.on('request', (request) => {
+    if (/\.(wav|m4a|mp3)$/.test(new URL(request.url()).pathname)) seen.push(new URL(request.url()).pathname);
+  });
+  return seen;
+}
+
+function pageErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => {
+    // A browser logs a failed media request itself; that is not the page's script failing.
+    if (message.type() === 'error' && !/Failed to load resource/.test(message.text())) errors.push(message.text());
+  });
+  return errors;
+}
+
+const headingBox = (page: Page) =>
+  page.locator('h1').evaluate((heading) => {
+    const { x, y, width, height } = heading.getBoundingClientRect();
+    return [x, y, width, height].map((value) => Math.round(value * 10) / 10);
+  });
+
+test('the heading still reads as the name, and each word is a described button', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${site.name.first} ${site.name.last}`);
+  for (const [button, word] of [
+    [first(page), site.name.first],
+    [last(page), site.name.last],
+  ] as const) {
+    await expect(button).toHaveText(word);
+    await expect(button).toHaveAccessibleName(word);
+    await expect(button).toHaveAccessibleDescription(site.name.audio.hint);
+    await expect(button).toHaveAttribute('data-audio', /^\/_astro\/.+\.(wav|m4a)$/);
+  }
+});
+
+test('no recording is fetched until a word is pressed, and then only that word’s', async ({ page }) => {
+  const requests = audioRequests(page);
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  expect(requests).toEqual([]);
+  const address = await first(page).getAttribute('data-audio');
+  await first(page).click();
+  await expect(first(page)).not.toHaveAttribute('data-playing', '', { timeout: 5_000 });
+  expect(new Set(requests)).toEqual(new Set([address]));
+});
+
+test('a word is marked while it plays and cleared when the recording ends', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    const original = HTMLMediaElement.prototype.play;
+    (window as any).marked = [];
+    HTMLMediaElement.prototype.play = function () {
+      (window as any).marked.push(document.querySelector('h1 [data-playing]')?.getAttribute('data-name-part') ?? null);
+      return original.call(this);
+    };
+  });
+  await last(page).click();
+  // Already marked at the moment playback is asked for.
+  expect(await page.evaluate(() => (window as any).marked)).toEqual(['last']);
+  await expect(page.locator('h1 [data-playing]')).toHaveCount(0, { timeout: 5_000 });
+});
+
+test('Enter on a focused word plays it, and the focus ring shows', async ({ page, browserName }) => {
+  // Safari moves between buttons with Option+Tab unless a system setting is changed.
+  const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+  await page.goto('/');
+  await page.evaluate(() => {
+    (window as any).played = 0;
+    const original = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      (window as any).played += 1;
+      return original.call(this);
+    };
+  });
+  await first(page).focus();
+  // Focus from the keyboard, so the ring applies.
+  await page.keyboard.press(`Shift+${tab}`);
+  await page.keyboard.press(tab);
+  await expect(first(page)).toBeFocused();
+  const ring = await first(page).evaluate((button) => {
+    const style = getComputedStyle(button);
+    return { style: style.outlineStyle, width: parseFloat(style.outlineWidth) };
+  });
+  expect(ring.style).not.toBe('none');
+  expect(ring.width).toBeGreaterThan(0);
+  await page.keyboard.press('Enter');
+  expect(await page.evaluate(() => (window as any).played)).toBe(1);
+});
+
+test('starting one word stops the other', async ({ page }) => {
+  await page.goto('/');
+  // Hold every recording open so the first is still playing when the second starts.
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = function () {
+      return Promise.resolve();
+    };
+  });
+  await first(page).click();
+  await expect(first(page)).toHaveAttribute('data-playing', '');
+  await last(page).click();
+  await expect(last(page)).toHaveAttribute('data-playing', '');
+  await expect(first(page)).not.toHaveAttribute('data-playing', '');
+});
+
+test('the letters ripple while the word plays, and the word is whole again after', async ({ page }) => {
+  await page.goto('/');
+  // Playback starts at once, so the wave's start does not depend on the network.
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = function () {
+      return Promise.resolve();
+    };
+  });
+  await first(page).click();
+  const moving = await page.evaluate(() =>
+    [...document.querySelectorAll('h1 [data-letter]')].map((letter) => letter.getAnimations().length),
+  );
+  expect(moving).toEqual(Array.from(site.name.first, () => 1));
+  // Split into letters, the button still gives its word to a screen reader.
+  await expect(first(page)).toHaveAccessibleName(site.name.first);
+  await expect(first(page).locator('[data-letter]')).toHaveCount(0, { timeout: 5_000 });
+  await expect(first(page)).toHaveText(site.name.first);
+  await expect(first(page)).not.toHaveAttribute('aria-label');
+});
+
+test('with reduced motion a press plays and nothing moves', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.evaluate(() => {
+    (window as any).played = 0;
+    HTMLMediaElement.prototype.play = function () {
+      (window as any).played += 1;
+      return Promise.resolve();
+    };
+  });
+  await first(page).click();
+  expect(await page.evaluate(() => (window as any).played)).toBe(1);
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  await expect(first(page).locator('[data-letter]')).toHaveCount(0);
+});
+
+test('refused playback leaves no mark, no error and no movement', async ({ page }) => {
+  const errors = pageErrors(page);
+  await page.goto('/');
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException('refused', 'NotAllowedError'));
+  });
+  await first(page).click();
+  await expect(first(page)).not.toHaveAttribute('data-playing', '');
+  await expect(first(page).locator('[data-letter]')).toHaveCount(0);
+  await expect(first(page)).toHaveText(site.name.first);
+  expect(errors).toEqual([]);
+});
+
+test('a missing recording leaves no mark and no error, and the word can be pressed again', async ({ page }) => {
+  const errors = pageErrors(page);
+  await page.route(/\.(wav|m4a)$/, (route) => route.fulfill({ status: 404, body: '' }));
+  await page.goto('/');
+  await last(page).click();
+  await expect(last(page)).not.toHaveAttribute('data-playing', '', { timeout: 5_000 });
+  await expect(last(page).locator('[data-letter]')).toHaveCount(0, { timeout: 5_000 });
+  await last(page).click();
+  await expect(last(page)).not.toHaveAttribute('data-playing', '', { timeout: 5_000 });
+  await expect(last(page)).toHaveText(site.name.last);
+  expect(errors).toEqual([]);
+});
+
+test('pressing a word never moves or resizes the heading', async ({ page }) => {
+  await page.goto('/');
+  const before = await headingBox(page);
+  await first(page).hover();
+  expect(await headingBox(page)).toEqual(before);
+  await first(page).click();
+  expect(await headingBox(page)).toEqual(before);
+  await expect(page.locator('h1 [data-playing]')).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator('h1 [data-letter]')).toHaveCount(0, { timeout: 5_000 });
+  expect(await headingBox(page)).toEqual(before);
+});

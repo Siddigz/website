@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
+import Speaker from './Speaker.astro';
 
 interface Props {
   /** Test-only: force the looking-for line on or off regardless of site.yaml. */
@@ -17,7 +18,8 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
 <section id="top" class="hero section container">
   <div class="text" data-hero-text>
     <h1 translate="no">
-      <span data-name-part="first">{site.name.first}</span>{" "}<span data-name-part="last">{site.name.last}</span>
+      {/* Each word plays its recording when pressed. The words stay plain text, so the heading reads as the name. */}
+      <button type="button" class="name-part" data-name-part="first" data-audio={site.nameAudio.first} aria-describedby="name-audio-hint"><span data-name-text>{site.name.first}</span><Speaker /></button>{" "}<button type="button" class="name-part" data-name-part="last" data-audio={site.nameAudio.last} aria-describedby="name-audio-hint"><span data-name-text>{site.name.last}</span><Speaker /></button>
     </h1>
     <p class="pitch">{site.pitch}</p>
     {showLookingFor && <p class="looking-for" data-looking-for>{site.lookingFor.text}</p>}
@@ -48,7 +50,13 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
       )
     }
   </div>
+  {/* Read out on each word of the name. Hidden, and outside the text column so it takes no place in it. */}
+  <p id="name-audio-hint" hidden>{site.name.audio.hint}</p>
 </section>
+
+<script>
+  import '../scripts/name-audio';
+</script>
 
 <style>
   .hero {
@@ -121,6 +129,68 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
 
   .figure {
     fill: var(--color-border);
+  }
+
+  /* The two words of the name are buttons that look like the heading's text. */
+  .name-part {
+    position: relative;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    letter-spacing: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* A small speaker over the end of the word: outside the text flow, so showing it moves nothing. */
+  .name-part :global(svg) {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    inline-size: var(--name-icon-size);
+    block-size: var(--name-icon-size);
+    translate: 0 -50%;
+    color: var(--color-accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .name-part:hover :global(svg),
+  .name-part:focus-visible :global(svg),
+  .name-part[data-playing] :global(svg) {
+    opacity: 1;
+  }
+
+  /*
+   * While a word plays, its letters rise and fall one after another. The
+   * script splits the word into letters only when motion is allowed, and
+   * puts it back when the wave has passed.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .name-part :global(svg) {
+      transition: opacity var(--duration-fast) var(--ease-out);
+    }
+
+    .name-part :global([data-letter]) {
+      display: inline-block;
+      animation: letter-wave var(--duration-letter) var(--ease-out) both;
+      /* The script numbers the letters where the browser cannot count them itself. */
+      animation-delay: calc((var(--sibling-index) - 1) * var(--stagger-letter));
+    }
+
+    @supports (animation-delay: calc(sibling-index() * 0.1s)) {
+      .name-part :global([data-letter]) {
+        animation-delay: calc((sibling-index() - 1) * var(--stagger-letter));
+      }
+    }
+  }
+
+  @keyframes letter-wave {
+    50% {
+      color: var(--color-accent);
+      translate: 0 calc(-1 * var(--lift-letter));
+    }
   }
 
   /* Each fact stays whole: "Carleton University" never splits across lines. */
