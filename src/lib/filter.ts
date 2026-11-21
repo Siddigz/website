@@ -2,7 +2,7 @@
  * The "More projects" filter, as it appears in the address: `?filter=systems`.
  * Pure, so the page script and the tests share it.
  */
-import { CATEGORIES } from '../content/schemas';
+import { CATEGORIES } from '../content/categories';
 
 export const FILTERS = ['all', ...CATEGORIES] as const;
 export type Filter = (typeof FILTERS)[number];

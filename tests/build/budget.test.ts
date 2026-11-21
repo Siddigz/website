@@ -125,6 +125,65 @@ describe('built site', () => {
     expect(html).not.toContain('#activity');
   });
 
+  it('no script sent to the browser can evaluate text as code, or carries a library meant for the build', () => {
+    const scripts = [
+      ...built.filter(([path]) => path.endsWith('.js')),
+      ...pages.flatMap(([path, html]) =>
+        [...html.matchAll(/<script\b(?![^>]*\bsrc=)(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g)].map((match): [string, string] => [path, match[1] ?? '']),
+      ),
+    ];
+    expect(scripts.length).toBeGreaterThan(5);
+    const evaluating = scripts.filter(([, text]) => /\beval\(|\bFunction\(/.test(text)).map(([path]) => path);
+    expect([...new Set(evaluating)]).toEqual([]);
+    // No single script is large: each feature's script is a few kilobytes.
+    const heavy = scripts.filter(([, text]) => text.length > 20_000).map(([path, text]) => `${path}: ${text.length} bytes`);
+    expect(heavy).toEqual([]);
+  });
+
+  describe('content security policy', () => {
+    const policyOf = (html: string) =>
+      /<meta http-equiv="content-security-policy" content="([^"]*)"/i.exec(html)?.[1]?.replaceAll('&#39;', "'").replaceAll('&apos;', "'") ?? '';
+    const rule = (policy: string, name: string) =>
+      policy
+        .split(';')
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(`${name} `))
+        ?.slice(name.length + 1) ?? null;
+
+    it('every page carries one, with the same fixed rules', () => {
+      for (const [path, html] of pages) {
+        const policy = policyOf(html);
+        expect(policy, path).not.toBe('');
+        expect(rule(policy, 'default-src'), path).toBe("'self'");
+        expect(rule(policy, 'img-src'), path).toBe("'self' data:");
+        expect(rule(policy, 'font-src'), path).toBe("'self'");
+        expect(rule(policy, 'media-src'), path).toBe("'self'");
+        expect(rule(policy, 'connect-src'), path).toBe("'self'");
+        expect(rule(policy, 'object-src'), path).toBe("'none'");
+        expect(rule(policy, 'base-uri'), path).toBe("'self'");
+        expect(rule(policy, 'form-action'), path).toBe("'none'");
+      }
+    });
+
+    it('scripts and styles are allowed one by one, by their hash: nothing typed into a page can run', () => {
+      for (const [path, html] of pages) {
+        const policy = policyOf(html);
+        for (const name of ['script-src', 'style-src']) {
+          const value = rule(policy, name) ?? '';
+          expect(value, `${path} ${name}`).toMatch(/'sha256-[A-Za-z0-9+/=]+'/);
+          expect(value, `${path} ${name}`).not.toContain("'unsafe-inline'");
+          expect(value, `${path} ${name}`).not.toContain("'unsafe-eval'");
+          expect(value, `${path} ${name}`).not.toMatch(/https?:|\*/);
+        }
+      }
+    });
+
+    it('no page relies on a style attribute or a script attribute, which the policy would block', () => {
+      const offending = pages.filter(([, html]) => /<[^>]+\s(style|on[a-z]+)="/i.test(html.replace(/<script[\s\S]*?<\/script>/g, ''))).map(([path]) => path);
+      expect(offending).toEqual([]);
+    });
+  });
+
   it('every page has one h1, a description and a canonical address from site.yaml', () => {
     const origin = new URL(readYaml('src/content/site.yaml').main.url).origin;
     expect(origin).toBe('https://siddigz.com');

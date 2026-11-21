@@ -4,14 +4,9 @@
  */
 import { z } from 'astro/zod';
 
-export const CATEGORIES = ['web-apps', 'ai-data', 'systems'] as const;
-export type Category = (typeof CATEGORIES)[number];
+import { CATEGORIES } from './categories';
 
-export const CATEGORY_LABELS: Record<Category, string> = {
-  'web-apps': 'Web & apps',
-  'ai-data': 'AI & data',
-  systems: 'Systems',
-};
+export { CATEGORIES, CATEGORY_LABELS, type Category } from './categories';
 
 const OWNER_REPO_PREFIX = 'https://github.com/Siddigz/';
 

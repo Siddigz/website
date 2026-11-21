@@ -7,6 +7,7 @@ import CommandMenu from '../components/CommandMenu.astro';
 import tokens from '../styles/tokens.css?raw';
 import { declaredValue, toHex } from '../lib/colour';
 import pageTransition from '../scripts/page-transition.js?raw';
+import themeEarly from '../scripts/theme-early.js?raw';
 import { getSite } from '../lib/site';
 import { onVercel } from '../lib/build-env';
 
@@ -54,19 +55,8 @@ const barColour = {
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content={barColour.light} media="(prefers-color-scheme: light)" data-bar="light" />
     <meta name="theme-color" content={barColour.dark} media="(prefers-color-scheme: dark)" data-bar="dark" />
-    <script is:inline>
-      // Apply a stored theme choice before first paint. Nothing else belongs here.
-      try {
-        var stored = localStorage.getItem('color-scheme');
-        if (stored === 'light' || stored === 'dark') {
-          document.querySelector('meta[name="color-scheme"]').content = stored;
-          // The browser-bar colour follows the pinned theme, not the system.
-          document.querySelectorAll('meta[data-bar]').forEach(function (bar) {
-            bar.media = bar.dataset.bar === stored ? 'all' : 'not all';
-          });
-        }
-      } catch (error) {}
-    </script>
+    {/* Applies a stored theme choice before the first draw. Its text is fixed, so the security policy can allow it by its hash. */}
+    <script is:inline set:html={themeEarly} />
     {/* Self-hosted fonts, both fetched early: the name at the top and the text under it. */}
     <Font cssVariable="--font-bricolage" preload />
     <Font cssVariable="--font-figtree" preload />
