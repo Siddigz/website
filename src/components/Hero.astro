@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
+import { longestGreeting } from '../lib/greeting';
 import Speaker from './Speaker.astro';
 
 interface Props {
@@ -29,8 +30,15 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
       <span class="fact">GPA {site.gpa} ·</span>{' '}
       <span class="fact">Expected {site.expectedGraduation}</span>
     </p>
-    {/* Stage 3 replaces this text with a greeting built from the visitor's clock. */}
-    <p class="greeting muted" data-greeting>Hello, and welcome.</p>
+    {/*
+      The neutral line is what the page is built with. The visitor's browser swaps
+      in a greeting from their own clock. The second, invisible line is the longest
+      greeting there is: it holds the room, so the swap never moves the buttons.
+    */}
+    <p class="greeting muted">
+      <span data-greeting data-words={JSON.stringify(site.greeting)} data-city={site.home.city} data-zone={site.home.timeZone}>{site.greeting.neutral}</span>
+      <span class="sizer" aria-hidden="true">{longestGreeting(site.greeting, site.home.city)}</span>
+    </p>
     <ul class="links" role="list">
       {site.profileLinks.map((link) => <li><a class="button" href={link.href}>{link.label}</a></li>)}
     </ul>
@@ -251,9 +259,18 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     font-size: var(--text-sm);
   }
 
-  /* One line is always reserved, so the stage 3 greeting cannot shift the page. */
+  /* Both lines share one place, and the invisible one sets its height. */
   .greeting {
-    min-block-size: calc(var(--text-sm) * var(--leading-normal));
+    display: grid;
+  }
+
+  .greeting > * {
+    grid-area: 1 / 1;
+  }
+
+  .sizer {
+    visibility: hidden;
+    user-select: none;
   }
 
   .links {

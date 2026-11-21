@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
+import { getSite } from '../lib/site';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -8,9 +9,10 @@ interface Props {
 
 const { id, data } = Astro.props.project;
 const contain = data.coverFit === 'contain';
+const { seenLabel } = await getSite();
 ---
 
-<article class="card">
+<article class="card" data-seen-slug={id}>
   {
     data.cover && contain && (
       /* Charts and screenshots: the whole image, never cropped. */
@@ -47,6 +49,8 @@ const contain = data.coverFit === 'contain';
       {data.stack.map((item) => <li class="pill">{item}</li>)}
     </ul>
   </div>
+  {/* Shown by the visitor's browser once this project's page has been opened. Over a corner, so it moves nothing. */}
+  <p class="seen pill" data-seen hidden>{seenLabel}</p>
 </article>
 
 <script>
@@ -152,6 +156,16 @@ const contain = data.coverFit === 'contain';
 
   .award {
     background: var(--color-tint-b);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .seen {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-end: var(--space-3);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
   }

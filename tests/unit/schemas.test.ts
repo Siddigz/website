@@ -98,11 +98,18 @@ describe('siteSchema', () => {
       repository: 'https://github.com/Siddigz/website',
       contactNote: 'Say hello.',
       home: { city: 'Ottawa', timeZone: 'America/Toronto' },
+      greeting: {
+        neutral: 'n', morning: 'm', afternoon: 'a', evening: 'e', night: 'n', returning: 'r',
+        times: '{yours} {mine} {city}', sameTime: '{time}',
+      },
+      seenLabel: 'Seen',
     };
     expect(siteSchema.safeParse(site).success).toBe(false);
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' } }).success).toBe(true);
     // The name needs its two recordings and the hint read out on them.
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, name: { first: 'A', last: 'B' } }).success).toBe(false);
+    // A time line that has lost a place for a value is refused.
+    expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, greeting: { ...site.greeting, times: '{yours} {city}' } }).success).toBe(false);
     // The photo is optional, but one with no alt text is refused.
     const complete = { ...site, lookingFor: { enabled: false, text: 't' } };
     expect(siteSchema.safeParse({ ...complete, photo: { src: './me.jpg', alt: 'Me' } }).success).toBe(true);
