@@ -1,18 +1,19 @@
 /*
- * Checks on the built site in dist/. Run `npm run build` first.
+ * Checks on the built site. Run `npm run build` first. The Vercel adapter puts
+ * what the host serves in .vercel/output/static, and redirects are host rules
+ * in .vercel/output/config.json, not pages.
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { EMAIL_PATTERN, readYaml, textFiles } from '../content/helpers';
+import { BUILT, EMAIL_PATTERN, readYaml, textFiles } from '../content/helpers';
 
-const DIST = 'dist';
+const DIST = BUILT;
 const JS_BUDGET_BYTES = 60 * 1024;
 
 const built = textFiles(DIST);
-// Redirect stubs (for example /projects) are not pages a visitor reads.
-const pages = built.filter(([path, html]) => path.endsWith('.html') && !/http-equiv="refresh"/i.test(html));
+const pages = built.filter(([path]) => path.endsWith('.html'));
 
 describe('built site', () => {
   it('has been built', () => {
@@ -67,14 +68,18 @@ describe('built site', () => {
     expect(hits).toEqual([]);
   });
 
-  it('test-only pages are marked noindex and nothing links to them', () => {
-    const devPages = pages.filter(([path]) => path.startsWith(join(DIST, 'dev')));
-    expect(devPages.length).toBeGreaterThan(0);
-    for (const [path, html] of devPages) {
-      expect(html, path).toMatch(/<meta name="robots" content="noindex"/);
-    }
-    const linking = pages.filter(([, html]) => /href="\/dev\//.test(html)).map(([path]) => path);
+  it('a normal build holds no test-only page, and nothing links to one', () => {
+    expect(existsSync(join(DIST, 'dev')), 'run `npm run build` first, not the test build').toBe(false);
+    const linking = built.filter(([, text]) => /["'(]\/dev\//.test(text)).map(([path]) => path);
     expect(linking).toEqual([]);
+  });
+
+  it('the bare /projects address is a redirect rule, not a page', () => {
+    expect(existsSync(join(DIST, 'projects', 'index.html'))).toBe(false);
+    const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
+    const rule = routes.find((route: any) => route.headers?.Location === '/#projects');
+    expect(rule?.status).toBe(301);
+    expect(new RegExp(rule.src).test('/projects')).toBe(true);
   });
 
   it('a build with no GitHub token leaves the activity section out, and nothing points at it', () => {

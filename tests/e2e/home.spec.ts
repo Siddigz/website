@@ -39,6 +39,11 @@ test('looking-for line follows the switch', async ({ page }) => {
   if (site.lookingFor.enabled) await expect(page.locator('[data-looking-for]')).toHaveText(site.lookingFor.text);
 });
 
+test('a test-only page asks not to be indexed', async ({ page }) => {
+  await page.goto('/dev/no-looking-for');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+});
+
 test('with the switch off the line is gone and leaves no gap', async ({ page }) => {
   await page.goto('/dev/no-looking-for');
   await expect(page.locator('#top h1')).toBeVisible();
