@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProofStrip from '../components/ProofStrip.astro';
@@ -22,9 +23,23 @@ const projects = await getCollection('projects');
 // Fetched while the site is built. Null (no token, GitHub unreachable)
 // leaves the section out; the rest of the page does not depend on it.
 const activity = await getActivity();
+
+// Structured data: tells search engines this page is about one person, and
+// which profiles are theirs. No way to contact them is included.
+const portrait = site.photo && (await getImage({ src: site.photo.src, width: 448, height: 448, fit: 'cover' }));
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.fullName,
+  url: new URL('/', Astro.site).href,
+  description: site.pitch,
+  ...(portrait ? { image: new URL(portrait.src, Astro.site).href } : {}),
+  sameAs: site.profileLinks.map((link) => link.href),
+};
 ---
 
 <BaseLayout title={site.fullName} description={site.pitch} path="/" expect="projects">
+  <script type="application/ld+json" slot="head" is:inline set:html={JSON.stringify(person)} />
   <Hero />
   <ProofStrip />
   <Experience />
