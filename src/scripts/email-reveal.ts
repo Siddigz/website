@@ -2,11 +2,10 @@
  * The Email buttons. Pressing one asks the server for a short-lived token,
  * trades it for the address, then shows the address as a link on every Email
  * button on the page and opens the visitor's mail app. The address is never
- * in the page as built, and neither is the mail link's prefix.
+ * in the page as built: only this script's empty mail prefix is.
  */
 const widgets = [...document.querySelectorAll<HTMLElement>('[data-email]')];
-// Put together when the page runs, so the built script does not hold a mail link's prefix as one word.
-const MAIL = `${[...'liam'].reverse().join('')}to:`;
+const MAIL = 'mailto:';
 const COPIED_FOR_MS = 2000;
 let busy = false;
 

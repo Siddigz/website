@@ -32,5 +32,7 @@ jobs:
         run: npm run test:build
       - name: Browser tests
         run: npm run test:e2e
+      # Measured even when a browser test failed, so one failure never hides the speed result.
       - name: Speed on a simulated mid-range phone
-        run: node scripts/measure-speed.mjs
+        if: ${{ !cancelled() }}
+        run: npm run test:speed

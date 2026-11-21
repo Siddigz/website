@@ -8,6 +8,9 @@ import { parse } from 'yaml';
 // The site address lives in one place: src/content/site.yaml.
 const { url } = parse(readFileSync(new URL('./src/content/site.yaml', import.meta.url), 'utf8')).main;
 
+// True for `astro dev`, which makes pictures on request while pages are being worked on.
+const devServer = process.argv.includes('dev');
+
 // The two small scripts that are put in the head as they are. The security
 // policy allows each by the hash of its exact text, worked out here.
 const hashOf = (file) => `sha256-${createHash('sha256').update(readFileSync(new URL(file, import.meta.url))).digest('base64')}`;
@@ -69,7 +72,13 @@ export default defineConfig({
   // The home page is the list of projects, so the bare folder address leads there.
   // Browsers ask for /favicon.ico without being told to; it leads to the small icon.
   redirects: { '/projects': '/#projects', '/favicon.ico': '/favicon-32.png' },
-  image: { layout: 'constrained', responsiveStyles: true },
+  image: {
+    layout: 'constrained',
+    responsiveStyles: true,
+    // Pictures are made at build time. The address that would resize them on
+    // request answers "not found" on the host; only the local dev server needs the real one.
+    ...(devServer ? {} : { endpoint: { route: '/_image', entrypoint: './src/lib/no-image-endpoint.ts' } }),
+  },
   // The stylesheets are small, so they travel inside each page: one less
   // round trip before anything can be drawn.
   build: { inlineStylesheets: 'always' },

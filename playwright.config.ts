@@ -4,12 +4,13 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  // On CI: every test's time is listed as well, and a test that fails is tried once more.
-  // A test that only passes the second time is reported as flaky, not hidden.
+  // On CI every test's time is listed as well. Nothing is retried: a test that
+  // fails once is a failure, so an occasional stall cannot hide behind a second try.
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
-  retries: process.env.CI ? 1 : 0,
-  use: { baseURL: 'http://localhost:4321', actionTimeout: 5_000 },
-  expect: { timeout: 3_000 },
+  // CI's Linux build of Safari's engine draws only a few frames a second, and a
+  // move from one page to another waits on frames, so CI is given more time.
+  use: { baseURL: 'http://localhost:4321', actionTimeout: process.env.CI ? 20_000 : 5_000 },
+  expect: { timeout: process.env.CI ? 10_000 : 3_000 },
   webServer: {
     command: 'node scripts/serve-dist.mjs 4321',
     url: 'http://localhost:4321',

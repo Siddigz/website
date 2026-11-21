@@ -355,9 +355,10 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
     font-size: var(--text-sm);
   }
 
-  /* At the server every header has been read and removed. */
+  /* At the server every header has been read and removed: struck through, with its colour drained. The text keeps its full contrast. */
   .seg[data-gone] {
-    opacity: 0.35;
+    --layer: var(--color-border);
+    text-decoration-line: line-through;
   }
 
   .label,

@@ -69,12 +69,20 @@ describe('built site', () => {
     expect(html.match(/<link rel="preload"[^>]*as="font"/g)?.length).toBe(2);
   });
 
-  it('no built file holds a mail link, in the pages or in the server function', () => {
-    // The Email button fetches the address when pressed, and puts the link together then.
+  it('no built file holds a mail link with an address in it, in the pages or in the server function', () => {
+    // The Email button fetches the address when pressed. Its script holds only the bare prefix.
     const everything = [...built, ...textFiles(join(BUILT, '..', 'functions'))];
     expect(everything.length).toBeGreaterThan(built.length);
-    const hits = everything.filter(([, text]) => text.includes('mailto:')).map(([path]) => path);
+    const hits = everything.filter(([, text]) => /mailto:[^"'`\s)]*@/.test(text) || /href=["']mailto:/.test(text)).map(([path]) => path);
     expect(hits).toEqual([]);
+  });
+
+  it('the server function cannot be made to resize pictures: every picture is made at build time', () => {
+    // The framework's on-request picture endpoint is replaced by one that answers "not found",
+    // so the picture library is not even part of what runs on the server.
+    const modules = join(BUILT, '..', 'functions', '_render.func', 'node_modules');
+    expect(existsSync(join(modules, 'sharp'))).toBe(false);
+    expect(existsSync(join(modules, '@img'))).toBe(false);
   });
 
   it('the email addresses and the daily rebuild are answered by the server, not built ahead of time', () => {
