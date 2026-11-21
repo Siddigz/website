@@ -262,9 +262,11 @@ One horizontal strip that scrolls sideways on its own, continuously, and loops
 through every skill in `skills.yaml`. The order in the file puts the skills
 large tech companies screen for first.
 
-- It pauses when hovered or focused.
+- It stops while the mouse is over it or its Pause box is ticked, gliding to
+  rest and back up to speed over 300 ms (owner's request, 2026-11-21).
 - With reduced motion set, it does not move. It becomes a normal wrapped list.
-- It is built with CSS only, so it costs no JavaScript.
+- The movement is CSS only. A small script does the gliding; without scripts
+  the strip still pauses, at once.
 - Screen readers get one plain list. The duplicate copy needed for a seamless
   loop is hidden from them.
 - It moves on its own track and never affects page scrolling.

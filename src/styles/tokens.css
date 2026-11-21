@@ -74,6 +74,8 @@
   /* Colours worked out from the ones above. Two colours are mixed in oklab:
      in oklch the hue drifts through pink when one of them is white or black. */
   --color-shade: oklch(40% 0.14 262);
+  /* White in both themes: the paper that charts and screenshots are drawn on. */
+  --color-paper: oklch(100% 0 0);
   /* Dims the page behind the command menu. */
   --color-backdrop: color-mix(in oklab, var(--color-shade) 35%, transparent);
   --color-tint-a: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
@@ -197,7 +199,8 @@
   --media-width: 56rem;
   --aside-width: 28rem;
   --backdrop-height: 46rem;
-  --diagram-width: 58rem;
+  /* Wide enough that the drawing's smallest labels stay a readable size. */
+  --diagram-width: 80rem;
   --drawing-height: 17rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;

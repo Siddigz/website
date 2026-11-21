@@ -6,7 +6,7 @@ const site = await getSite();
 ---
 
 <section id="contact" class="section container">
-  <h2 class="section-title">Contact</h2>
+  <h2 class="section-title">{site.sections.contact}</h2>
   <p class="muted">{site.contactNote}</p>
   <ul role="list">
     {site.profileLinks.map((link) => <li><a href={link.href}>{link.label}</a></li>)}

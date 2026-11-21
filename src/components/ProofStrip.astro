@@ -1,11 +1,13 @@
 ---
+import { getSite } from '../lib/site';
 import { getCollection } from 'astro:content';
 
 const items = (await getCollection('proof')).sort((a, b) => a.data.order - b.data.order);
+const site = await getSite();
 ---
 
 <section id="proof" class="proof container">
-  <h2 class="visually-hidden">Highlights</h2>
+  <h2 class="visually-hidden">{site.sections.proof}</h2>
   <ul role="list">
     {
       items.map(({ data }) => (

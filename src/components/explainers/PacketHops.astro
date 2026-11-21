@@ -42,8 +42,8 @@ const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
     <span data-caption-text>{HOPS[0]!.caption}</span>
   </p>
 
-  {/* Wider than a phone: it scrolls inside this box, which the keyboard can reach. The words in it repeat the captions and the table. */}
-  <div class="diagram" role="group" aria-label="Network path from a laptop to a web server" tabindex="0">
+  {/* Wider than a phone: it scrolls inside this box, which the keyboard can reach. One picture to a screen reader: its words repeat the captions and the table. */}
+  <div class="diagram" role="img" aria-label="Network path from a laptop to a web server" tabindex="0">
     <svg viewBox="0 0 1160 245" aria-hidden="true">
       {regions.map((region) => <rect class={`region ${region.kind}`} x={region.x} y="58" width={region.width} height="180" rx="10" />)}
       {regions.map((region) => <text class="small" x={region.at} y="232">{region.label}</text>)}

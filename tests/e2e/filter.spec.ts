@@ -128,3 +128,33 @@ test('the filter does not scroll the page sideways at 320px', async ({ page }) =
   await page.locator('#more-projects').scrollIntoViewIfNeeded();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+test('two quick presses still move only the rows, never the whole page', async ({ page }) => {
+  await page.goto('/');
+  test.skip(!(await page.evaluate(() => 'startViewTransition' in document)), 'this browser has no view transitions');
+  // Record, for every transition, whether the page as a whole was kept out of it when it began.
+  await page.evaluate(() => {
+    (window as any).kept = [];
+    const original = document.startViewTransition.bind(document);
+    document.startViewTransition = ((update: any) => {
+      const transition = original(update);
+      transition.ready.then(
+        () => (window as any).kept.push(document.documentElement.hasAttribute('data-filtering')),
+        () => {},
+      );
+      return transition;
+    }) as typeof document.startViewTransition;
+  });
+  // Both presses land before the first change has finished.
+  await page.evaluate(() => {
+    const press = (value: string) => document.querySelector<HTMLElement>(`[data-filter-value="${value}"]`)!.click();
+    press('systems');
+    press('ai-data');
+  });
+  await expect(visibleRows(page)).toHaveCount(count('ai-data'));
+  await expect
+    .poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('#more-projects .row')].filter((row) => row.style.viewTransitionName).length))
+    .toBe(0);
+  expect(await page.evaluate(() => (window as any).kept as boolean[])).not.toContain(false);
+  expect(await page.evaluate(() => document.documentElement.hasAttribute('data-filtering'))).toBe(false);
+});

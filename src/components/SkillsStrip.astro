@@ -1,7 +1,9 @@
 ---
+import { getSite } from '../lib/site';
 import { getEntry } from 'astro:content';
 
 const { items } = (await getEntry('skills', 'main'))!.data;
+const site = await getSite();
 ---
 
 <!--
@@ -12,13 +14,13 @@ const { items } = (await getEntry('skills', 'main'))!.data;
   is hidden from assistive technology.
 -->
 <section id="skills" class="skills">
-  <h2 class="visually-hidden">Skills</h2>
+  <h2 class="visually-hidden">{site.sections.skills}</h2>
   <div class="strip">
     <div class="container">
       {/* Inside the container, so the strip is exactly as wide as the other sections. */}
       <div class="viewport" data-skills-viewport>
         <div class="track" data-track>
-          <ul aria-label="Skills" role="list" translate="no">
+          <ul aria-label={site.sections.skills} role="list" translate="no">
             {items.map((skill) => <li class="pill">{skill}</li>)}
           </ul>
           <ul class="copy" aria-hidden="true" role="list" translate="no">

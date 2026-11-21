@@ -1,0 +1,68 @@
+---
+// A small still picture for the "NRZ vs PAM4" card: four levels, the signal as
+// sent and as measured, and the symbols that were read wrongly. Decorative.
+import { thumbnail } from '../../lib/explainers/signal';
+
+const WIDTH = 320;
+const HEIGHT = 180;
+const drawing = thumbnail({ width: WIDTH, height: HEIGHT });
+---
+
+<svg class="thumb" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-hidden="true">
+  {drawing.levels.map((y) => <line class="level" x1={drawing.left} x2={drawing.right} y1={y} y2={y} />)}
+  {drawing.thresholds.map((y) => <line class="threshold" x1={drawing.left} x2={drawing.right} y1={y} y2={y} />)}
+  <path class="sent" d={drawing.sent}></path>
+  <path class="received" d={drawing.received}></path>
+  {
+    drawing.points.map((point) => (
+      <>
+        <circle class:list={['dot', { bad: point.bad }]} cx={point.x} cy={point.y} r="4" />
+        {point.bad && <path class="cross" d={`M${point.x - 4} ${point.y - 15}l8 8m0 -8l-8 8`} />}
+      </>
+    ))
+  }
+</svg>
+
+<style>
+  /* Sizes are in the drawing's own units: it scales as a whole. */
+  .level {
+    stroke: var(--color-text-muted);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+    opacity: 0.6;
+  }
+
+  .threshold {
+    stroke: var(--color-wrong);
+    stroke-width: 1;
+    stroke-dasharray: 2 3;
+  }
+
+  .sent {
+    fill: none;
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+  }
+
+  .received {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .dot {
+    fill: var(--color-accent);
+  }
+
+  .dot.bad {
+    fill: var(--color-wrong);
+  }
+
+  .cross {
+    fill: none;
+    stroke: var(--color-wrong);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+</style>

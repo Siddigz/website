@@ -54,8 +54,8 @@ const cards = [
       ))
     }
   </div>
-  {/* Read out when it changes: it is the conclusion of whatever was just adjusted. */}
-  <p class="caption" role="status" data-caption>{text.caption}</p>
+  {/* Not a live region: the slider's own value is announced as it moves, and that is enough to follow along. */}
+  <p class="caption" data-caption>{text.caption}</p>
 
   <div class="drawings">
     <section>

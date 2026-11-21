@@ -310,8 +310,9 @@ if (root) {
   // The theme can change by the toggle, by another tab or with the system; the width with the window.
   const scheme = document.querySelector('meta[name="color-scheme"]');
   if (scheme) new MutationObserver(redraw).observe(scheme, { attributes: true, attributeFilter: ['content'] });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
-  new ResizeObserver(redraw).observe(root);
+  // Older browsers lack one or the other of these; the drawings still appear, they just do not follow later changes.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', redraw);
+  if (typeof ResizeObserver === 'function') new ResizeObserver(redraw).observe(root);
 
   // A reloaded page may come back with the controls where the visitor left them.
   const slider = find<HTMLInputElement>('[data-slider]');

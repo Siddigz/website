@@ -1,28 +1,34 @@
 /*
  * What the browser remembers about a visitor, kept only in their own browser:
- * how many times they have come, and which project pages they have opened.
+ * how many times they have come, when they were last here, and which project
+ * pages they have opened.
  * Storage can be missing or blocked (private windows), so every function
  * takes it as a value that may be undefined and never throws.
  */
 const VISITS = 'visits';
-const THIS_VISIT = 'visit';
+const LAST_SEEN = 'last-seen';
 const SEEN = 'seen-projects';
 const SEEN_LIMIT = 50;
+/** A visit ends once this long has passed with no page opened. */
+const VISIT_GAP_MS = 30 * 60_000;
 
 /**
- * Call once per page load. A visit is one browser session: reloading, or going
- * to a project and back, stays the same visit. `returning` is true for the
- * whole of any session after the first.
+ * Call once per page load. A visit is a run of page loads with no gap of half
+ * an hour: reloading, going to a project and back, or opening a second tab all
+ * stay the same visit, because every tab shares the browser's lasting storage.
+ * `returning` is true for the whole of any visit after the first.
  */
-export function startVisit(local: Storage | undefined, session: Storage | undefined): { returning: boolean } {
+export function startVisit(local: Storage | undefined, now: number): { returning: boolean } {
   try {
-    if (!local || !session) return { returning: false };
-    const known = Number(session.getItem(THIS_VISIT));
-    if (known >= 1) return { returning: known > 1 };
-    const earlier = Number(local.getItem(VISITS));
-    const visit = (Number.isInteger(earlier) && earlier > 0 ? earlier : 0) + 1;
-    session.setItem(THIS_VISIT, String(visit));
+    if (!local) return { returning: false };
+    const stored = Number(local.getItem(VISITS));
+    const visits = Number.isInteger(stored) && stored > 0 ? stored : 0;
+    const lastSeen = Number(local.getItem(LAST_SEEN));
+    // A clock that has gone backwards is read as "just now", not as a long absence.
+    const away = Number.isFinite(lastSeen) && lastSeen > 0 ? now - lastSeen : Infinity;
+    const visit = visits === 0 || away > VISIT_GAP_MS ? visits + 1 : visits;
     local.setItem(VISITS, String(visit));
+    local.setItem(LAST_SEEN, String(now));
     return { returning: visit > 1 };
   } catch {
     return { returning: false };

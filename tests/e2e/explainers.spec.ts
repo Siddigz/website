@@ -47,6 +47,51 @@ for (const width of [320, 375]) {
   });
 }
 
+test('every explainer card carries a small drawing of what it explains', async ({ page }) => {
+  await page.goto('/');
+  const cards = page.locator('#explainers article');
+  for (const [index, explainer] of explainers.entries()) {
+    const drawing = cards.nth(index).locator('svg');
+    await expect(drawing).toHaveCount(1);
+    await expect(drawing).toBeVisible();
+    // Decoration: the card is still named by its title alone.
+    await expect(drawing).toHaveAttribute('aria-hidden', 'true');
+    await expect(cards.nth(index).getByRole('link')).toHaveAccessibleName(explainer.title);
+    const box = (await drawing.boundingBox())!;
+    expect(box.width).toBeGreaterThan(150);
+    expect(box.height).toBeGreaterThan(80);
+    // It really draws something, and sits above the words.
+    expect(await drawing.locator('path, rect, circle, line, polyline').count()).toBeGreaterThan(5);
+    expect(box.y).toBeLessThan((await cards.nth(index).locator('h3').boundingBox())!.y);
+  }
+  // The two drawings are different pictures.
+  const shapes = await cards.locator('svg').evaluateAll((drawings) => drawings.map((drawing) => drawing.innerHTML));
+  expect(new Set(shapes).size).toBe(explainers.length);
+});
+
+test('the drawings on the cards follow the theme', async ({ page }) => {
+  const ink = () =>
+    page.locator('#explainers article svg').first().evaluate((drawing) => {
+      const shape = drawing.querySelector('[class]')!;
+      const style = getComputedStyle(shape);
+      return `${style.fill} ${style.stroke}`;
+    });
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const light = await ink();
+  await page.emulateMedia({ colorScheme: 'dark' });
+  expect(await ink()).not.toBe(light);
+});
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`the Explainers section has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    await page.goto('/');
+    const { violations } = await new AxeBuilder({ page }).include('#explainers').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} element(s))`)).toEqual([]);
+  });
+}
+
 for (const explainer of explainers) {
   test(`${explainer.slug}: the page has its title, its summary and a way back`, async ({ page }) => {
     const response = await page.goto(`/explainers/${explainer.slug}`);
@@ -263,9 +308,13 @@ test.describe('one packet, hop by hop', () => {
   test('on a narrow screen the drawing scrolls inside its own box, which the keyboard can reach', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await open(page);
-    const box = page.getByRole('group', { name: 'Network path from a laptop to a web server' });
+    // One picture to a screen reader, named in words; its details are in the captions and the table.
+    const box = page.getByRole('img', { name: 'Network path from a laptop to a web server' });
     await expect(box).toHaveAttribute('tabindex', '0');
     expect(await box.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+    // Its smallest labels are still a readable size.
+    const smallest = await box.locator('text').evaluateAll((labels) => Math.min(...labels.map((label) => label.getBoundingClientRect().height)));
+    expect(smallest).toBeGreaterThanOrEqual(11);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 
@@ -340,6 +389,12 @@ test.describe('NRZ vs PAM4', () => {
     await expect(readout(page, 'measured').locator('.big')).toHaveText('< 1 in 20,000');
     await expect(readout(page, 'theory').locator('.big')).toHaveText('0');
     await expect(page.locator('[data-signal] [data-wave-note]')).toContainText('0 of 40 symbols');
+  });
+
+  test('only the slider’s own value is announced as it moves, not the whole conclusion each step', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('[data-signal] [data-caption]')).not.toHaveAttribute('role', 'status');
+    await expect(page.locator('[data-signal] output')).toHaveCount(1);
   });
 
   test('the arrow keys move the noise slider', async ({ page }) => {

@@ -37,7 +37,8 @@ export async function handleRebuild(request: Request, env: RebuildEnv, fetchImpl
   }
 
   try {
-    const response = await fetchImpl(hook.href, { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS) });
+    // The hook is called exactly where the setting points: it is never followed anywhere else.
+    const response = await fetchImpl(hook.href, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(TIMEOUT_MS) });
     return response.ok ? answer(200, 'started') : answer(502, 'failed');
   } catch {
     return answer(502, 'failed');

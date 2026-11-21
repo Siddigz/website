@@ -9,11 +9,11 @@ const site = await getSite();
 // count as "being in" this link's part of the page.
 const hasExplainers = (await getExplainers()).length > 0;
 const links = [
-  { href: '/#experience', label: 'Experience', sections: ['experience'] },
-  { href: '/#projects', label: 'Projects', sections: ['projects', 'more-projects'] },
+  { href: '/#experience', label: site.nav.experience, sections: ['experience'] },
+  { href: '/#projects', label: site.nav.projects, sections: ['projects', 'more-projects'] },
   // The one section a visitor would not guess is there.
   ...(hasExplainers ? [{ href: '/#explainers', label: site.explainers.title, sections: ['explainers'] }] : []),
-  { href: '/#about', label: 'About', sections: ['about'] },
+  { href: '/#about', label: site.nav.about, sections: ['about'] },
 ];
 ---
 

@@ -141,6 +141,22 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  sections: z.object({
+    proof: z.string().min(1),
+    experience: z.string().min(1),
+    skills: z.string().min(1),
+    projects: z.string().min(1),
+    moreProjects: z.string().min(1),
+    activity: z.string().min(1),
+    contact: z.string().min(1),
+  }),
+  nav: z.object({ experience: z.string().min(1), projects: z.string().min(1), about: z.string().min(1) }),
+  activity: z.object({
+    total: z.string().includes('{n}'),
+    less: z.string().min(1),
+    more: z.string().min(1),
+    commits: z.string().min(1),
+  }),
   explainers: z.object({ title: z.string().min(1), back: z.string().min(1), noScript: z.string().min(1) }),
   resumeLabel: z.string().min(1),
   email: z.object({

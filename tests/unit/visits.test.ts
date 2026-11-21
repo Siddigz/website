@@ -22,39 +22,56 @@ const broken = new Proxy({} as Storage, {
   },
 });
 
+const START = Date.UTC(2026, 10, 21, 15, 0, 0);
+const MINUTE = 60_000;
+
 describe('startVisit', () => {
-  it('counts a first visit once, however often the page loads in that session', () => {
+  it('counts a first visit once, however often pages load during it', () => {
     const local = storage();
-    const session = storage();
-    expect(startVisit(local, session)).toEqual({ returning: false });
+    expect(startVisit(local, START)).toEqual({ returning: false });
     expect(local.getItem('visits')).toBe('1');
-    expect(startVisit(local, session)).toEqual({ returning: false });
+    expect(startVisit(local, START + 5 * MINUTE)).toEqual({ returning: false });
+    expect(startVisit(local, START + 20 * MINUTE)).toEqual({ returning: false });
     expect(local.getItem('visits')).toBe('1');
   });
 
-  it('calls a new session after an earlier one a return, for that whole session', () => {
+  it('is the same visit in a second tab: every tab of a browser shares what it remembers', () => {
+    // A second tab has its own session storage but the same lasting storage.
     const local = storage();
-    startVisit(local, storage());
-    const second = storage();
-    expect(startVisit(local, second)).toEqual({ returning: true });
+    expect(startVisit(local, START)).toEqual({ returning: false });
+    expect(startVisit(local, START + MINUTE)).toEqual({ returning: false });
+    expect(local.getItem('visits')).toBe('1');
+  });
+
+  it('calls it a return once half an hour has passed with no page opened, and for the whole of that visit', () => {
+    const local = storage();
+    startVisit(local, START);
+    expect(startVisit(local, START + 29 * MINUTE)).toEqual({ returning: false });
+    const later = START + 29 * MINUTE + 31 * MINUTE;
+    expect(startVisit(local, later)).toEqual({ returning: true });
     expect(local.getItem('visits')).toBe('2');
-    expect(startVisit(local, second)).toEqual({ returning: true });
+    expect(startVisit(local, later + 10 * MINUTE)).toEqual({ returning: true });
     expect(local.getItem('visits')).toBe('2');
   });
 
-  it('treats a count that is not a number as no visits yet', () => {
-    const local = storage({ visits: 'many' });
-    expect(startVisit(local, storage())).toEqual({ returning: false });
+  it('treats a count or a time that is not a number as no visits yet', () => {
+    const local = storage({ visits: 'many', 'last-seen': 'yesterday' });
+    expect(startVisit(local, START)).toEqual({ returning: false });
+    expect(local.getItem('visits')).toBe('1');
+  });
+
+  it('is not fooled by a clock that has gone backwards', () => {
+    const local = storage();
+    startVisit(local, START);
+    expect(startVisit(local, START - 5 * 60 * MINUTE)).toEqual({ returning: false });
     expect(local.getItem('visits')).toBe('1');
   });
 
   it.each([
-    ['both missing', undefined, undefined],
-    ['both throwing', broken, broken],
-    ['only the session one throwing', storage({ visits: '3' }), broken],
-    ['only the lasting one throwing', broken, storage()],
-  ])('is a first visit, without throwing, with storage %s', (_name, local, session) => {
-    expect(startVisit(local, session)).toEqual({ returning: false });
+    ['missing', undefined],
+    ['throwing', broken],
+  ])('is a first visit, without throwing, with storage %s', (_name, local) => {
+    expect(startVisit(local, START)).toEqual({ returning: false });
   });
 });
 

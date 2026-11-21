@@ -75,8 +75,9 @@ const groups = GROUPS.map((group) => ({ group, label: site.menu.groups[group], i
         </div>
       ))
     }
-    <p class="empty muted" data-menu-empty hidden>{site.menu.empty}</p>
   </div>
+  {/* Outside the list, and a status, so "nothing matches" is said aloud as well as shown. */}
+  <p class="empty muted" role="status" data-menu-empty-line><span data-menu-empty hidden>{site.menu.empty}</span></p>
 </dialog>
 
 <script>
@@ -101,7 +102,7 @@ const groups = GROUPS.map((group) => ({ group, label: site.menu.groups[group], i
   /* Only while open: a closed dialog must stay out of the page. */
   .menu[open] {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
   }
 
   /* Scrolling inside the menu, or over the dimmed page, never scrolls the page behind. */
@@ -185,6 +186,11 @@ const groups = GROUPS.map((group) => ({ group, label: site.menu.groups[group], i
   }
 
   .empty {
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  /* While something matches, the line holds nothing and takes no room. */
+  .empty:not(:has(> :not([hidden]))) {
+    display: none;
   }
 </style>

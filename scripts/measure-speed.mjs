@@ -64,7 +64,7 @@ try {
   console.table(rows);
   console.log(`Budget: score ${BUDGET.score} or more, largest content within ${BUDGET.largestContentMs} ms, layout shift under ${BUDGET.layoutShift}.`);
 } finally {
-  await chrome.kill();
+  chrome.kill();
   server.kill();
 }
 process.exit(failed ? 1 : 0);

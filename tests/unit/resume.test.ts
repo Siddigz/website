@@ -61,6 +61,28 @@ describe('handleResume', () => {
     expect(await response.text()).not.toContain('example.test');
   });
 
+  it('answers 404 when the file says it is over 5 MB, without downloading it', async () => {
+    let downloaded = false;
+    const fetchImpl = vi.fn(async () => {
+      const response = new Response(pdf('real') as Uint8Array<ArrayBuffer>, { headers: { 'content-length': String(6 * 1024 * 1024) } });
+      Object.defineProperty(response, 'arrayBuffer', { value: async () => ((downloaded = true), new ArrayBuffer(0)) });
+      return response;
+    }) as unknown as typeof fetch;
+    const response = await handleResume({ RESUME_ENABLED: 'true', RESUME_URL: ADDRESS }, placeholder, NAME, fetchImpl);
+    expect(response.status).toBe(404);
+    expect(downloaded).toBe(false);
+  });
+
+  it('answers 404 when the address leads somewhere that is not https', async () => {
+    const fetchImpl = vi.fn(async () => {
+      const response = new Response(pdf('real') as Uint8Array<ArrayBuffer>);
+      Object.defineProperty(response, 'url', { value: 'http://elsewhere.example.test/resume.pdf' });
+      return response;
+    }) as unknown as typeof fetch;
+    const response = await handleResume({ RESUME_ENABLED: 'true', RESUME_URL: ADDRESS }, placeholder, NAME, fetchImpl);
+    expect(response.status).toBe(404);
+  });
+
   it('answers 404 for an address that is not https, without asking for it', async () => {
     const fetchImpl = serving(pdf('real'));
     for (const address of ['http://files.example.test/resume.pdf', 'file:///etc/passwd', 'not an address']) {

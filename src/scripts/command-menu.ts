@@ -63,7 +63,10 @@ if (dialog && input) {
 
   // Ctrl+K, or ⌘K on Apple keyboards, from anywhere on the page.
   document.addEventListener('keydown', (event) => {
-    if (event.key.toLowerCase() !== 'k' || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
+    // The K key itself, whatever its layout prints on it (on an Arabic layout it types ن),
+    // or any key that types "k". Some tools send key events with no key at all.
+    const isK = event.code === 'KeyK' || event.key?.toLowerCase() === 'k';
+    if (!isK || !(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
     event.preventDefault();
     if (dialog.open) dialog.close();
     else open();

@@ -1,10 +1,14 @@
 ---
 // The home page's list of explainers: one card each, with its title and summary.
+import { THUMBS } from './explainers';
 import { getExplainers } from '../lib/explainer-list';
 import { getSite } from '../lib/site';
 
 const site = await getSite();
 const explainers = await getExplainers();
+for (const { id } of explainers) {
+  if (!THUMBS[id]) throw new Error(`src/content/explainers/${id}.md has no card drawing: add "${id}" to THUMBS in src/components/explainers/index.ts`);
+}
 ---
 
 {
@@ -14,6 +18,8 @@ const explainers = await getExplainers();
       <div class="cards">
         {explainers.map((explainer) => (
           <article class="card">
+            {/* A small still drawing of what the explainer shows. Decoration: the title names the card. */}
+            <div class="visual">{[THUMBS[explainer.id]!].map((Thumb) => <Thumb />)}</div>
             <h3>
               <a href={`/explainers/${explainer.id}`}>{explainer.data.title}</a>
             </h3>
@@ -38,6 +44,7 @@ const explainers = await getExplainers();
     align-content: start;
     gap: var(--space-2);
     padding: var(--space-5);
+    overflow: clip;
     border-radius: var(--radius-card);
     background: var(--color-surface);
     box-shadow: var(--shadow-card);
@@ -60,6 +67,20 @@ const explainers = await getExplainers();
     .card:focus-within {
       translate: 0 calc(var(--lift-card) * -1);
     }
+  }
+
+  /* The drawing fills the top of the card, edge to edge, like a project's cover. */
+  .visual {
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
+    padding: var(--space-3);
+    border-block-end: var(--border-width) solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .visual :global(svg) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
   }
 
   h3 {

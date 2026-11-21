@@ -152,3 +152,46 @@ export const waveNote = (wrong: number) => `${wrong} of ${WAVE_SYMBOLS} symbols 
 export const START = { levels: 4 as Levels, sigma: 0.05, seed: 20260101, gray: true };
 /** The three drawings use different stretches of random numbers from one seed. */
 export const SEED_OFFSET = { eye: 7919, histogram: 104729 };
+
+/**
+ * A small still picture of the idea, for the explainer's card on the home page:
+ * fourteen symbols of PAM4 with enough noise that a couple are read wrongly.
+ * Coordinates are for a box of the given size. The same picture every build.
+ */
+export function thumbnail({ width, height }: { width: number; height: number }) {
+  const LEVELS: Levels = 4;
+  const COUNT = 14;
+  const NOISE = 0.1;
+  // The first run of random symbols that makes the point clearly: every level
+  // used, two symbols misread, and nothing off the edge of the picture.
+  let cells = waveform(LEVELS, NOISE, 1).cells.slice(0, COUNT);
+  for (let seed = 1; seed < 500; seed += 1) {
+    const candidate = waveform(LEVELS, NOISE, seed).cells.slice(0, COUNT);
+    const fits = candidate.every((cell) => cell.received > -0.15 && cell.received < 1.15);
+    if (fits && candidate.filter((cell) => cell.bad).length === 2 && new Set(candidate.map((cell) => cell.sent)).size === LEVELS) {
+      cells = candidate;
+      break;
+    }
+  }
+  const pad = { x: width * 0.06, y: height * 0.12 };
+  const step = (width - 2 * pad.x) / COUNT;
+  const yOf = (value: number) => pad.y + ((Y_MAX - value) / (Y_MAX - Y_MIN)) * (height - 2 * pad.y);
+  const round = (value: number) => Math.round(value * 10) / 10;
+  const values = levelsOf(LEVELS);
+  const points = cells.map((cell, index) => ({ x: round(pad.x + (index + 0.5) * step), y: round(yOf(cell.received)), bad: cell.bad }));
+  return {
+    /** Where each level's dashed line sits. */
+    levels: values.map((value) => round(yOf(value))),
+    /** Where the receiver's decision flips, halfway between levels. */
+    thresholds: values.slice(1).map((value, index) => round(yOf((value + values[index]!) / 2))),
+    left: round(pad.x),
+    right: round(width - pad.x),
+    /** What was sent: a staircase. */
+    sent: cells
+      .map((cell, index) => `${index === 0 ? 'M' : 'L'}${round(pad.x + index * step)} ${round(yOf(values[cell.sent]!))}H${round(pad.x + (index + 1) * step)}`)
+      .join(''),
+    /** What was measured: a line through the samples. */
+    received: points.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x} ${point.y}`).join(''),
+    points,
+  };
+}

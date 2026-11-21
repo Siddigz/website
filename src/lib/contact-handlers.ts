@@ -56,6 +56,9 @@ export async function handleAddress(request: Request, env: ContactEnv, now: numb
   const settings = guard(request, env, now);
   if (settings instanceof Response) return settings;
 
+  // A body that announces itself as large is refused before any of it is read.
+  if (Number(request.headers.get('content-length')) > MAX_BODY_BYTES) return json(400, { error: 'bad request' });
+
   let body: unknown;
   try {
     const text = await request.text();

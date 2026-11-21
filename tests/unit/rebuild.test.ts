@@ -65,6 +65,12 @@ describe('handleRebuild', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it('never follows the hook somewhere else', async () => {
+    const fetchImpl = hook();
+    await handleRebuild(call(`Bearer ${SECRET}`), env, fetchImpl);
+    expect((fetchImpl as any).mock.calls[0][1].redirect).toBe('error');
+  });
+
   it('answers only GET, which is how the host’s scheduler calls it', async () => {
     const fetchImpl = hook();
     const response = await handleRebuild(call(`Bearer ${SECRET}`, 'POST'), env, fetchImpl);

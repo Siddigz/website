@@ -19,6 +19,8 @@ const GRACE_MS = 1000;
 let press = 0;
 
 function letters(word: string): string[] {
+  // Whole characters where the browser can find them (so an accented letter stays one piece); code points otherwise.
+  if (typeof Intl.Segmenter !== 'function') return [...word];
   return [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(word)].map((part) => part.segment);
 }
 

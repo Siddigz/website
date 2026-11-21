@@ -2,6 +2,7 @@
 import type { Activity } from '../lib/github-activity';
 import { monthLabels } from '../lib/github-activity';
 import { formatDay } from '../lib/dates';
+import { getSite } from '../lib/site';
 
 interface Props {
   /** Fetched while the site was built. The page leaves this section out when there is none. */
@@ -9,7 +10,8 @@ interface Props {
 }
 
 const { activity } = Astro.props;
-const total = `${activity.total.toLocaleString('en-US')} contributions in the last year`;
+const { sections, activity: words } = await getSite();
+const total = words.total.replace('{n}', activity.total.toLocaleString('en-US'));
 const months = new Map(monthLabels(activity.weeks).map(({ week, label }) => [week, label]));
 // A year that starts midweek: empty squares keep the first days on their own rows.
 const lead = Array.from({ length: 7 - (activity.weeks[0]?.length ?? 7) });
@@ -17,7 +19,7 @@ const LEVELS = [0, 1, 2, 3, 4];
 ---
 
 <section id="activity" class="section container">
-  <h2 class="section-title">GitHub activity</h2>
+  <h2 class="section-title">{sections.activity}</h2>
   <div class="panel">
     <div class="graph">
       <p class="total" id="activity-total">{total}</p>
@@ -38,15 +40,15 @@ const LEVELS = [0, 1, 2, 3, 4];
         }
       </div>
       <p class="key muted" aria-hidden="true">
-        Less
+        {words.less}
         {LEVELS.map((level) => <span data-level={level} />)}
-        More
+        {words.more}
       </p>
     </div>
     {
       activity.commits.length > 0 && (
         <div class="commits">
-          <h3>Recent commits</h3>
+          <h3>{words.commits}</h3>
           <ul role="list">
             {activity.commits.map((commit) => (
               <li>

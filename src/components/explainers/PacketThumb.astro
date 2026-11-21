@@ -1,0 +1,88 @@
+---
+// A small still picture for the "One packet, hop by hop" card: the packet, in
+// its four coloured layers, part-way along a row of devices. Decorative.
+const WIDTH = 320;
+const HEIGHT = 180;
+// Five stops across the picture; the packet sits over the second.
+const stops = [36, 98, 160, 222, 284];
+const AT = 1;
+const layers = ['eth', 'ip', 'tcp', 'dat'];
+---
+
+<svg class="thumb" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-hidden="true">
+  <rect class="region home" x="6" y="50" width="124" height="112" rx="10"></rect>
+  <rect class="region far" x="190" y="50" width="124" height="112" rx="10"></rect>
+  <line class="wire" x1={stops[0]} x2={stops[1]} y1="112" y2="112"></line>
+  <line class="fiber" x1={stops[1]} x2={stops[3]} y1="112" y2="112"></line>
+  <line class="wire" x1={stops[3]} x2={stops[4]} y1="112" y2="112"></line>
+  {stops.map((x, index) => (index === 2 ? <polygon class="amplifier" points={`${x - 13},98 ${x - 13},126 ${x + 13},112`} /> : <rect class="node" x={x - 20} y="94" width="40" height="36" rx="6" />))}
+  {/* The path the packet has still to travel. */}
+  <path class="hop" d={`M${stops[AT]} 70 Q ${(stops[AT]! + stops[AT + 1]!) / 2} 34 ${stops[AT + 1]} 70`}></path>
+  <g transform={`translate(${stops[AT]! - 28} 60)`}>
+    {layers.map((layer, index) => <rect class={layer} x={index * 14} y="0" width="14" height="18" />)}
+    <rect class="outline" x="0" y="0" width="56" height="18" rx="2"></rect>
+  </g>
+</svg>
+
+<style>
+  /* Sizes are in the drawing's own units: it scales as a whole. */
+  .region.home {
+    fill: var(--color-tint-a);
+  }
+
+  .region.far {
+    fill: var(--color-tint-b);
+  }
+
+  .node {
+    fill: var(--color-surface);
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+  }
+
+  .amplifier {
+    fill: var(--color-surface);
+    stroke: var(--color-amber);
+    stroke-width: 1.5;
+  }
+
+  .wire {
+    stroke: var(--color-text-muted);
+    stroke-width: 2;
+  }
+
+  .fiber {
+    stroke: var(--color-amber);
+    stroke-width: 4;
+  }
+
+  .hop {
+    fill: none;
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 4;
+    stroke-linecap: round;
+  }
+
+  .eth {
+    fill: var(--color-layer-eth);
+  }
+
+  .ip {
+    fill: var(--color-layer-ip);
+  }
+
+  .tcp {
+    fill: var(--color-layer-tcp);
+  }
+
+  .dat {
+    fill: var(--color-layer-data);
+  }
+
+  .outline {
+    fill: none;
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+  }
+</style>

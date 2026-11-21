@@ -1,4 +1,5 @@
 ---
+import { getSite } from '../lib/site';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { formatRange } from '../lib/dates';
@@ -14,10 +15,11 @@ const logos = {
 };
 
 const roles = (await getCollection('experience')).sort((a, b) => a.data.order - b.data.order);
+const site = await getSite();
 ---
 
 <section id="experience" class="section container">
-  <h2 class="section-title">Experience</h2>
+  <h2 class="section-title">{site.sections.experience}</h2>
   <ol role="list">
     {
       roles.map(({ data }) => {

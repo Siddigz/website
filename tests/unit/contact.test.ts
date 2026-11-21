@@ -140,6 +140,21 @@ describe('address address', () => {
     expect(await body(response)).not.toContain('@');
   });
 
+  it('refuses a body that says it is large before reading any of it', async () => {
+    let read = false;
+    const big = request('/api/contact/address', { body: JSON.stringify({ token: issueToken(SECRET, NOW) }), headers: { 'content-length': '500000' } });
+    const watched = new Proxy(big, {
+      get(target, property) {
+        if (property === 'text' || property === 'json' || property === 'arrayBuffer') read = true;
+        const value = Reflect.get(target, property, target);
+        return typeof value === 'function' ? value.bind(target) : value;
+      },
+    });
+    const response = await handleAddress(watched, env, NOW);
+    expect(response.status).toBe(400);
+    expect(read).toBe(false);
+  });
+
   it('answers only POST', async () => {
     const response = await handleAddress(request('/api/contact/address', { method: 'GET' }), env, NOW);
     expect(response.status).toBe(405);

@@ -167,3 +167,25 @@ describe('readouts', () => {
     expect(sci(0.00065)).toBe('6.5e-4');
   });
 });
+
+describe('thumbnail', () => {
+  it('lays a short stretch of the waveform out inside a box, the same way every time', async () => {
+    const { thumbnail } = await import('../../src/lib/explainers/signal');
+    const drawing = thumbnail({ width: 320, height: 180 });
+    expect(drawing.levels.length).toBe(4);
+    expect(drawing.points.length).toBe(14);
+    for (const point of drawing.points) {
+      expect(point.x).toBeGreaterThan(0);
+      expect(point.x).toBeLessThan(320);
+      expect(point.y).toBeGreaterThan(0);
+      expect(point.y).toBeLessThan(180);
+    }
+    // It shows the point of the explainer: at least one symbol read wrongly, and most read right.
+    const wrong = drawing.points.filter((point) => point.bad).length;
+    expect(wrong).toBeGreaterThanOrEqual(1);
+    expect(wrong).toBeLessThanOrEqual(4);
+    expect(thumbnail({ width: 320, height: 180 })).toEqual(drawing);
+    expect(drawing.sent.startsWith('M')).toBe(true);
+    expect(drawing.received.startsWith('M')).toBe(true);
+  });
+});

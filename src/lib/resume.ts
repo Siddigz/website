@@ -24,6 +24,10 @@ async function fetchPdf(address: string, fetchImpl: typeof fetch): Promise<Uint8
     if (new URL(address).protocol !== 'https:') return null;
     const response = await fetchImpl(address, { signal: AbortSignal.timeout(TIMEOUT_MS) });
     if (!response.ok) return null;
+    // If the address led somewhere else, that place must be https too.
+    if (response.url && new URL(response.url).protocol !== 'https:') return null;
+    // A file that says it is too large is not downloaded at all.
+    if (Number(response.headers.get('content-length')) > MAX_BYTES) return null;
     const bytes = new Uint8Array(await response.arrayBuffer());
     return bytes.length <= MAX_BYTES && isPdf(bytes) ? bytes : null;
   } catch {

@@ -11,6 +11,7 @@ const status = document.querySelector<HTMLElement>('[data-filter-status]');
 const buttons = [...(group?.querySelectorAll<HTMLButtonElement>('button[data-filter-value]') ?? [])];
 const rows = [...document.querySelectorAll<HTMLElement>('#more-projects .row[data-category]')];
 const motionAllowed = matchMedia('(prefers-reduced-motion: no-preference)');
+let latest = 0;
 
 function show(filter: Filter): void {
   let shown = 0;
@@ -34,7 +35,11 @@ function choose(filter: Filter): void {
   // page as a whole is kept out of it so only the rows move.
   rows.forEach((row, index) => (row.style.viewTransitionName = `filter-row-${index}`));
   document.documentElement.dataset.filtering = '';
+  // A second press can start before the first change has finished. Only the
+  // latest one tidies up, so an earlier one cannot strip what it still needs.
+  const mine = (latest += 1);
   const done = () => {
+    if (mine !== latest) return;
     rows.forEach((row) => row.style.removeProperty('view-transition-name'));
     delete document.documentElement.dataset.filtering;
   };

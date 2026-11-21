@@ -164,3 +164,23 @@ test.describe('the browser bar takes the page colour', () => {
     expect(await bar(page)).toEqual(light);
   });
 });
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`a chart on a project card sits on paper of its own colour, so it fills the card's rounded top (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.goto('/');
+    const charts = page.locator('#projects .cover.contain');
+    expect(await charts.count()).toBeGreaterThan(0);
+    for (const chart of await charts.all()) {
+      // The charts are drawn on white. A frame of any other colour shows the picture as a square patch inside it.
+      // Painted onto a one-pixel canvas, so the colour compares the same however the browser writes it.
+      const frame = await chart.evaluate((image) => {
+        const context = document.createElement('canvas').getContext('2d')!;
+        context.fillStyle = getComputedStyle(image).backgroundColor;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data];
+      });
+      expect(frame).toEqual([255, 255, 255, 255]);
+    }
+  });
+}

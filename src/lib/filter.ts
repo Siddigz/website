@@ -1,5 +1,5 @@
 /*
- * The "More projects" filter, as it appears in the address: `?filter=systems`.
+ * The filter on the second list of projects, as it appears in the address: `?filter=systems`.
  * Pure, so the page script and the tests share it.
  */
 import { CATEGORIES } from '../content/categories';

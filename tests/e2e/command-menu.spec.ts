@@ -32,6 +32,25 @@ for (const keys of ['Control+k', 'Meta+k']) {
   });
 }
 
+test('the shortcut is the K key itself, whatever letter the keyboard layout puts on it', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  // On an Arabic layout the key marked K types the letter noon.
+  await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ن', code: 'KeyK', ctrlKey: true, bubbles: true, cancelable: true })));
+  await expect(menu(page)).toBeVisible();
+  await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ن', code: 'KeyK', metaKey: true, bubbles: true, cancelable: true })));
+  await expect(menu(page)).toBeHidden();
+  // Some tools send key events with no key at all. They are ignored, not an error.
+  await page.evaluate(() => {
+    const bare = new KeyboardEvent('keydown', { ctrlKey: true, bubbles: true });
+    Object.defineProperty(bare, 'key', { value: undefined });
+    document.dispatchEvent(bare);
+  });
+  await expect(menu(page)).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
 test('typing narrows the list, and Enter opens the one that is left', async ({ page }) => {
   await page.goto('/');
   await opener(page).click();
@@ -101,6 +120,9 @@ test('a search that matches nothing says so, and Enter does nothing', async ({ p
   await search(page).fill('zzzz');
   await expect(options(page)).toHaveCount(0);
   await expect(menu(page).getByText(site.menu.empty)).toBeVisible();
+  // It is said aloud too: a status outside the list, not a stray line inside it.
+  await expect(menu(page).getByRole('status')).toHaveText(site.menu.empty);
+  await expect(menu(page).getByRole('listbox').getByText(site.menu.empty)).toHaveCount(0);
   await expect(search(page)).toHaveAttribute('aria-activedescendant', '');
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowDown');

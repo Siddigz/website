@@ -125,11 +125,12 @@ const { seenLabel } = await getSite();
     border-block-end: var(--border-width) solid var(--color-border);
   }
 
+  /* Charts are drawn on white, so their frame is white too, in both themes: the picture then reads as filling the card's rounded top instead of sitting in it as a square patch. */
   .cover.contain {
     padding: var(--space-3);
     object-fit: contain;
     object-position: center;
-    background: var(--color-bg);
+    background: var(--color-paper);
   }
 
   .body {

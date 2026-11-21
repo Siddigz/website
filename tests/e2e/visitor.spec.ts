@@ -31,7 +31,7 @@ test.describe('a visitor in Berlin', () => {
     await expect.poll(() => plainText(page)).toBe('You’re up late. It’s 3:14 AM for you and 9:14 PM in Ottawa.');
   });
 
-  test('is welcomed back in a later session, and not by a reload or a trip to a project', async ({ page }) => {
+  test('is welcomed back after time away, and not by a reload, a trip to a project or a second tab', async ({ page, context }) => {
     await page.clock.setFixedTime(AT);
     await page.goto('/');
     await expect.poll(() => plainText(page)).toContain(words.night);
@@ -40,10 +40,16 @@ test.describe('a visitor in Berlin', () => {
     await page.goto(`/projects/${featuredSlugs()[0]}`);
     await page.goto('/');
     await expect.poll(() => plainText(page)).toContain(words.night);
-    // Closing the browser ends the session. Its storage goes; the lasting storage stays.
-    await page.evaluate(() => sessionStorage.clear());
+    // A second tab in the same browser is still the first visit.
+    const tab = await context.newPage();
+    await tab.clock.setFixedTime(new Date(AT.getTime() + 60_000));
+    await tab.goto('/');
+    await expect.poll(async () => ((await tab.locator('#top [data-greeting]').textContent()) ?? '')).toContain(words.night);
+    await tab.close();
+    // Forty minutes with no page opened: the next one is a return.
+    await page.clock.setFixedTime(new Date(AT.getTime() + 41 * 60_000));
     await page.reload();
-    await expect.poll(() => plainText(page)).toBe('Welcome back. It’s 3:14 AM for you and 9:14 PM in Ottawa.');
+    await expect.poll(() => plainText(page)).toBe('Welcome back. It’s 3:55 AM for you and 9:55 PM in Ottawa.');
     await page.reload();
     await expect.poll(() => plainText(page)).toContain(words.returning);
   });
@@ -132,7 +138,7 @@ test('a card is marked once its project page has been opened, and nothing moves'
 test('with storage blocked the greeting still shows, nothing is marked and nothing breaks', async ({ page }) => {
   const errors = pageErrors(page);
   await page.addInitScript(() => {
-    for (const name of ['localStorage', 'sessionStorage']) {
+    for (const name of ['localStorage', 'sessionStorage']) { // either may be refused by a browser
       Object.defineProperty(window, name, {
         get() {
           throw new Error('blocked');

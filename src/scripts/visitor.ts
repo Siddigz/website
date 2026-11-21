@@ -8,7 +8,7 @@ import { greeting, type GreetingWords } from '../lib/greeting';
 import { markSeen, seenProjects, startVisit } from '../lib/visits';
 
 /** Reading the storage objects can itself throw when a browser blocks them. */
-function storage(name: 'localStorage' | 'sessionStorage'): Storage | undefined {
+function storage(name: 'localStorage'): Storage | undefined {
   try {
     return window[name];
   } catch {
@@ -17,7 +17,7 @@ function storage(name: 'localStorage' | 'sessionStorage'): Storage | undefined {
 }
 
 const local = storage('localStorage');
-const { returning } = startVisit(local, storage('sessionStorage'));
+const { returning } = startVisit(local, Date.now());
 
 // The greeting. If anything about the clock is unusable, the neutral line stays.
 const line = document.querySelector<HTMLElement>('[data-greeting]');

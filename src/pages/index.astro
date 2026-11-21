@@ -46,14 +46,14 @@ const person = {
   <SkillsStrip />
 
   <section id="projects" class="section container">
-    <h2 class="section-title">Featured projects</h2>
+    <h2 class="section-title">{site.sections.projects}</h2>
     <div class="cards">
       {featuredProjects(projects).map((project) => <ProjectCard project={project} />)}
     </div>
   </section>
 
   <section id="more-projects" class="section container">
-    <h2 class="section-title">More projects</h2>
+    <h2 class="section-title">{site.sections.moreProjects}</h2>
     <ProjectFilter categories={moreProjects(projects).map((project) => project.data.category)} />
     <ul class="rows" role="list">
       {moreProjects(projects).map((project) => <ProjectRow project={project} />)}
