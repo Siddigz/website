@@ -1,0 +1,76 @@
+---
+// One page per explainer: a way back, the title, the summary, then its interactive part.
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { WIDGETS } from '../../components/explainers';
+import { getExplainers } from '../../lib/explainer-list';
+import { getSite } from '../../lib/site';
+
+export async function getStaticPaths() {
+  return (await getExplainers()).map((explainer) => ({ params: { slug: explainer.id }, props: { explainer } }));
+}
+
+interface Props {
+  explainer: CollectionEntry<'explainers'>;
+}
+
+const { explainer } = Astro.props;
+const { title, summary } = explainer.data;
+const site = await getSite();
+const Widget = WIDGETS[explainer.id];
+if (!Widget) {
+  throw new Error(`src/content/explainers/${explainer.id}.md has no interactive part: add "${explainer.id}" to src/components/explainers/index.ts`);
+}
+---
+
+<BaseLayout title={`${title} · ${site.fullName}`} description={summary} path={`/explainers/${explainer.id}`} expect="explainer-top">
+  <article class="explainer section container">
+    <header id="explainer-top">
+      <a class="back" href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>
+      <h1>{title}</h1>
+      <p class="summary">{summary}</p>
+    </header>
+    <Widget />
+    <footer>
+      <a href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .explainer {
+    display: grid;
+    gap: var(--space-6);
+    /* The interactive part may hold something wide that scrolls inside itself. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  header {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+    max-inline-size: var(--measure);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .summary {
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+  }
+
+  .back,
+  footer a {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+
+  footer {
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+</style>

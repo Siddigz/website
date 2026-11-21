@@ -79,5 +79,9 @@ main:
       theme: Theme
   # The link to the resume. Shown only while the host's RESUME_ENABLED setting is "true".
   resumeLabel: Resume
+  # The explainers: the section's title on the home page, and the link back from each one.
+  explainers:
+    title: Explainers
+    back: Back to explainers
   # Shown on a featured project's card once its page has been opened.
   seenLabel: Seen

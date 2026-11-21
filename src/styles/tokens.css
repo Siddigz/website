@@ -31,6 +31,11 @@
   /* The "available" light. */
   --color-live-light: oklch(58% 0.17 150);
   --color-live-dark: oklch(78% 0.19 150);
+  /* Two more hues for drawings in the explainers: a violet, and an amber for fibre and light. */
+  --color-violet-light: oklch(50% 0.19 300);
+  --color-violet-dark: oklch(80% 0.11 300);
+  --color-amber-light: oklch(56% 0.13 70);
+  --color-amber-dark: oklch(83% 0.13 85);
   /* A third pill tint, beside the two mixed from the accents further down. */
   --color-tint-warm-light: oklch(93% 0.07 95);
   --color-tint-warm-dark: oklch(34% 0.06 95);
@@ -54,6 +59,8 @@
   --color-border: var(--color-border-light);
   --color-on-accent: var(--color-on-accent-light);
   --color-live: var(--color-live-light);
+  --color-violet: var(--color-violet-light);
+  --color-amber: var(--color-amber-light);
   --color-tint-warm: var(--color-tint-warm-light);
   --color-glow-a: var(--color-glow-a-light);
   --color-glow-b: var(--color-glow-b-light);
@@ -79,11 +86,20 @@
   --color-heat-2: color-mix(in oklab, var(--color-live) 52%, var(--color-bg));
   --color-heat-3: color-mix(in oklab, var(--color-live) 76%, var(--color-bg));
   --color-heat-4: var(--color-live);
+  /* The four layers of a packet, in the packet explainer. */
+  --color-layer-eth: var(--color-accent);
+  --color-layer-ip: var(--color-live);
+  --color-layer-tcp: var(--color-violet);
+  --color-layer-data: var(--color-text-muted);
+  /* A value that has just changed. */
+  --color-changed: color-mix(in oklab, var(--color-amber) 30%, var(--color-surface));
   --gradient-accent: linear-gradient(100deg, var(--color-accent), var(--color-accent-2));
 
   /* Type */
   --font-sans: var(--font-figtree);
   --font-heading: var(--font-bricolage);
+  /* Addresses and numbers in the explainers. Fonts every device already has. */
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --text-sm: 0.875rem;
   --text-base: 1.0625rem;
   --text-lg: 1.125rem;
@@ -171,6 +187,8 @@
   --media-width: 56rem;
   --aside-width: 28rem;
   --backdrop-height: 46rem;
+  --diagram-width: 58rem;
+  --layer-edge: 0.25rem;
   --menu-width: 34rem;
   --menu-height: 30rem;
   --menu-key-width: 3.5rem;
@@ -198,6 +216,8 @@
     --color-border: var(--color-border-dark);
     --color-on-accent: var(--color-on-accent-dark);
     --color-live: var(--color-live-dark);
+    --color-violet: var(--color-violet-dark);
+    --color-amber: var(--color-amber-dark);
     --color-tint-warm: var(--color-tint-warm-dark);
     --color-glow-a: var(--color-glow-a-dark);
     --color-glow-b: var(--color-glow-b-dark);
@@ -218,6 +238,8 @@
     --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
     --color-on-accent: light-dark(var(--color-on-accent-light), var(--color-on-accent-dark));
     --color-live: light-dark(var(--color-live-light), var(--color-live-dark));
+    --color-violet: light-dark(var(--color-violet-light), var(--color-violet-dark));
+    --color-amber: light-dark(var(--color-amber-light), var(--color-amber-dark));
     --color-tint-warm: light-dark(var(--color-tint-warm-light), var(--color-tint-warm-dark));
     --color-glow-a: light-dark(var(--color-glow-a-light), var(--color-glow-a-dark));
     --color-glow-b: light-dark(var(--color-glow-b-light), var(--color-glow-b-dark));

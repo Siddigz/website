@@ -274,7 +274,7 @@ test('skills strip is still under reduced motion', async ({ page }) => {
 test('every section is in order', async ({ page }) => {
   await page.goto('/');
   const ids = await page.locator('main > section').evaluateAll((els) => els.map((e) => e.id));
-  expect(ids).toEqual(['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'activity', 'about', 'contact']);
+  expect(ids).toEqual(['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'explainers', 'activity', 'about', 'contact']);
 });
 
 test('featured cards appear in order, each linking to its page', async ({ page }) => {

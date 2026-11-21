@@ -1,0 +1,561 @@
+---
+// "One packet, hop by hop": a drawing of the path, the packet's headers, and
+// a history table. The page is built showing the first stop, with the whole
+// journey already in the table; the script (src/scripts/explainers/packet.ts)
+// steps through it. Data and sentences come from src/lib/explainers/packet.ts.
+import { DELIVERED, HOPS, LAST_STEP, VERDICT, changeLine, historyRows, stateAt, stepLine } from '../../lib/explainers/packet';
+
+const start = stateAt(0);
+const rows = historyRows(LAST_STEP);
+
+// Where each stop sits along the drawing, in the drawing's own units.
+const X = [50, 160, 270, 380, 460, 540, 620, 735, 845, 975, 1100];
+const TOKEN_Y = 92;
+
+type Box = { x: number; width: number; lines: string[]; under: string[]; kind?: 'router' | 'modem' | 'server' };
+const boxes: Box[] = [
+  { x: 50, width: 84, lines: ['Laptop'], under: ['MAC AA', `IP ${HOPS[0]!.ipSrc}`] },
+  { x: 160, width: 84, lines: ['Home', 'router'], under: ['home side MAC BB', 'ISP side MAC CC'], kind: 'router' },
+  { x: 270, width: 84, lines: ['ISP', 'router'], under: ['MAC DD'], kind: 'router' },
+  { x: 380, width: 76, lines: ['Optical', 'modem'], under: ['fiber end'], kind: 'modem' },
+  { x: 620, width: 76, lines: ['Optical', 'modem'], under: ['fiber end'], kind: 'modem' },
+  { x: 735, width: 84, lines: ['Carrier', 'router'], under: ['MAC EE'], kind: 'router' },
+  { x: 845, width: 84, lines: ['Edge', 'router'], under: ['MAC FF'], kind: 'router' },
+  { x: 1100, width: 84, lines: ['Web', 'server'], under: ['MAC 99', `IP ${start.ipDst}`], kind: 'server' },
+];
+const regions = [
+  { x: 2, width: 204, label: 'Home LAN', at: 104, kind: 'home' },
+  { x: 208, width: 18, label: 'link 1', at: 217, kind: 'link' },
+  { x: 314, width: 376, label: 'link 2 (fiber)', at: 502, kind: 'link' },
+  { x: 779, width: 22, label: 'link 3', at: 790, kind: 'link' },
+  { x: 842, width: 310, label: 'Data-centre LAN', at: 997, kind: 'dc' },
+];
+const wires = [[92, 118], [202, 228], [312, 342], [658, 693], [777, 803], [887, 925], [1025, 1058]];
+const amplifiers = [460, 540];
+const ports = Array.from({ length: 10 }, (_, port) => 930 + port * 9);
+---
+
+<div class="packet" data-packet data-stops={JSON.stringify(X)}>
+  {/* Read out when it changes, so a screen reader follows the packet too. */}
+  <p class="caption" role="status" data-caption>
+    <span class="step" data-step>{stepLine(0)}</span>
+    <span data-caption-text>{HOPS[0]!.caption}</span>
+  </p>
+
+  {/* Wider than a phone: it scrolls inside this box, which the keyboard can reach. The words in it repeat the captions and the table. */}
+  <div class="diagram" role="group" aria-label="Network path from a laptop to a web server" tabindex="0">
+    <svg viewBox="0 0 1160 245" aria-hidden="true">
+      {regions.map((region) => <rect class={`region ${region.kind}`} x={region.x} y="58" width={region.width} height="180" rx="10" />)}
+      {regions.map((region) => <text class="small" x={region.at} y="232">{region.label}</text>)}
+      <line class="fiber" x1="418" y1="125" x2="582" y2="125"></line>
+      <path class="span" d="M342 66H658M342 60v12M658 60v12"></path>
+      <text class="distance" x="500" y="54">~450 km fiber</text>
+      {wires.map(([from, to]) => <line class="wire" x1={from} y1="125" x2={to} y2="125" />)}
+      {
+        boxes.map((box) => (
+          <g>
+            <rect class={`node ${box.kind ?? ''}`} x={box.x - box.width / 2} y="100" width={box.width} height="50" rx="6" />
+            {box.lines.map((line, index) => (
+              <text class="name" x={box.x} y={box.lines.length === 1 ? 129 : 119 + index * 14}>
+                {line}
+              </text>
+            ))}
+            {box.under.map((line, index) => (
+              <text class="small" x={box.x} y={168 + index * 13}>
+                {line}
+              </text>
+            ))}
+          </g>
+        ))
+      }
+      {
+        amplifiers.map((x) => (
+          <g>
+            <polygon class="amplifier" points={`${x - 14},110 ${x - 14},140 ${x + 14},125`} />
+            <text class="small" x={x} y="168">amplifier</text>
+          </g>
+        ))
+      }
+      <rect class="node switch" x="925" y="110" width="100" height="30" rx="3"></rect>
+      <text class="name small-name" x="975" y="124">Switch</text>
+      {ports.map((x) => <rect class="port" x={x} y="130" width="6" height="6" />)}
+      <text class="small" x="975" y="168">Data-centre switch</text>
+      <text class="small" x="975" y="181">(flat, many ports)</text>
+      {/* The packet. The script moves it by setting --packet-x; CSS does the gliding. */}
+      <g class="token" data-token transform={`translate(0 ${TOKEN_Y})`}>
+        <rect class="eth" x="-22" y="-7" width="11" height="14"></rect>
+        <rect class="ip" x="-11" y="-7" width="11" height="14"></rect>
+        <rect class="tcp" x="0" y="-7" width="11" height="14"></rect>
+        <rect class="dat" x="11" y="-7" width="11" height="14"></rect>
+        <rect class="outline" x="-22" y="-7" width="44" height="14"></rect>
+        <text class="name small-name" x="0" y="-11">packet</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="bar">
+    <div class="seg eth" data-seg="eth">
+      <span class="label">Ethernet header</span>
+      <span>dst MAC <span class="v" data-f="eDst">{start.eDst}</span> src MAC <span class="v" data-f="eSrc">{start.eSrc}</span></span>
+    </div>
+    <div class="seg ip" data-seg="ip">
+      <span class="label">IP header</span>
+      <span>
+        dst IP <span class="v" data-f="ipDst">{start.ipDst}</span> src IP <span class="v" data-f="ipSrc">{start.ipSrc}</span> TTL <span class="v" data-f="ttl">{start.ttl}</span>
+      </span>
+    </div>
+    <div class="seg tcp">
+      <span class="label">TCP header</span>
+      <span>dst port <span class="v" data-f="port">{start.port}</span></span>
+    </div>
+    <div class="seg dat">
+      <span class="label">Data</span>
+      <span>your web request (payload)</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button type="button" data-previous aria-disabled="true">Previous</button>
+    <button type="button" class="main" data-next>Next hop</button>
+    <button type="button" data-reset>Reset</button>
+    <span class="info muted" data-info data-delivered={DELIVERED}></span>
+  </div>
+
+  <div class="cards">
+    <div class="card eth">
+      <h2>Ethernet</h2>
+      <div class="field">
+        <span class="fname">dst MAC</span>
+        <span class="fval" data-f="eDst">{start.eDst}</span>
+        <span class="note strong">only reaches the next router</span>
+      </div>
+      <div class="field">
+        <span class="fname">src MAC</span>
+        <span class="fval" data-f="eSrc">{start.eSrc}</span>
+      </div>
+    </div>
+    <div class="card ip">
+      <h2>IP</h2>
+      <div class="field">
+        <span class="fname">dst IP</span>
+        <span class="fval" data-f="ipDst">{start.ipDst}</span>
+        <span class="note strong">never changes end to end</span>
+      </div>
+      <div class="field">
+        <span class="fname">src IP</span>
+        <span class="fval" data-f="ipSrc">{start.ipSrc}</span>
+        <span class="note" data-nat hidden>NAT: home router swaps in your public IP — the destination IP is never touched.</span>
+      </div>
+      <div class="field">
+        <span class="fname">TTL (hops left)</span>
+        <span class="fval" data-f="ttl">{start.ttl}</span>
+        <span class="note">−1 at each router</span>
+      </div>
+    </div>
+    <div class="card tcp">
+      <h2>TCP</h2>
+      <div class="field">
+        <span class="fname">dst port</span>
+        <span class="fval" data-f="port">{start.port}</span>
+        <span class="note">443 = HTTPS</span>
+      </div>
+    </div>
+    <div class="card dat">
+      <h2>Data</h2>
+      <div class="field">
+        <span class="fname">payload</span>
+        <span class="fval">web request</span>
+        <span class="note">never touched by any network device</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="changed" data-changed-line>{changeLine(0)}</p>
+  <p class="verdict" data-verdict hidden>{VERDICT}</p>
+
+  <h2 class="history-title" id="packet-history">History: one row per hop</h2>
+  {/* On a narrow screen the table scrolls inside this box, which the keyboard can reach. */}
+  <div class="table-scroll" role="group" aria-labelledby="packet-history" tabindex="0">
+  <table>
+    <thead>
+      <tr><th scope="col">Link</th><th scope="col">dst MAC</th><th scope="col">src MAC</th><th scope="col">dst IP</th><th scope="col">TTL</th></tr>
+    </thead>
+    <tbody>
+      {/* Every row is here from the start. The script shows them as the packet reaches each stop; without scripts they all show. */}
+      {
+        rows.map((row, index) => (
+          <tr hidden={index > 0} data-current={index === 0 ? '' : undefined}>
+            <td>{row.link}</td>
+            <td class="m">{row.eDst}</td>
+            <td class="m">{row.eSrc}</td>
+            <td class="m">{row.ipDst}</td>
+            <td class="m">{row.ttl}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/explainers/packet';
+</script>
+
+<style>
+  .packet {
+    display: grid;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+
+  /* Each layer of the packet has one colour everywhere: the drawing, the bar and the cards. */
+  .eth {
+    --layer: var(--color-layer-eth);
+  }
+
+  .ip {
+    --layer: var(--color-layer-ip);
+  }
+
+  .tcp {
+    --layer: var(--color-layer-tcp);
+  }
+
+  .dat {
+    --layer: var(--color-layer-data);
+  }
+
+  .caption {
+    display: grid;
+    gap: var(--space-1);
+    /* Room for the longest caption, so the drawing below does not jump between steps. */
+    min-block-size: calc(var(--text-base) * var(--leading-normal) * 4);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    align-content: start;
+  }
+
+  .step {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+  }
+
+  .diagram {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+  }
+
+  svg {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: var(--diagram-width);
+    block-size: auto;
+  }
+
+  /* Sizes inside the drawing are in the drawing's own units: it scales as a whole. */
+  text {
+    fill: var(--color-text);
+    font-family: var(--font-sans);
+    text-anchor: middle;
+  }
+
+  .name {
+    font-size: 11px;
+    font-weight: var(--weight-bold);
+  }
+
+  .small-name {
+    font-size: 10px;
+  }
+
+  .small {
+    fill: var(--color-text-muted);
+    font-size: 10px;
+  }
+
+  .distance {
+    font-size: 12px;
+    font-weight: var(--weight-bold);
+  }
+
+  .region.home {
+    fill: var(--color-tint-a);
+  }
+
+  .region.link {
+    fill: var(--color-tint-c);
+  }
+
+  .region.dc {
+    fill: var(--color-tint-b);
+  }
+
+  .node {
+    fill: var(--color-surface);
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+  }
+
+  .wire {
+    stroke: var(--color-text-muted);
+    stroke-width: 2;
+  }
+
+  .fiber {
+    stroke: var(--color-amber);
+    stroke-width: 4;
+  }
+
+  .span {
+    fill: none;
+    stroke: var(--color-text-muted);
+    stroke-width: 1.2;
+  }
+
+  .amplifier {
+    fill: var(--color-surface);
+    stroke: var(--color-amber);
+    stroke-width: 1.5;
+  }
+
+  .port {
+    fill: var(--color-text-muted);
+  }
+
+  .token rect {
+    fill: var(--layer);
+  }
+
+  .token .outline {
+    fill: none;
+    stroke: var(--color-text);
+  }
+
+  /* The packet sits over the stop it is at. */
+  .token {
+    translate: calc(var(--packet-x, 50) * 1px) 0;
+  }
+
+  .bar {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .seg {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border-block-start: var(--layer-edge) solid var(--layer);
+    border-radius: var(--radius-sm);
+    background: color-mix(in oklab, var(--layer) 12%, var(--color-surface));
+    font-size: var(--text-sm);
+  }
+
+  /* At the server every header has been read and removed. */
+  .seg[data-gone] {
+    opacity: 0.35;
+  }
+
+  .label,
+  .card h2 {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0;
+  }
+
+  .v,
+  .fval,
+  .m {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-label);
+  }
+
+  .v,
+  .fval {
+    padding-inline: var(--space-1);
+    border-radius: var(--radius-sm);
+  }
+
+  /* A value this stop has just rewritten. It stays marked until the next step. */
+  [data-changed] {
+    background: var(--color-changed);
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .controls button {
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .controls .main {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .controls button[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .info {
+    font-size: var(--text-sm);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  .card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-block-start: var(--layer-edge) solid var(--layer);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .field {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-1);
+  }
+
+  .fname,
+  .note {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .fval {
+    font-size: var(--text-lg);
+  }
+
+  .note.strong {
+    color: var(--color-text);
+    font-weight: var(--weight-label);
+  }
+
+  /* `hidden` must win over the display values set above. */
+  .packet [hidden] {
+    display: none;
+  }
+
+  .changed,
+  .verdict {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+  }
+
+  .verdict {
+    border: var(--border-width) solid var(--color-layer-ip);
+  }
+
+  .history-title {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-lg);
+  }
+
+  table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    padding: var(--space-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+    text-align: start;
+  }
+
+  /* Addresses and column names stay whole; only the link's name may wrap. */
+  th,
+  .m {
+    white-space: nowrap;
+  }
+
+  tr[data-current] td {
+    background: var(--color-tint-c);
+  }
+
+  /* Without scripts the buttons cannot work: they go, and the table shows the whole journey. */
+  @media (scripting: none) {
+    .controls {
+      display: none;
+    }
+
+    .packet tbody tr[hidden] {
+      display: table-row;
+    }
+  }
+
+  /* Movement, only for visitors who allow it. Without it, values simply change. */
+  @media (prefers-reduced-motion: no-preference) {
+    .token {
+      transition: translate var(--duration-base) var(--ease-out);
+    }
+
+    /* A router replaces the Ethernet header: the old one leaves, the new one arrives. */
+    .seg[data-swap] {
+      animation: header-swap var(--duration-base) var(--ease-out);
+    }
+
+    [data-changed] {
+      animation: value-pop var(--duration-base) var(--ease-out);
+    }
+  }
+
+  @keyframes header-swap {
+    0% {
+      opacity: 1;
+      translate: 0;
+    }
+
+    45% {
+      opacity: 0;
+      translate: calc(-1 * var(--space-6)) 0;
+    }
+
+    55% {
+      opacity: 0;
+      translate: var(--space-6) 0;
+    }
+
+    100% {
+      opacity: 1;
+      translate: 0;
+    }
+  }
+
+  @keyframes value-pop {
+    from {
+      scale: 1.25;
+    }
+  }
+</style>

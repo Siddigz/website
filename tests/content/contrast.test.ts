@@ -20,6 +20,11 @@ const PAIRS: [string, string, number][] = [
   ['on-accent', 'accent', 4.5],
   ['accent-2', 'bg', 3],
   ['live', 'surface', 3],
+  // Lines and marks in the explainers' drawings.
+  ['violet', 'surface', 3],
+  ['violet', 'bg', 3],
+  ['amber', 'surface', 3],
+  ['amber', 'bg', 3],
 ];
 
 describe.each(['light', 'dark'])('%s theme', (scheme) => {

@@ -3,7 +3,7 @@ import { pagePaths } from '../content/helpers';
 
 // Every page a visitor can reach, plus the not-found page and the test-only page.
 const pages = [...pagePaths(), '/does-not-exist', '/dev/no-looking-for'];
-const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'activity', 'about', 'contact'];
+const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'explainers', 'activity', 'about', 'contact'];
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
@@ -15,7 +15,16 @@ test.describe('without JavaScript', () => {
     await expect(page.getByRole('list', { name: 'Skills' }).getByRole('listitem').first()).toBeVisible();
   });
 
-  for (const path of pagePaths().slice(1)) {
+  for (const path of pagePaths().filter((path) => path.startsWith('/explainers/'))) {
+    test(`${path} shows its title and summary`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.locator('h1')).toBeVisible();
+      await expect(page.locator('main header p')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Back to explainers' }).first()).toBeVisible();
+    });
+  }
+
+  for (const path of pagePaths().filter((path) => path.startsWith('/projects/'))) {
     test(`${path} shows its full content`, async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('h1')).toBeVisible();

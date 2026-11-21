@@ -97,6 +97,15 @@ export const proofSchema = z.object({
   order: z.number(),
 });
 
+/** An explainer page. Its interactive part is the component named for its file in src/components/explainers/. */
+export const explainerSchema = z.object({
+  title: z.string().min(1),
+  /** One sentence. Also the page's description and the text on its home page card. */
+  summary: z.string().min(1),
+  /** Lower comes first. */
+  order: z.number().int(),
+});
+
 export const skillsSchema = z.object({
   id: z.string().optional(),
   items: z.array(z.string().min(1)).min(1),
@@ -137,6 +146,7 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  explainers: z.object({ title: z.string().min(1), back: z.string().min(1) }),
   resumeLabel: z.string().min(1),
   email: z.object({
     button: z.string().min(1),

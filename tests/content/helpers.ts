@@ -64,4 +64,13 @@ export const featuredSlugs = (): string[] => featuredProjects(asEntries()).map((
 export const moreSlugs = (): string[] => moreProjects(asEntries()).map((entry) => entry.id);
 
 /** Every page a visitor can reach from the home page. */
-export const pagePaths = (): string[] => ['/', ...featuredSlugs().map((slug) => `/projects/${slug}`)];
+export const explainerSlugs = (): string[] =>
+  readdirSync('src/content/explainers')
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => name.replace(/\.md$/, ''));
+
+export const pagePaths = (): string[] => [
+  '/',
+  ...featuredSlugs().map((slug) => `/projects/${slug}`),
+  ...explainerSlugs().map((slug) => `/explainers/${slug}`),
+];
