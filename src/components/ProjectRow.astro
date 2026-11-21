@@ -51,6 +51,16 @@ const { data } = Astro.props.project;
     border-block-end: var(--border-width) solid var(--color-border);
   }
 
+  /* A row the filter has taken out. The rule above would otherwise keep it on screen. */
+  .row[hidden] {
+    display: none;
+  }
+
+  /* While the filter changes, every row moves and fades the same way. */
+  .row {
+    view-transition-class: filter-row;
+  }
+
   /* A thumbnail takes a first column only on rows that have one. */
   .row:has(.thumb) {
     grid-template-columns: var(--thumb-width) 1fr auto;

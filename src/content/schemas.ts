@@ -137,6 +137,11 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  filter: z.object({
+    all: z.string().min(1),
+    label: z.string().min(1),
+    status: z.string().includes('{n}').includes('{total}'),
+  }),
 });
 
 export const aboutSchema = z.object({

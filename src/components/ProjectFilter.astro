@@ -1,0 +1,70 @@
+---
+import { CATEGORIES, CATEGORY_LABELS, type Category } from '../content/schemas';
+import { getSite } from '../lib/site';
+
+interface Props {
+  /** The category of every row in the list, one entry per row. */
+  categories: Category[];
+}
+
+const { filter } = await getSite();
+// A category with no row gets no button.
+const present = CATEGORIES.filter((category) => Astro.props.categories.includes(category));
+---
+
+{/* Buttons that narrow the list below to one category. Without scripts they are hidden and every row shows. */}
+<div class="filter" role="group" aria-label={filter.label} data-filter data-status={filter.status}>
+  <button type="button" data-filter-value="all" aria-pressed="true">{filter.all}</button>
+  {present.map((category) => <button type="button" data-filter-value={category} aria-pressed="false">{CATEGORY_LABELS[category]}</button>)}
+</div>
+{/* Announced to screen readers when the list changes. */}
+<p class="visually-hidden" role="status" data-filter-status></p>
+
+<script>
+  import '../scripts/filter';
+</script>
+
+<style>
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-end: var(--space-4);
+  }
+
+  /* The buttons do nothing without scripts, so they are not offered. */
+  @media (scripting: none) {
+    .filter {
+      display: none;
+    }
+  }
+
+  button {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  button:hover {
+    border-color: var(--color-accent);
+  }
+
+  button[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    button {
+      transition:
+        background-color var(--duration-fast) var(--ease-out),
+        border-color var(--duration-fast) var(--ease-out),
+        color var(--duration-fast) var(--ease-out);
+    }
+  }
+</style>
