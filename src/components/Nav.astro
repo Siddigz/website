@@ -1,14 +1,18 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import { getExplainers } from '../lib/explainer-list';
 import { getSite } from '../lib/site';
 
 const site = await getSite();
 
 // Same order as the sections on the home page. `sections` are the ids that
 // count as "being in" this link's part of the page.
+const hasExplainers = (await getExplainers()).length > 0;
 const links = [
   { href: '/#experience', label: 'Experience', sections: ['experience'] },
   { href: '/#projects', label: 'Projects', sections: ['projects', 'more-projects'] },
+  // The one section a visitor would not guess is there.
+  ...(hasExplainers ? [{ href: '/#explainers', label: site.explainers.title, sections: ['explainers'] }] : []),
   { href: '/#about', label: 'About', sections: ['about'] },
 ];
 ---
@@ -188,11 +192,12 @@ const links = [
     }
   }
 
-  /* On narrow screens the links drop to their own row. */
+  /* On narrow screens the links drop to their own row, a little closer together so all of them fit. */
   @media (max-width: 30rem) {
     .links {
       order: 3;
       flex-basis: 100%;
+      gap: var(--space-4);
     }
   }
 </style>

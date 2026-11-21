@@ -52,6 +52,9 @@ test('with the switch on, a Resume link sits with the other buttons at the top',
   const link = page.locator('#top .links').getByRole('link', { name: site.resumeLabel });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('href', '/resume.pdf');
+  // It opens beside the site, in a new tab, without handing that tab a way back into this one.
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAttribute('rel', /noopener/);
   const order = await page.locator('#top .links > li').evaluateAll((items) => items.map((item) => (item as HTMLElement).innerText.trim()));
   expect(order).toEqual(['GitHub', 'LinkedIn', 'Email', site.resumeLabel]);
 });

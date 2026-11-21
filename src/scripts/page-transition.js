@@ -22,6 +22,12 @@
   };
 
   /**
+   * A picture still on its way has nothing to show, so it stays out of the animation.
+   * @param {HTMLImageElement} picture
+   */
+  const loaded = (picture) => picture.complete && picture.naturalWidth > 0;
+
+  /**
    * Sets a transition name on each element until the transition is over.
    * @param {[HTMLElement | null, string][]} pairs
    * @param {ViewTransition} transition
@@ -44,12 +50,12 @@
     if (!card) return;
     /** @type {HTMLElement | null} */
     const heading = card.querySelector('h3');
-    /** @type {HTMLElement | null} */
+    /** @type {HTMLImageElement | null} */
     const picture = card.querySelector('img');
     lend(
       [
         [heading && onScreen(heading) ? heading : null, 'project-title'],
-        [picture && onScreen(picture) ? picture : null, 'project-image'],
+        [picture && loaded(picture) && onScreen(picture) ? picture : null, 'project-image'],
       ],
       transition,
     );
@@ -77,9 +83,9 @@
     }
     const from = activation?.from?.url;
     if (from) connectCard(projectSlug(from), event.viewTransition);
-    // On a project page: a lead picture that starts off screen stays out of it.
-    /** @type {HTMLElement | null} */
+    // On a project page: a lead picture that starts off screen, or has not arrived yet, stays out of it.
+    /** @type {HTMLImageElement | null} */
     const lead = document.querySelector('[data-transition-image]');
-    if (lead && !onScreen(lead)) lend([[lead, 'none']], event.viewTransition);
+    if (lead && !(loaded(lead) && onScreen(lead))) lend([[lead, 'none']], event.viewTransition);
   });
 })();

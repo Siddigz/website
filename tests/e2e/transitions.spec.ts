@@ -143,3 +143,18 @@ test('a picture that is off screen on the new page is left out of the animation'
   expect(arriving.names).toContain('project-title');
   expect(arriving.names).not.toContain('project-image');
 });
+
+test('a card picture that has not loaded yet takes no part in the animation', async ({ page }) => {
+  await record(page);
+  // The cards' pictures never arrive, as on a very slow connection.
+  await page.route(/\/_astro\/cover\./, () => {});
+  await page.goto('/', { waitUntil: 'commit' });
+  test.skip(!(await animatesBetweenPages(page)), 'this browser does not animate between pages');
+  const link = page.locator(`#projects a[href="/projects/${first}"]`);
+  await link.scrollIntoViewIfNeeded();
+  await link.click();
+  await expect(page.locator('h1')).toHaveText(title(first));
+  const leaving = await entryFor(page, 'pageswap', (path) => path === '/');
+  expect(leaving.names).toContain('project-title');
+  expect(leaving.names).not.toContain('project-image');
+});
