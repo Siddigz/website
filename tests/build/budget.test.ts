@@ -23,15 +23,23 @@ describe('built site', () => {
 
   it('home page ships at most 60 KB of compressed JavaScript', () => {
     const html = readFileSync(join(DIST, 'index.html'), 'utf8');
-    const external = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((match) =>
-      readFileSync(join(DIST, match[1]!.split('?')[0]!)),
-    );
+    // The host's analytics script is not counted (rule 12), and only exists on the host.
+    const external = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
+      .map((match) => match[1]!.split('?')[0]!)
+      .filter((src) => !src.startsWith('/_vercel/'))
+      .map((src) => readFileSync(join(DIST, src)));
     const inline = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((match) =>
       Buffer.from(match[1] ?? ''),
     );
     const total = [...external, ...inline].reduce((sum, source) => sum + gzipSync(source).length, 0);
     expect(total).toBeGreaterThan(0);
     expect(total).toBeLessThanOrEqual(JS_BUDGET_BYTES);
+  });
+
+  it('a build made anywhere but on the host asks for no analytics script', () => {
+    if (process.env.VERCEL === '1') return;
+    const asking = built.filter(([, text]) => text.includes('/_vercel/')).map(([path]) => path);
+    expect(asking).toEqual([]);
   });
 
   it('no page needs a third-party request to render', () => {

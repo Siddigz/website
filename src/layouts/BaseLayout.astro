@@ -8,6 +8,7 @@ import tokens from '../styles/tokens.css?raw';
 import { declaredValue, toHex } from '../lib/colour';
 import pageTransition from '../scripts/page-transition.js?raw';
 import { getSite } from '../lib/site';
+import { onVercel } from '../lib/build-env';
 
 interface Props {
   title: string;
@@ -100,6 +101,11 @@ const barColour = {
       <slot />
     </main>
     <CommandMenu />
+    {/*
+      Page-view counting by the host: no cookies, nothing identifying, same address as the site.
+      Only in builds made on the host, so local and test builds never ask for it.
+    */}
+    {onVercel && <script is:inline defer src="/_vercel/insights/script.js" />}
     <script>
       // The greeting from the visitor's clock, and the marks on projects they have opened.
       import '../scripts/visitor';
