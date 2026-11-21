@@ -7,6 +7,7 @@ import CommandMenu from '../components/CommandMenu.astro';
 import tokens from '../styles/tokens.css?raw';
 import { declaredValue, toHex } from '../lib/colour';
 import pageTransition from '../scripts/page-transition.js?raw';
+import { getSite } from '../lib/site';
 
 interface Props {
   title: string;
@@ -20,9 +21,18 @@ interface Props {
    * from the page before, it waits until this element is there to animate to.
    */
   expect?: string;
+  /**
+   * The picture other sites show when this page is shared: a path on this
+   * site, 1200 by 630. Pages without one of their own use the home page's.
+   */
+  image?: string;
+  /** What that picture shows, in words. */
+  imageAlt?: string;
 }
 
-const { title, description, path, noindex = false, expect } = Astro.props;
+const { title, description, path, noindex = false, expect, image = '/og/home.png' } = Astro.props;
+const imageAlt = Astro.props.imageAlt ?? `${title}. ${description}`;
+const site = await getSite();
 // Not yet in the HTML types, so passed as a plain set of attributes.
 const blocking = { blocking: 'render' } as const;
 const canonical = new URL(path, Astro.site);
@@ -63,6 +73,18 @@ const barColour = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    {/* What other sites show when this page is shared. */}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={path === '/' ? 'website' : 'article'} />
+    <meta property="og:site_name" content={site.fullName} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
     {expect && <link rel="expect" href={`#${expect}`} {...blocking} />}
     {/* Listening before the first draw, for the animation between a project's card and its page. */}
     <script is:inline set:html={pageTransition} />

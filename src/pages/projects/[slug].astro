@@ -29,7 +29,11 @@ const site = await getSite();
 const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url;
 ---
 
-<BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`} expect="project-top">
+<BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`}
+  expect="project-top"
+  image={`/og/projects/${project.id}.png`}
+  imageAlt={`${data.title}. ${data.oneLiner}`}
+>
   <article class="project section container" data-project-slug={project.id}>
     <header id="project-top">
       <a class="back" href="/#projects"><span aria-hidden="true">←</span> Back to projects</a>
