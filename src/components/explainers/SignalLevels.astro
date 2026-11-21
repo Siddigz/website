@@ -95,11 +95,17 @@ const cards = [
 </script>
 
 <style>
+  /* As wide as the rest of the page, so it sits squarely under the title. */
   .signal {
     display: grid;
     gap: var(--space-4);
     min-inline-size: 0;
-    max-inline-size: var(--drawing-width);
+  }
+
+  /* Text keeps a comfortable line length; the controls and drawings use the full width. */
+  .intro,
+  .legend {
+    max-inline-size: var(--measure);
   }
 
   .panel {

@@ -153,7 +153,7 @@
   --squiggle-width: 4.5rem;
   --squiggle-height: 0.5rem;
   --live-ping-reach: 0.375rem;
-  --name-icon-size: 1.125rem;
+  --name-icon-size: 1.375rem;
 
   /* Depth: shadows carry a little of the accent. */
   --shadow-card: 0 1px 2px color-mix(in oklab, var(--color-shade) 8%, transparent), 0 1rem 2rem -1rem color-mix(in oklab, var(--color-shade) 28%, transparent);
@@ -176,6 +176,10 @@
   --tilt-photo-hover: -1deg;
   --scale-photo-hover: 1.02;
   --turn-icon: 30deg;
+  /* The speaker on the name: tipped up to the right, further while it plays, and small before it pops up. */
+  --tilt-speaker: -30deg;
+  --tilt-speaker-playing: -42deg;
+  --scale-speaker-rest: 0.6;
   --duration-letter: 300ms;
   --stagger-letter: 45ms;
   --lift-letter: 0.12em;
@@ -194,8 +198,7 @@
   --aside-width: 28rem;
   --backdrop-height: 46rem;
   --diagram-width: 58rem;
-  --drawing-height: 16rem;
-  --drawing-width: 56rem;
+  --drawing-height: 17rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;
   --menu-height: 30rem;

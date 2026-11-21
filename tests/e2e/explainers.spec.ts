@@ -39,6 +39,22 @@ for (const explainer of explainers) {
     await expect(page.locator('#explainers')).toBeInViewport();
   });
 
+  test(`${explainer.slug}: the interactive part is as wide as the page's content, so it sits squarely under the title`, async ({ page }) => {
+    await page.goto(`/explainers/${explainer.slug}`);
+    const edges = await page.evaluate(() => {
+      const article = document.querySelector('article.explainer')!;
+      const style = getComputedStyle(article);
+      const outer = article.getBoundingClientRect();
+      const widget = article.querySelector('header')!.nextElementSibling!.getBoundingClientRect();
+      return {
+        left: Math.round(widget.left - (outer.left + parseFloat(style.paddingLeft))),
+        right: Math.round(outer.right - parseFloat(style.paddingRight) - widget.right),
+      };
+    });
+    expect(Math.abs(edges.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(edges.right)).toBeLessThanOrEqual(1);
+  });
+
   test(`${explainer.slug}: the menu lists it`, async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: site.menu.open }).click();
