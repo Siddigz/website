@@ -68,7 +68,7 @@ ol[role='list'] {
 a {
   color: var(--color-accent);
   text-decoration-thickness: var(--indicator-width);
-  text-underline-offset: 0.2em;
+  text-underline-offset: var(--underline-offset);
 }
 
 ::selection {

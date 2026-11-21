@@ -61,6 +61,22 @@ describe('built site', () => {
     expect(html.match(/<link rel="preload"[^>]*as="font"/g)?.length).toBe(2);
   });
 
+  it('no built file holds a mail link, in the pages or in the server function', () => {
+    // The Email button fetches the address when pressed, and puts the link together then.
+    const everything = [...built, ...textFiles(join(BUILT, '..', 'functions'))];
+    expect(everything.length).toBeGreaterThan(built.length);
+    const hits = everything.filter(([, text]) => text.includes('mailto:')).map(([path]) => path);
+    expect(hits).toEqual([]);
+  });
+
+  it('the two email addresses are answered by the server, not built ahead of time', () => {
+    const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
+    for (const path of ['/api/contact/token', '/api/contact/address']) {
+      expect(existsSync(join(DIST, path)), path).toBe(false);
+      expect(routes.some((route: any) => route.dest === '_render' && new RegExp(route.src).test(path)), path).toBe(true);
+    }
+  });
+
   it('no built file contains an email address', () => {
     const hits = built.flatMap(([path, text]) =>
       (text.match(EMAIL_PATTERN) ?? []).map((hit) => `${path}: ${hit}`),

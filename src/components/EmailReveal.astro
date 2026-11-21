@@ -1,0 +1,107 @@
+---
+// A button that fetches the contact address when pressed. The address is not
+// in the page: it comes from the server, in exchange for a short-lived token.
+import { getSite } from '../lib/site';
+
+interface Props {
+  /** `button` looks like the site's other buttons; `link` suits a row of plain links. */
+  look?: 'button' | 'link';
+}
+
+const { look = 'button' } = Astro.props;
+const { email } = await getSite();
+---
+
+<span class="email" data-email data-copy={email.copy} data-copied={email.copied} data-failed={email.failed}>
+  <button type="button" class:list={[look === 'button' ? 'button' : 'plain']} data-email-reveal>{email.button}</button>
+  {/* Once the address has arrived, the script puts a link to it here, before the Copy button. */}
+  <span class="result" data-email-result hidden>
+    <button type="button" class="copy" data-email-copy>{email.copy}</button>
+  </span>
+  {/* Says what happened, to everyone: a failure stays on screen; "Copied" is also on the button. */}
+  <span class="status" role="status" data-email-status></span>
+</span>
+
+<script>
+  import '../scripts/email-reveal';
+</script>
+
+<style>
+  .email {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  /* The buttons do nothing without scripts, so they are not offered. */
+  @media (scripting: none) {
+    .email {
+      display: none;
+    }
+  }
+
+  /* Looks like the plain links beside it. */
+  .plain {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent);
+    font-weight: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: var(--indicator-width);
+    text-underline-offset: var(--underline-offset);
+    cursor: pointer;
+  }
+
+  .result {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  /* The rule above would otherwise keep the empty result on screen. */
+  .result[hidden],
+  [data-email-reveal][hidden] {
+    display: none;
+  }
+
+  .result :global(a) {
+    font-weight: var(--weight-medium);
+    overflow-wrap: anywhere;
+  }
+
+  .copy {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    border-color: var(--color-accent);
+  }
+
+  .status {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+
+  /* "Copied" is already on the button, so here it is only read out. */
+  .status[data-kind='copied'] {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .status:empty {
+    display: none;
+  }
+</style>

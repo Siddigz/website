@@ -30,8 +30,9 @@ test('hero shows the name, pitch, school facts and links', async ({ page }) => {
   await expect(page.locator('#top [data-greeting]')).toHaveText(/\S/);
   await expect(page.locator('#top').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
   await expect(page.locator('#top').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
+  // The address is fetched on request (see email.spec.ts): until then there is a button and no mail link.
   await expect(page.locator('#top').getByRole('link', { name: /email/i })).toHaveCount(0);
-  await expect(page.locator('#top').getByRole('button', { name: /email/i })).toHaveCount(0);
+  await expect(page.locator('#top').getByRole('button', { name: 'Email' })).toHaveCount(1);
 });
 
 test('looking-for line follows the switch', async ({ page }) => {
@@ -391,11 +392,13 @@ test('about shows the bio, activities and the Hack the North caption', async ({ 
   }
 });
 
-test('contact has GitHub and LinkedIn and no email control', async ({ page }) => {
+test('contact has GitHub, LinkedIn and an Email button, and no mail link until it is pressed', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#contact').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
   await expect(page.locator('#contact').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
-  await expect(page.locator('#contact').getByText(/email/i)).toHaveCount(0);
+  // The address is fetched on request: see email.spec.ts.
+  await expect(page.locator('#contact').getByRole('button', { name: 'Email' })).toBeVisible();
+  await expect(page.locator('#contact a[href^="mail"]')).toHaveCount(0);
   await expect(page.locator('#contact')).toContainText(site.contactNote);
 });
 

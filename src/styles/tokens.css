@@ -124,6 +124,7 @@
   --border-width: 1px;
   --indicator-width: 2px;
   --focus-width: 2px;
+  --underline-offset: 0.2em;
   --photo-edge: 0.375rem;
   --button-depth: 0.25rem;
   --button-rise: 0.125rem;

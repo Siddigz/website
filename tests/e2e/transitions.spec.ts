@@ -35,6 +35,12 @@ async function record(page: Page) {
 }
 
 const log = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('vt-log') ?? '[]') as Entry[]);
+/** The entry for one event on one kind of page, waited for: the address changes a moment before the page is revealed. */
+async function entryFor(page: Page, event: string, onPage: (path: string) => boolean): Promise<Entry> {
+  const find = async () => (await log(page).catch(() => [])).find((entry) => entry.event === event && onPage(entry.page));
+  await expect.poll(find).toBeTruthy();
+  return (await find())!;
+}
 const animatesBetweenPages = (page: Page) =>
   page.evaluate(() => 'onpagereveal' in window && typeof CSSViewTransitionRule !== 'undefined');
 
@@ -61,9 +67,8 @@ test('going from a card to its page animates, carrying the title and the picture
   await link.scrollIntoViewIfNeeded();
   await link.click();
   await expect(page.locator('h1')).toHaveText(title(first));
-  const entries = await log(page);
-  const leaving = entries.find((entry) => entry.event === 'pageswap' && entry.page === '/')!;
-  const arriving = entries.find((entry) => entry.event === 'pagereveal' && entry.page.startsWith('/projects/'))!;
+  const leaving = await entryFor(page, 'pageswap', (path) => path === '/');
+  const arriving = await entryFor(page, 'pagereveal', (path) => path.startsWith('/projects/'));
   expect(leaving.transition).toBe(true);
   expect(arriving.transition).toBe(true);
   // The card that was pressed, and only that one, carries the names the project page uses.
@@ -86,7 +91,7 @@ test('coming back to the list carries the title back to its card', async ({ page
   test.skip(!(await animatesBetweenPages(page)), 'this browser does not animate between pages');
   await page.getByRole('link', { name: 'Back to projects' }).first().click();
   await expect(page).toHaveURL(/\/#projects$/);
-  const arriving = (await log(page)).find((entry) => entry.event === 'pagereveal' && entry.page === '/')!;
+  const arriving = await entryFor(page, 'pagereveal', (path) => path === '/');
   expect(arriving.transition).toBe(true);
   expect(arriving.names).toContain('project-title');
 });
@@ -134,7 +139,7 @@ test('a picture that is off screen on the new page is left out of the animation'
   await expect(page.locator('h1')).toHaveText(title(first));
   const lead = await page.locator('main img').first().boundingBox();
   test.skip(lead!.y < 420, 'the lead picture is on screen at this size');
-  const arriving = (await log(page)).find((entry) => entry.event === 'pagereveal' && entry.page.startsWith('/projects/'))!;
+  const arriving = await entryFor(page, 'pagereveal', (path) => path.startsWith('/projects/'));
   expect(arriving.names).toContain('project-title');
   expect(arriving.names).not.toContain('project-image');
 });
