@@ -165,6 +165,8 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await page.goto('/');
     await opener(page).click();
     await expect(search(page)).toBeFocused();
+    // The menu fades in. Colours are only final once that is over.
+    await menu(page).evaluate((dialog) => Promise.all(dialog.getAnimations().map((animation) => animation.finished)));
     const { violations } = await new AxeBuilder({ page })
       .include('#command-menu')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
