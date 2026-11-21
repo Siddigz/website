@@ -121,3 +121,35 @@ describe('structured data', () => {
     for (const { path, html } of pages.slice(1)) expect(html, path).not.toContain('application/ld+json');
   });
 });
+
+describe('the site icon', () => {
+  const tokens = readFileSync('src/styles/tokens.css', 'utf8');
+  const html = pagePaths().map((path) => ({ path, html: readFileSync(fileFor(path), 'utf8') }));
+
+  it.each(html)('$path links the drawn icon, the small picture and the phone icon', ({ html: page }) => {
+    expect(page).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+    expect(page).toContain('<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">');
+    expect(page).toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png">');
+  });
+
+  it('the two pictures are 32 and 180 pixels across', async () => {
+    for (const [file, size] of [['favicon-32.png', 32], ['apple-touch-icon.png', 180]] as const) {
+      const { width, height, format } = await sharp(join(BUILT, file)).metadata();
+      expect([width, height, format], file).toEqual([size, size, 'png']);
+    }
+  });
+
+  it('the drawn icon holds shapes only, on the accent colour', async () => {
+    const { declaredValue, toHex } = await import('../../src/lib/colour');
+    const svg = readFileSync(join(BUILT, 'favicon.svg'), 'utf8');
+    expect(svg).not.toMatch(/<text|font-family|<style|<image|href/);
+    expect(svg.toLowerCase()).toContain(toHex(declaredValue(tokens, '--color-accent-light')));
+    expect(statSync(join(BUILT, 'favicon.svg')).size).toBeLessThan(8 * 1024);
+  });
+
+  it('a bare /favicon.ico leads to the small picture', () => {
+    const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
+    const rule = routes.find((route: any) => route.headers?.Location === '/favicon-32.png');
+    expect(new RegExp(rule.src).test('/favicon.ico')).toBe(true);
+  });
+});

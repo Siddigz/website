@@ -69,6 +69,10 @@ const barColour = {
     {/* Self-hosted fonts, both fetched early: the name at the top and the text under it. */}
     <Font cssVariable="--font-bricolage" preload />
     <Font cssVariable="--font-figtree" preload />
+    {/* The site's icon: drawn, with a small picture for browsers that want one, and a larger one for phone home screens. */}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
