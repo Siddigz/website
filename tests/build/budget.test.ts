@@ -4,7 +4,7 @@
  * in .vercel/output/config.json, not pages.
  */
 import { describe, it, expect } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { BUILT, EMAIL_PATTERN, readYaml, textFiles } from '../content/helpers';
@@ -75,6 +75,17 @@ describe('built site', () => {
       expect(existsSync(join(DIST, path)), path).toBe(false);
       expect(routes.some((route: any) => route.dest === '_render' && new RegExp(route.src).test(path)), path).toBe(true);
     }
+  });
+
+  it('the resume is answered by the server, and a normal build neither holds a file for it nor links to it', () => {
+    expect(existsSync(join(DIST, 'resume.pdf'))).toBe(false);
+    const pdfs = (readdirSync(DIST, { recursive: true }) as string[]).filter((path) => path.endsWith('.pdf'));
+    expect(pdfs).toEqual([]);
+    const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
+    expect(routes.some((route: any) => route.dest === '_render' && new RegExp(route.src).test('/resume.pdf'))).toBe(true);
+    if (process.env.RESUME_ENABLED === 'true') return;
+    const linking = pages.filter(([, html]) => /href="[^"]*resume/i.test(html)).map(([path]) => path);
+    expect(linking).toEqual([]);
   });
 
   it('no built file contains an email address', () => {

@@ -41,6 +41,21 @@ test('looking-for line follows the switch', async ({ page }) => {
   if (site.lookingFor.enabled) await expect(page.locator('[data-looking-for]')).toHaveText(site.lookingFor.text);
 });
 
+test('there is no Resume link while the switch is off', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: site.resumeLabel })).toHaveCount(0);
+  await expect(page.locator('a[href*="resume"]')).toHaveCount(0);
+});
+
+test('with the switch on, a Resume link sits with the other buttons at the top', async ({ page }) => {
+  await page.goto('/dev/resume-on');
+  const link = page.locator('#top .links').getByRole('link', { name: site.resumeLabel });
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('href', '/resume.pdf');
+  const order = await page.locator('#top .links > li').evaluateAll((items) => items.map((item) => (item as HTMLElement).innerText.trim()));
+  expect(order).toEqual(['GitHub', 'LinkedIn', 'Email', site.resumeLabel]);
+});
+
 test('a test-only page asks not to be indexed', async ({ page }) => {
   await page.goto('/dev/no-looking-for');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');

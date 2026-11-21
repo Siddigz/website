@@ -137,6 +137,7 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  resumeLabel: z.string().min(1),
   email: z.object({
     button: z.string().min(1),
     copy: z.string().min(1),

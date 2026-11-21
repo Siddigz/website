@@ -98,6 +98,20 @@ test('Enter on a focused word plays it, and the focus ring shows', async ({ page
   expect(await page.evaluate(() => (window as any).played)).toBe(1);
 });
 
+test('a recording that never reports its end is still unmarked once it should be over', async ({ page }) => {
+  await page.goto('/');
+  // Playback "starts" but no end is ever announced, as when a browser stalls.
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = function () {
+      return Promise.resolve();
+    };
+    Object.defineProperty(HTMLMediaElement.prototype, 'duration', { get: () => 0.3 });
+  });
+  await first(page).click();
+  await expect(first(page)).toHaveAttribute('data-playing', '');
+  await expect(first(page)).not.toHaveAttribute('data-playing', '', { timeout: 5_000 });
+});
+
 test('starting one word stops the other', async ({ page }) => {
   await page.goto('/');
   // Hold every recording open so the first is still playing when the second starts.
