@@ -19,6 +19,23 @@
 5. **One wording change in an explainer** (see "Decisions made here", item 7). Approved on 2026-11-20.
 6. **At ship:** merge the pull request, make `siddigz.com` the primary domain, the private history steps, the six pinned repositories, LinkedIn.
 
+## Progress
+
+**2026-11-21: Tasks 1 to 17 are built, tested and pushed to `revamp`.** Tasks 18 and 19 (checks before ship, and ship) are what is left, and they wait on the owner: approval of the new text and of the new look, and the go-ahead to open the pull request.
+
+Where the build differs from what is written below:
+
+- **Build layout (Task 1):** tests and the local server read `.vercel/output/static`, the folder the host serves.
+- **Greeting (Task 3):** its room is held by an invisible copy of the longest greeting, not a line count.
+- **Without scripts (Tasks 4, 5, 7, 10, 11):** buttons that need a script are hidden with `@media (scripting: none)`.
+- **Menu (Task 5):** the theme entry uses the toggle's two existing labels. The dialog is named "Command menu" for screen readers.
+- **Page transitions (Task 6):** the script is plain JavaScript placed in the head, allowed by its hash.
+- **Packet explainer (Task 10):** a changed value stays marked until the next step; the header swap is one 250 ms animation.
+- **Speed (Task 16):** the first measurement put the home page at 1.88 s, over budget. The heading font now ships only weight 800 (the one in use), which brought it to 1.73 s.
+- **Added at the owner's request (2026-11-21):** the skills strip glides to a stop and back up to speed over 300 ms, instead of freezing.
+
+Still the owner's to approve: every entry under "New text" (plus "Command menu", "Copy"/"Copied" and the README), the seven link preview pictures, the site icon, the explainer pages' look, the new pieces on the home page (name buttons, greeting, Email button, filter, menu, Explainers section), and the two recordings whenever convenient.
+
 ## Global constraints
 
 - Text and structure approved in stages 1 and 2 do not change. Anything visible that is new is in "New text".
