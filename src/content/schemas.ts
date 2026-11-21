@@ -125,6 +125,18 @@ export const siteSchema = z.object({
   /** The sentence in the Contact section. */
   contactNote: z.string().min(1),
   home: z.object({ city: z.string().min(1), timeZone: z.string().min(1) }),
+  /** The greeting's phrases. `times` and `sameTime` hold the places the clock times go. */
+  greeting: z.object({
+    neutral: z.string().min(1),
+    morning: z.string().min(1),
+    afternoon: z.string().min(1),
+    evening: z.string().min(1),
+    night: z.string().min(1),
+    returning: z.string().min(1),
+    times: z.string().includes('{yours}').includes('{mine}').includes('{city}'),
+    sameTime: z.string().includes('{time}'),
+  }),
+  seenLabel: z.string().min(1),
 });
 
 export const aboutSchema = z.object({

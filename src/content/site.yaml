@@ -32,7 +32,22 @@ main:
   # This site's own repository. Its commits count towards the recent activity.
   repository: https://github.com/Siddigz/website
   contactNote: The quickest way to reach me is a message on LinkedIn.
-  # Used by the per-visitor greeting (stage 3).
+  # Where "my time" in the greeting is.
   home:
     city: Ottawa
     timeZone: America/Toronto
+  # The line above the buttons at the top of the home page. `neutral` is in the
+  # page as built; the visitor's browser swaps in one opening and one time line.
+  greeting:
+    neutral: Hello, and welcome.
+    morning: Good morning.
+    afternoon: Good afternoon.
+    evening: Good evening.
+    night: You’re up late.
+    # Replaces the time-of-day words on a later visit.
+    returning: Welcome back.
+    times: It’s {yours} for you and {mine} in {city}.
+    # When the visitor's clock reads the same as mine.
+    sameTime: It’s {time} for both of us.
+  # Shown on a featured project's card once its page has been opened.
+  seenLabel: Seen

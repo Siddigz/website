@@ -26,7 +26,8 @@ test('hero shows the name, pitch, school facts and links', async ({ page }) => {
   await expect(page.getByText(site.pitch)).toBeVisible();
   await expect(page.locator('#top')).toContainText(`GPA ${site.gpa}`);
   await expect(page.locator('#top')).toContainText('April 2028');
-  await expect(page.locator('#top [data-greeting]')).toHaveText('Hello, and welcome.');
+  // The neutral line is replaced by a greeting from the visitor's clock: see visitor.spec.ts.
+  await expect(page.locator('#top [data-greeting]')).toHaveText(/\S/);
   await expect(page.locator('#top').getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', site.links.github);
   await expect(page.locator('#top').getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', site.links.linkedin);
   await expect(page.locator('#top').getByRole('link', { name: /email/i })).toHaveCount(0);
