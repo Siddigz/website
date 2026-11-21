@@ -3,6 +3,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import { Font } from 'astro:assets';
 import Nav from '../components/Nav.astro';
+import CommandMenu from '../components/CommandMenu.astro';
 import tokens from '../styles/tokens.css?raw';
 import { declaredValue, toHex } from '../lib/colour';
 
@@ -61,6 +62,7 @@ const barColour = {
     <main id="main">
       <slot />
     </main>
+    <CommandMenu />
     <script>
       // The greeting from the visitor's clock, and the marks on projects they have opened.
       import '../scripts/visitor';

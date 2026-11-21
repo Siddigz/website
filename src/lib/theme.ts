@@ -1,5 +1,8 @@
 export type Scheme = 'light' | 'dark';
 
+/** What the theme switch says, in the nav and in the command menu. The page shows the one that applies. */
+export const THEME_LABELS = { toDark: 'Switch to dark theme', toLight: 'Switch to light theme' } as const;
+
 /** Same key the previous site used, so returning visitors keep their choice. */
 export const STORAGE_KEY = 'color-scheme';
 
