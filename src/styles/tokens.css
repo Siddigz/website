@@ -36,6 +36,9 @@
   --color-violet-dark: oklch(80% 0.11 300);
   --color-amber-light: oklch(56% 0.13 70);
   --color-amber-dark: oklch(83% 0.13 85);
+  /* A symbol the receiver misread, and the thresholds it decides by. */
+  --color-wrong-light: oklch(54% 0.21 27);
+  --color-wrong-dark: oklch(74% 0.16 25);
   /* A third pill tint, beside the two mixed from the accents further down. */
   --color-tint-warm-light: oklch(93% 0.07 95);
   --color-tint-warm-dark: oklch(34% 0.06 95);
@@ -61,6 +64,7 @@
   --color-live: var(--color-live-light);
   --color-violet: var(--color-violet-light);
   --color-amber: var(--color-amber-light);
+  --color-wrong: var(--color-wrong-light);
   --color-tint-warm: var(--color-tint-warm-light);
   --color-glow-a: var(--color-glow-a-light);
   --color-glow-b: var(--color-glow-b-light);
@@ -188,6 +192,8 @@
   --aside-width: 28rem;
   --backdrop-height: 46rem;
   --diagram-width: 58rem;
+  --drawing-height: 16rem;
+  --drawing-width: 56rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;
   --menu-height: 30rem;
@@ -218,6 +224,7 @@
     --color-live: var(--color-live-dark);
     --color-violet: var(--color-violet-dark);
     --color-amber: var(--color-amber-dark);
+    --color-wrong: var(--color-wrong-dark);
     --color-tint-warm: var(--color-tint-warm-dark);
     --color-glow-a: var(--color-glow-a-dark);
     --color-glow-b: var(--color-glow-b-dark);
@@ -240,6 +247,7 @@
     --color-live: light-dark(var(--color-live-light), var(--color-live-dark));
     --color-violet: light-dark(var(--color-violet-light), var(--color-violet-dark));
     --color-amber: light-dark(var(--color-amber-light), var(--color-amber-dark));
+    --color-wrong: light-dark(var(--color-wrong-light), var(--color-wrong-dark));
     --color-tint-warm: light-dark(var(--color-tint-warm-light), var(--color-tint-warm-dark));
     --color-glow-a: light-dark(var(--color-glow-a-light), var(--color-glow-a-dark));
     --color-glow-b: light-dark(var(--color-glow-b-light), var(--color-glow-b-dark));
