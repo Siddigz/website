@@ -69,9 +69,9 @@ describe('built site', () => {
     expect(hits).toEqual([]);
   });
 
-  it('the two email addresses are answered by the server, not built ahead of time', () => {
+  it('the email addresses and the daily rebuild are answered by the server, not built ahead of time', () => {
     const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
-    for (const path of ['/api/contact/token', '/api/contact/address']) {
+    for (const path of ['/api/contact/token', '/api/contact/address', '/api/rebuild']) {
       expect(existsSync(join(DIST, path)), path).toBe(false);
       expect(routes.some((route: any) => route.dest === '_render' && new RegExp(route.src).test(path)), path).toBe(true);
     }
