@@ -41,8 +41,9 @@ export default defineConfig({
     }),
   ],
   fonts: [
+    // Headings are always weight 800, so only that weight is shipped: about half the size of the full range.
     font('Bricolage Grotesque', '--font-bricolage', sans, [
-      [`${variable}/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2`, '200 800'],
+      ['@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff2', '800'],
     ]),
     font('Figtree', '--font-figtree', sans, [[`${variable}/figtree/files/figtree-latin-wght-normal.woff2`, '300 900']]),
   ],

@@ -4,7 +4,6 @@
  * active entry with the arrow keys and opens the chosen one.
  */
 import { filterItems, moveActive, type CommandItem } from '../lib/command';
-import { toggleTheme } from './theme';
 
 const dialog = document.querySelector<HTMLDialogElement>('dialog#command-menu');
 const input = dialog?.querySelector<HTMLInputElement>('[role="combobox"]');
@@ -86,7 +85,8 @@ if (dialog && input) {
   dialog.addEventListener('click', (event) => {
     const option = (event.target as Element).closest<HTMLElement>('[role="option"]');
     if (!option) return;
-    if (option.dataset.action === 'toggle-theme') toggleTheme();
+    // The theme entry presses the nav's own toggle, so there is one switch and one piece of code behind it.
+    if (option.dataset.action === 'toggle-theme') document.querySelector<HTMLElement>('[data-theme-toggle]')?.click();
     dialog.close();
   });
 
