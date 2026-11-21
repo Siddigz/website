@@ -103,6 +103,7 @@ describe('siteSchema', () => {
         times: '{yours} {mine} {city}', sameTime: '{time}',
       },
       seenLabel: 'Seen',
+      email: { button: 'Email', copy: 'Copy', copied: 'Copied', failed: 'f', noScript: 'n' },
       menu: { open: 'o', title: 't', search: 's', empty: 'e', groups: { sections: 'a', projects: 'b', explainers: 'c', links: 'd', theme: 'e' } },
       filter: { all: 'All', label: 'Filter', status: '{n} of {total}' },
     };

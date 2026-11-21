@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
 import { longestGreeting } from '../lib/greeting';
 import Speaker from './Speaker.astro';
+import EmailReveal from './EmailReveal.astro';
 
 interface Props {
   /** Test-only: force the looking-for line on or off regardless of site.yaml. */
@@ -41,6 +42,7 @@ const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
     </p>
     <ul class="links" role="list">
       {site.profileLinks.map((link) => <li><a class="button" href={link.href}>{link.label}</a></li>)}
+      <li><EmailReveal /></li>
     </ul>
   </div>
   {/* The photo from site.yaml. Without one, a generic figure: decorative, so hidden from screen readers. */}

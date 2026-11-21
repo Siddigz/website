@@ -32,6 +32,15 @@ main:
   # This site's own repository. Its commits count towards the recent activity.
   repository: https://github.com/Siddigz/website
   contactNote: The quickest way to reach me is a message on LinkedIn.
+  # The Email button. The address itself is a private setting on the host and
+  # is never in this repo: the button fetches it when pressed.
+  email:
+    button: Email
+    copy: Copy
+    copied: Copied
+    failed: That didn’t work. Message me on LinkedIn instead.
+    # Shown in Contact when the visitor's browser runs no scripts.
+    noScript: Email needs JavaScript. Message me on LinkedIn instead.
   # Where "my time" in the greeting is.
   home:
     city: Ottawa

@@ -137,6 +137,13 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  email: z.object({
+    button: z.string().min(1),
+    copy: z.string().min(1),
+    copied: z.string().min(1),
+    failed: z.string().min(1),
+    noScript: z.string().min(1),
+  }),
   menu: z.object({
     open: z.string().min(1),
     title: z.string().min(1),
