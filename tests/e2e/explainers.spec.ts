@@ -181,6 +181,24 @@ test.describe('one packet, hop by hop', () => {
     await expect(previous(page)).toBeDisabled();
   });
 
+  test('at the server the removed headers are struck through, not faded: their text keeps its full contrast', async ({ page }) => {
+    const widget = await open(page);
+    for (let step = 0; step < 10; step += 1) await next(page).click();
+    for (const name of ['eth', 'ip']) {
+      const segment = widget.locator(`[data-seg="${name}"]`);
+      await expect(segment).toHaveAttribute('data-gone', '');
+      // An automated scan does not see text faded by its container, so it is checked here.
+      const style = await segment.evaluate((element) => {
+        const computed = getComputedStyle(element);
+        return { opacity: computed.opacity, line: computed.textDecorationLine };
+      });
+      expect(style.opacity).toBe('1');
+      expect(style.line).toContain('line-through');
+    }
+    await reset(page).click();
+    await expect(widget.locator('[data-gone]')).toHaveCount(0);
+  });
+
   test('Previous goes back a stop', async ({ page }) => {
     await open(page);
     await next(page).click();
@@ -198,6 +216,22 @@ test.describe('one packet, hop by hop', () => {
     await next(page).click();
     await expect.poll(x).toBeGreaterThan(start + 5);
   });
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    for (const steps of [1, 10]) {
+      test(`step ${steps} has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
+        await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+        await open(page);
+        for (let step = 0; step < steps; step += 1) await next(page).click();
+        await expect(caption(page)).toContainText(`Step ${steps} of 10`);
+        const { violations } = await new AxeBuilder({ page })
+          .include('[data-packet]')
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .analyze();
+        expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} element(s))`)).toEqual([]);
+      });
+    }
+  }
 
   test('all three buttons work from the keyboard', async ({ page }) => {
     await open(page);
@@ -377,6 +411,21 @@ test.describe('NRZ vs PAM4', () => {
     expect(box.x + box.width).toBeLessThanOrEqual(320);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`the other formats have no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+      await open(page);
+      for (const name of ['NRZ (2 levels)', 'PAM8 (8 levels)']) {
+        await format(page, name).click();
+        const { violations } = await new AxeBuilder({ page })
+          .include('[data-signal]')
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+          .analyze();
+        expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} element(s))`), name).toEqual([]);
+      }
+    });
+  }
 
   test('the controls work from the keyboard', async ({ page, browserName }) => {
     const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';

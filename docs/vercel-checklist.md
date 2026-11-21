@@ -14,7 +14,7 @@ says otherwise. After changing a setting, redeploy for it to take effect.
 
 | Name | What it is | Where the value comes from | Status |
 |---|---|---|---|
-| `GITHUB_ACTIVITY_TOKEN` | Lets the build read the public contribution graph and recent commits. Without it the GitHub activity section is left out. | A fine-grained GitHub token with no extra permissions. | Done |
+| `GITHUB_ACTIVITY_TOKEN` | Lets the build read the public contribution graph and recent commits. Without it the GitHub activity section is left out. When the token expires the section quietly disappears from the next build, so note its expiry date somewhere you will see it. | A fine-grained GitHub token with no extra permissions. | Done |
 | `CONTACT_ADDRESS` | The address the Email button reveals. | Typed in by hand. | Done |
 | `CONTACT_TOKEN_SECRET` | Signs the one-minute tokens the Email button uses. | A random value (see below). | Done |
 | `CRON_SECRET` | Vercel sends it when it calls the daily rebuild, so nobody else can trigger one. | A random value (see below). | Done |
@@ -48,8 +48,12 @@ the browser's console.
 
 Firewall → add a rate limit rule: path starts with `/api/contact/`, at most
 10 requests per minute per visitor (by IP address), then deny. The site also
-limits this itself; the rule is the stronger of the two. If the plan offers
-bot protection, turn it on for the same path.
+limits this itself; the rule is the stronger of the two.
+
+Leave bot protection (a challenge page) off for this path unless the Email
+button has been tried on the preview with it on: the button calls these
+addresses in the background, where a challenge page cannot be answered, so
+it may simply stop working for real visitors.
 
 ## 5. Domain
 

@@ -55,6 +55,32 @@ test('no recording is fetched until a word is pressed, and then only that wordâ€
   expect(new Set(requests)).toEqual(new Set([address]));
 });
 
+test('pressing a word really fetches a recording and plays it through', async ({ page, browserName }) => {
+  await page.goto('/');
+  // Count the moments the browser reports about the real recording: no stand-ins here.
+  await page.evaluate(() => {
+    (window as any).heard = { playing: 0, ended: 0, error: 0, furthest: 0 };
+    const original = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      for (const name of ['playing', 'ended', 'error'] as const) this.addEventListener(name, () => ((window as any).heard[name] += 1));
+      this.addEventListener('timeupdate', () => ((window as any).heard.furthest = Math.max((window as any).heard.furthest, this.currentTime)));
+      return original.call(this);
+    };
+  });
+  const answer = page.waitForResponse((response) => /\.(wav|m4a)$/.test(new URL(response.url()).pathname));
+  await first(page).click();
+  const response = await answer;
+  expect([200, 206]).toContain(response.status());
+  expect(response.headers()['content-type']).toMatch(/^audio\//);
+  // The file is one the browser can play: playback starts, and nothing reports an error.
+  await expect.poll(() => page.evaluate(() => (window as any).heard.playing), { timeout: 8_000 }).toBeGreaterThan(0);
+  expect(await page.evaluate(() => (window as any).heard.error)).toBe(0);
+  // Chromium plays to the end without a sound card; the other engines' test builds may not report it.
+  if (browserName === 'chromium') {
+    await expect.poll(() => page.evaluate(() => (window as any).heard.ended), { timeout: 8_000 }).toBe(1);
+  }
+});
+
 test('a word is marked while it plays and cleared when the recording ends', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => {

@@ -33,12 +33,21 @@ async function measure(url, port) {
   };
 }
 
+/** Waits until the local server answers, however slow the machine is to start it. */
+async function ready(url) {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (await fetch(url).then((response) => response.ok, () => false)) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`The local server did not answer at ${url}`);
+}
+
 const server = spawn('node', ['scripts/serve-dist.mjs', String(PORT)], { stdio: 'ignore' });
 // The same browser the tests use, so no other one has to be installed.
 const chrome = await launch({ chromePath: chromium.executablePath(), chromeFlags: ['--headless=new', '--no-sandbox'] });
 let failed = false;
 try {
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  await ready(`http://localhost:${PORT}/`);
   const rows = [];
   for (const path of pages) {
     const runs = [];
