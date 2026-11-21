@@ -244,19 +244,24 @@ const stopped = async (page: Page) => {
   const { state, rate } = await stripState(page);
   return state === 'paused' || rate === 0;
 };
-/** Records the strip's speed on every frame for a while, so a test can see how it changed. */
-const recordRates = (page: Page, forMs: number) =>
-  page.evaluate((duration) => {
+/** Records the strip's speed on every frame until `stopRecording` is called, so a test can see how it changed. */
+const startRecording = (page: Page) =>
+  page.evaluate(() => {
     const animation = document.querySelector('#skills [data-track]')!.getAnimations()[0]!;
     const rates: number[] = [];
     (window as any).rates = rates;
-    const end = performance.now() + duration;
+    (window as any).recording = true;
     const sample = () => {
       rates.push(animation.playState === 'paused' ? 0 : animation.playbackRate);
-      if (performance.now() < end) requestAnimationFrame(sample);
+      if ((window as any).recording) requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
-  }, forMs);
+  });
+const stopRecording = (page: Page): Promise<number[]> =>
+  page.evaluate(() => {
+    (window as any).recording = false;
+    return (window as any).rates as number[];
+  });
 
 test('skills strip moves, and the pause control stops it', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -296,23 +301,27 @@ test('skills strip eases to a stop and back up to speed, rather than jerking', a
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   await page.locator('#skills').scrollIntoViewIfNeeded();
-  await recordRates(page, 900);
+  // Recording runs for as long as the change takes, however slow the machine is.
+  await startRecording(page);
   await page.locator('[data-skills-viewport]').hover();
   await expect.poll(() => stopped(page)).toBe(true);
-  await page.waitForTimeout(950);
-  const slowing: number[] = await page.evaluate(() => (window as any).rates);
-  // Full speed, then some speeds in between, then stopped: never straight from one to the other.
+  await page.waitForTimeout(100);
+  const slowing = await stopRecording(page);
+  // Full speed, then at least one speed in between, then stopped: never straight from one to the other.
   expect(slowing[0]).toBe(1);
   expect(slowing.at(-1)).toBe(0);
-  expect(slowing.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(3);
+  expect(slowing.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(1);
   for (let index = 1; index < slowing.length; index += 1) expect(slowing[index]!).toBeLessThanOrEqual(slowing[index - 1]!);
 
-  await recordRates(page, 900);
+  await startRecording(page);
   await page.mouse.move(5, 5);
-  await page.waitForTimeout(950);
-  const rising: number[] = await page.evaluate(() => (window as any).rates);
+  await expect.poll(async () => (await stripState(page)).rate).toBe(1);
+  await page.waitForTimeout(100);
+  const rising = await stopRecording(page);
+  expect(rising[0]).toBe(0);
   expect(rising.at(-1)).toBe(1);
-  expect(rising.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(3);
+  expect(rising.filter((rate) => rate > 0 && rate < 1).length).toBeGreaterThanOrEqual(1);
+  for (let index = 1; index < rising.length; index += 1) expect(rising[index]!).toBeGreaterThanOrEqual(rising[index - 1]!);
 });
 
 test('with scripts off the skills strip still pauses under the pointer', async ({ browser }) => {

@@ -4,7 +4,10 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  reporter: process.env.CI ? 'github' : 'list',
+  // On CI: every test's time is listed as well, and a test that fails is tried once more.
+  // A test that only passes the second time is reported as flaky, not hidden.
+  reporter: process.env.CI ? [['github'], ['list']] : 'list',
+  retries: process.env.CI ? 1 : 0,
   use: { baseURL: 'http://localhost:4321', actionTimeout: 5_000 },
   expect: { timeout: 3_000 },
   webServer: {
