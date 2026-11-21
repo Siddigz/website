@@ -1,14 +1,11 @@
 ---
 // The home page's list of explainers: one card each, with its title and summary.
-import { THUMBS } from './explainers';
+import ExplainerThumb from './explainers/ExplainerThumb.astro';
 import { getExplainers } from '../lib/explainer-list';
 import { getSite } from '../lib/site';
 
 const site = await getSite();
 const explainers = await getExplainers();
-for (const { id } of explainers) {
-  if (!THUMBS[id]) throw new Error(`src/content/explainers/${id}.md has no card drawing: add "${id}" to THUMBS in src/components/explainers/index.ts`);
-}
 ---
 
 {
@@ -19,7 +16,7 @@ for (const { id } of explainers) {
         {explainers.map((explainer) => (
           <article class="card">
             {/* A small still drawing of what the explainer shows. Decoration: the title names the card. */}
-            <div class="visual">{[THUMBS[explainer.id]!].map((Thumb) => <Thumb />)}</div>
+            <div class="visual"><ExplainerThumb slug={explainer.id} /></div>
             <h3>
               <a href={`/explainers/${explainer.id}`}>{explainer.data.title}</a>
             </h3>

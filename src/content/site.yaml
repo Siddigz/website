@@ -8,6 +8,8 @@ main:
     # A recording of each word, in src/assets/audio/. These are placeholder
     # tones until the real ones are brought in with scripts/import-audio.mjs.
     audio:
+      # Off: the name is plain text. On: each word is a button that plays its recording.
+      enabled: false
       first: name-first.wav
       last: name-last.wav
       # Read to screen reader users on each word of the name.

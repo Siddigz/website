@@ -87,7 +87,7 @@ describe('siteSchema', () => {
   it('requires the looking-for switch to be a boolean', () => {
     const site = {
       url: 'https://siddigz.com',
-      name: { first: 'A', last: 'B', audio: { first: 'a.wav', last: 'b.wav', hint: 'Plays it.' } },
+      name: { first: 'A', last: 'B', audio: { enabled: false, first: 'a.wav', last: 'b.wav', hint: 'Plays it.' } },
       pitch: 'p',
       lookingFor: { enabled: 'yes', text: 't' },
       program: 'p',

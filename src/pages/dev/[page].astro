@@ -12,6 +12,8 @@ export function getStaticPaths() {
     { params: { page: 'no-looking-for' }, props: { lookingFor: false, photo: false } },
     // The top of the home page as it looks with the resume switched on.
     { params: { page: 'resume-on' }, props: { resume: true } },
+    // The top of the home page with the name's sound switched on.
+    { params: { page: 'name-audio' }, props: { nameAudio: true } },
   ];
   return fixtures ? pages : [];
 }
@@ -20,12 +22,13 @@ interface Props {
   lookingFor?: boolean;
   photo?: boolean;
   resume?: boolean;
+  nameAudio?: boolean;
 }
 
 const { page } = Astro.params;
-const { lookingFor, photo, resume } = Astro.props;
+const { lookingFor, photo, resume, nameAudio } = Astro.props;
 ---
 
 <BaseLayout title="Test page" description="Test page." path={`/dev/${page}`} noindex>
-  <Hero lookingForOverride={lookingFor} photoOverride={photo} resumeOverride={resume} />
+  <Hero lookingForOverride={lookingFor} photoOverride={photo} resumeOverride={resume} nameAudioOverride={nameAudio} />
 </BaseLayout>

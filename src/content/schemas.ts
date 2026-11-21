@@ -49,6 +49,11 @@ export function projectSchema<Image extends z.ZodType>(image: () => Image) {
       coverFit: z.enum(['cover', 'contain']).default('cover'),
       /** Which part of a cropped cover to keep. */
       coverPosition: z.enum(['left top', 'top', 'center', 'bottom']).default('left top'),
+      /**
+       * Which part of the cover the link preview picture keeps, for a screenshot whose
+       * heading sits in one corner. Left out, the most eye-catching part is kept (best for photos).
+       */
+      previewPosition: z.enum(['left top', 'top', 'center', 'bottom']).optional(),
       gallery: z.array(z.object({ src: image(), alt: z.string().min(1) })).optional(),
     })
     .superRefine((project, context) => {
@@ -113,7 +118,7 @@ export const siteSchema = z.object({
     first: z.string().min(1),
     last: z.string().min(1),
     /** File names in src/assets/audio/, and the hint read out on each word. */
-    audio: z.object({ first: z.string().min(1), last: z.string().min(1), hint: z.string().min(1) }),
+    audio: z.object({ enabled: z.boolean(), first: z.string().min(1), last: z.string().min(1), hint: z.string().min(1) }),
   }),
   pitch: z.string().min(1),
   lookingFor: z.object({ enabled: z.boolean(), text: z.string().min(1) }),

@@ -182,6 +182,8 @@
   --tilt-speaker: -30deg;
   --tilt-speaker-playing: -42deg;
   --scale-speaker-rest: 0.6;
+  /* How small something starts when it pops into place. */
+  --scale-pop-from: 0.9;
   --duration-letter: 300ms;
   --stagger-letter: 45ms;
   --lift-letter: 0.12em;

@@ -41,6 +41,19 @@ test('looking-for line follows the switch', async ({ page }) => {
   if (site.lookingFor.enabled) await expect(page.locator('[data-looking-for]')).toHaveText(site.lookingFor.text);
 });
 
+test('the name follows its sound switch: plain text when off, pressable words when on', async ({ page, request }) => {
+  await page.goto('/');
+  const on: boolean = site.name.audio.enabled;
+  await expect(page.locator('h1')).toHaveText(`${site.name.first} ${site.name.last}`);
+  await expect(page.locator('h1 button')).toHaveCount(on ? 2 : 0);
+  await expect(page.locator('h1 svg')).toHaveCount(on ? 2 : 0);
+  await expect(page.locator('#name-audio-hint')).toHaveCount(on ? 1 : 0);
+  // Switched off, the page does not so much as mention a recording.
+  const html = await (await request.get('/')).text();
+  expect(/\.(wav|m4a)/.test(html)).toBe(on);
+  expect(html.includes('data-audio')).toBe(on);
+});
+
 test('there is no Resume link while the switch is off', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('link', { name: site.resumeLabel })).toHaveCount(0);

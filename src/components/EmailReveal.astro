@@ -54,11 +54,16 @@ const { email } = await getSite();
     cursor: pointer;
   }
 
+  /*
+   * Once revealed: one small box in two halves. The address on top, and under
+   * it a Copy button exactly as wide, so the two read as a single piece.
+   */
   .result {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
+    display: inline-grid;
+    overflow: clip;
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
   }
 
   /* The rule above would otherwise keep the empty result on screen. */
@@ -68,22 +73,67 @@ const { email } = await getSite();
   }
 
   .result :global(a) {
-    font-weight: var(--weight-medium);
+    display: block;
+    padding: var(--space-2) var(--space-4);
+    color: var(--color-text);
+    font-weight: var(--weight-bold);
+    text-align: center;
+    text-decoration: none;
     overflow-wrap: anywhere;
   }
 
+  .result :global(a:hover) {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
   .copy {
-    padding: var(--space-1) var(--space-3);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-pill);
-    background: var(--color-surface);
+    inline-size: 100%;
+    padding: var(--space-2) var(--space-4);
+    border: 0;
+    border-block-start: var(--border-width) solid var(--color-button-edge);
+    background: var(--color-tint-a);
     font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
+    font-weight: var(--weight-bold);
     cursor: pointer;
   }
 
   .copy:hover {
-    border-color: var(--color-accent);
+    background: var(--color-tap);
+  }
+
+  /* Inside the box's rounded corners a ring drawn outside would be cut off, so it is drawn just inside. */
+  .result :global(a:focus-visible),
+  .copy:focus-visible {
+    outline-offset: calc(-1 * var(--focus-width) - var(--border-width));
+  }
+
+  /*
+   * Opening: the box pops in with a little spring, and the Copy half slides
+   * down out from under the address. Only for visitors who allow motion.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .result:not([hidden]) {
+      animation: email-open var(--duration-base) var(--ease-spring);
+    }
+
+    .result:not([hidden]) .copy {
+      animation: email-copy-drop var(--duration-base) var(--ease-out);
+    }
+  }
+
+  @keyframes email-open {
+    from {
+      opacity: 0;
+      scale: var(--scale-pop-from);
+    }
+  }
+
+  @keyframes email-copy-drop {
+    from {
+      opacity: 0;
+      translate: 0 -100%;
+    }
   }
 
   .status {

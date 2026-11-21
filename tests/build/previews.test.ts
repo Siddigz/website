@@ -46,17 +46,36 @@ describe('link previews', () => {
     expect(statSync(file).size).toBeLessThan(300 * 1024);
   });
 
-  it('there are seven pictures: the home page and each featured project', () => {
+  it('there is a picture for the home page, each featured project and each explainer', () => {
     const made = (readdirSync(join(BUILT, 'og'), { recursive: true }) as string[]).filter((name) => name.endsWith('.png')).sort();
-    expect(made).toEqual(['home.png', ...featuredSlugs().map((slug) => join('projects', `${slug}.png`))].sort());
-    expect(made.length).toBe(7);
+    expect(made).toEqual(
+      ['home.png', ...featuredSlugs().map((slug) => join('projects', `${slug}.png`)), ...explainerSlugs().map((slug) => join('explainers', `${slug}.png`))].sort(),
+    );
+    expect(made.length).toBe(9);
   });
 
-  it('each project page uses its own picture; the home page and the explainers share one', () => {
+  it('every project page and every explainer uses its own picture; the home page has the one with the name', () => {
     for (const { path, html } of pages) {
-      const expected = path.startsWith('/projects/') ? `${ORIGIN}/og${path}.png` : `${ORIGIN}/og/home.png`;
+      const expected = path === '/' ? `${ORIGIN}/og/home.png` : `${ORIGIN}/og${path}.png`;
       expect(meta(html, 'og:image'), path).toBe(expected);
     }
+  });
+
+  it('the explainers’ pictures are not blank where their drawing goes, and differ from each other', async () => {
+    const sums: number[] = [];
+    for (const slug of explainerSlugs()) {
+      // The right-hand part of the card, where the drawing sits.
+      const { data } = await sharp(join(BUILT, 'og', 'explainers', `${slug}.png`)).extract({ left: 700, top: 120, width: 420, height: 390 }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+      const colours = new Set<string>();
+      let sum = 0;
+      for (let index = 0; index < data.length; index += 3) {
+        colours.add(`${data[index]},${data[index + 1]},${data[index + 2]}`);
+        sum = (sum * 31 + data[index]!) % 1_000_000_007;
+      }
+      expect(colours.size, slug).toBeGreaterThan(4);
+      sums.push(sum);
+    }
+    expect(new Set(sums).size).toBe(sums.length);
   });
 
   it('a project’s preview says what the project is', () => {

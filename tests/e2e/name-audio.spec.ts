@@ -2,6 +2,9 @@ import { test, expect, type Page } from '@playwright/test';
 import { readYaml } from '../content/helpers';
 
 const site = readYaml('src/content/site.yaml').main;
+// The name's sound is switched off on the site itself (site.yaml: name.audio.enabled). It is kept working,
+// and tested, on a test-only page that switches it on.
+const PAGE = '/dev/name-audio';
 const first = (page: Page) => page.locator('h1 button[data-name-part="first"]');
 const last = (page: Page) => page.locator('h1 button[data-name-part="last"]');
 
@@ -31,7 +34,7 @@ const headingBox = (page: Page) =>
   });
 
 test('the heading still reads as the name, and each word is a described button', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${site.name.first} ${site.name.last}`);
   for (const [button, word] of [
     [first(page), site.name.first],
@@ -46,7 +49,7 @@ test('the heading still reads as the name, and each word is a described button',
 
 test('no recording is fetched until a word is pressed, and then only that wordâ€™s', async ({ page }) => {
   const requests = audioRequests(page);
-  await page.goto('/');
+  await page.goto(PAGE);
   await page.waitForLoadState('networkidle');
   expect(requests).toEqual([]);
   const address = await first(page).getAttribute('data-audio');
@@ -56,7 +59,7 @@ test('no recording is fetched until a word is pressed, and then only that wordâ€
 });
 
 test('pressing a word really fetches a recording and plays it through', async ({ page, browserName }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   // Count the moments the browser reports about the real recording: no stand-ins here.
   await page.evaluate(() => {
     (window as any).heard = { loadeddata: 0, playing: 0, ended: 0, error: 0 };
@@ -88,7 +91,7 @@ test('pressing a word really fetches a recording and plays it through', async ({
 });
 
 test('a word is marked while it plays and cleared when the recording ends', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   await page.evaluate(() => {
     const original = HTMLMediaElement.prototype.play;
     (window as any).marked = [];
@@ -106,7 +109,7 @@ test('a word is marked while it plays and cleared when the recording ends', asyn
 test('Enter on a focused word plays it, and the focus ring shows', async ({ page, browserName }) => {
   // Safari moves between buttons with Option+Tab unless a system setting is changed.
   const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
-  await page.goto('/');
+  await page.goto(PAGE);
   await page.evaluate(() => {
     (window as any).played = 0;
     const original = HTMLMediaElement.prototype.play;
@@ -131,7 +134,7 @@ test('Enter on a focused word plays it, and the focus ring shows', async ({ page
 });
 
 test('a recording that never reports its end is still unmarked once it should be over', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   // Playback "starts" but no end is ever announced, as when a browser stalls.
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = function () {
@@ -145,7 +148,7 @@ test('a recording that never reports its end is still unmarked once it should be
 });
 
 test('starting one word stops the other', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   // Hold every recording open so the first is still playing when the second starts.
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = function () {
@@ -160,7 +163,7 @@ test('starting one word stops the other', async ({ page }) => {
 });
 
 test('the letters ripple while the word plays, and the word is whole again after', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   // Playback starts at once, so the wave's start does not depend on the network.
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = function () {
@@ -181,7 +184,7 @@ test('the letters ripple while the word plays, and the word is whole again after
 
 test('with reduced motion a press plays and nothing moves', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
+  await page.goto(PAGE);
   await page.evaluate(() => {
     (window as any).played = 0;
     HTMLMediaElement.prototype.play = function () {
@@ -197,7 +200,7 @@ test('with reduced motion a press plays and nothing moves', async ({ page }) => 
 
 test('refused playback leaves no mark, no error and no movement', async ({ page }) => {
   const errors = pageErrors(page);
-  await page.goto('/');
+  await page.goto(PAGE);
   await page.evaluate(() => {
     HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException('refused', 'NotAllowedError'));
   });
@@ -211,7 +214,7 @@ test('refused playback leaves no mark, no error and no movement', async ({ page 
 test('a missing recording leaves no mark and no error, and the word can be pressed again', async ({ page }) => {
   const errors = pageErrors(page);
   await page.route(/\.(wav|m4a)$/, (route) => route.fulfill({ status: 404, body: '' }));
-  await page.goto('/');
+  await page.goto(PAGE);
   await last(page).click();
   await expect(last(page)).not.toHaveAttribute('data-playing', '', { timeout: 5_000 });
   await expect(last(page).locator('[data-letter]')).toHaveCount(0, { timeout: 5_000 });
@@ -222,7 +225,7 @@ test('a missing recording leaves no mark and no error, and the word can be press
 });
 
 test('pressing a word never moves or resizes the heading', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   const before = await headingBox(page);
   await first(page).hover();
   expect(await headingBox(page)).toEqual(before);
@@ -234,7 +237,7 @@ test('pressing a word never moves or resizes the heading', async ({ page }) => {
 });
 
 test('pointing at a word shows a small speaker, tipped up and to the right', async ({ page }) => {
-  await page.goto('/');
+  await page.goto(PAGE);
   const icon = first(page).locator('svg');
   await expect(icon).toHaveCSS('opacity', '0');
   await first(page).hover();

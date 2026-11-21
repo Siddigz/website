@@ -9,6 +9,8 @@ links:
 featured: 3
 result: Every deadline, grade and announcement across all courses in one dashboard, with each outline’s grading rules applied.
 cover: ../../assets/projects/brightspace-deadlines/cover.png
+# The link preview keeps the screenshot's top-left corner, where its heading is.
+previewPosition: left top
 coverAlt: The Brightspace Deadlines grades page, showing a course average and the mark needed on the rest for each letter grade. Sample data.
 gallery:
   - src: ../../assets/projects/brightspace-deadlines/deadlines.png

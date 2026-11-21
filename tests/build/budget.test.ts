@@ -93,6 +93,12 @@ describe('built site', () => {
     }
   });
 
+  it('with the name’s sound switched off, no page that ships mentions a recording', () => {
+    if (readYaml('src/content/site.yaml').main.name.audio.enabled) return;
+    const mentioning = pages.filter(([, html]) => /data-audio|\.wav|\.m4a|name-audio-hint/.test(html)).map(([path]) => path);
+    expect(mentioning).toEqual([]);
+  });
+
   it('the resume is answered by the server, and a normal build neither holds a file for it nor links to it', () => {
     expect(existsSync(join(DIST, 'resume.pdf'))).toBe(false);
     const pdfs = (readdirSync(DIST, { recursive: true }) as string[]).filter((path) => path.endsWith('.pdf'));

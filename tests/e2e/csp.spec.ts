@@ -52,9 +52,6 @@ test('the home page’s features all work under the policy', async ({ page }) =>
   const before = await scheme.getAttribute('content');
   await page.locator('[data-theme-toggle]').click();
   await expect(scheme).not.toHaveAttribute('content', before!);
-  // Name audio: the recording is fetched and played, and the letters are split and styled by the script.
-  await page.locator('h1 button[data-name-part="first"]').click();
-  await expect(page.locator('h1 [data-playing]')).toHaveCount(0, { timeout: 8_000 });
   // Menu.
   await page.locator('[data-menu-open]').click();
   await page.locator('dialog#command-menu [role="combobox"]').fill('about');
@@ -65,6 +62,15 @@ test('the home page’s features all work under the policy', async ({ page }) =>
   // Email.
   await page.locator('#contact [data-email-reveal]').click();
   await expect(page.locator('#contact [data-email-link]')).toBeVisible();
+  expect(await refused()).toEqual([]);
+});
+
+test('the name’s sound works under the policy, where it is switched on', async ({ page }) => {
+  const refused = await watch(page);
+  await page.goto('/dev/name-audio');
+  // The recording is fetched and played, and the letters are split and styled by the script.
+  await page.locator('h1 button[data-name-part="first"]').click();
+  await expect(page.locator('h1 [data-playing]')).toHaveCount(0, { timeout: 8_000 });
   expect(await refused()).toEqual([]);
 });
 

@@ -23,7 +23,8 @@ export async function getSite() {
   return {
     ...entry.data,
     fullName: `${entry.data.name.first} ${entry.data.name.last}`,
-    nameAudio: { first: recording(entry.data.name.audio.first), last: recording(entry.data.name.audio.last) },
+    /** Where each recording of the name is served from. Only asked for while the sound is switched on. */
+    nameAudio: () => ({ first: recording(entry.data.name.audio.first), last: recording(entry.data.name.audio.last) }),
     profileLinks: PROFILE_LINKS.map(({ key, label }) => ({ label, href: entry.data.links[key] })),
   };
 }

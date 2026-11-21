@@ -68,6 +68,62 @@ test('pressing Email shows the address as a link with a Copy button, and opens t
   expect(await page.evaluate(() => (window as any).opened)).toEqual([`${MAIL}${ADDRESS}`]);
 });
 
+for (const where of ['#top', '#contact'] as const) {
+  test(`the revealed address sits on top with Copy below it, exactly as wide (${where})`, async ({ page }) => {
+    await mockServer(page);
+    await recordMail(page);
+    await page.goto('/');
+    await reveal(page, where).click();
+    const link = widget(page, where).getByRole('link', { name: ADDRESS });
+    const copy = widget(page, where).getByRole('button', { name: words.copy });
+    await expect(link).toBeVisible();
+    // Measured once the opening animation has finished.
+    await expect.poll(() => widget(page, where).locator('[data-email-result]').evaluate((box) => box.getAnimations({ subtree: true }).length)).toBe(0);
+    const address = (await link.boundingBox())!;
+    const button = (await copy.boundingBox())!;
+    // Stacked, not side by side: Copy starts where the address ends, and the two share their left and right edges.
+    expect(button.y).toBeGreaterThanOrEqual(address.y + address.height - 1);
+    expect(Math.abs(button.x - address.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(button.width - address.width)).toBeLessThanOrEqual(1);
+    // They read as one piece: nothing but a hairline between them.
+    expect(button.y - (address.y + address.height)).toBeLessThanOrEqual(2);
+    // Both are comfortable to press.
+    expect(button.height).toBeGreaterThanOrEqual(24);
+    expect(address.height).toBeGreaterThanOrEqual(24);
+  });
+}
+
+test('the address and Copy open with a short animation, and without one when motion is reduced', async ({ page }) => {
+  await mockServer(page);
+  await recordMail(page);
+  await page.goto('/');
+  // Each animation that starts inside the widget is noted as it begins: its name and how long it runs.
+  const watch = () =>
+    page.evaluate(() => {
+      (window as any).started = [];
+      document.querySelector('#top [data-email]')!.addEventListener('animationstart', (event) => {
+        const { animationName, target } = event as AnimationEvent;
+        (window as any).started.push([animationName, parseFloat(getComputedStyle(target as Element).animationDuration)]);
+      });
+    });
+  await watch();
+  await reveal(page, '#top').click();
+  await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => (window as any).started.length)).toBeGreaterThanOrEqual(2);
+  const started: [string, number][] = await page.evaluate(() => (window as any).started);
+  // Rule 18: nothing in the interface moves for longer than 300 ms.
+  for (const [name, seconds] of started) expect(seconds, name).toBeLessThanOrEqual(0.3);
+  // When it is over the box is fully there, at its own size.
+  await expect.poll(() => widget(page, '#top').locator('[data-email-result]').evaluate((box) => box.getAnimations({ subtree: true }).length)).toBe(0);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  await watch();
+  await reveal(page, '#top').click();
+  await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+  expect(await page.evaluate(() => (window as any).started)).toEqual([]);
+});
+
 test('one reveal fills the other Email button too, with no further calls', async ({ page }) => {
   const calls = await mockServer(page);
   await recordMail(page);

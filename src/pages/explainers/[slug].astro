@@ -23,7 +23,7 @@ if (!Widget) {
 }
 ---
 
-<BaseLayout title={`${title} · ${site.fullName}`} description={summary} path={`/explainers/${explainer.id}`} expect="explainer-top">
+<BaseLayout title={`${title} · ${site.fullName}`} description={summary} path={`/explainers/${explainer.id}`} expect="explainer-top" image={`/og/explainers/${explainer.id}.png`}>
   <article class="explainer section container">
     <header id="explainer-top">
       <a class="back" href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>

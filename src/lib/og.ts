@@ -18,6 +18,12 @@ export type OgCard = {
   picture?: Buffer;
   /** Show the whole picture instead of cropping it to fill its frame (charts, screenshots). */
   contain?: boolean;
+  /**
+   * Which part of a cropped picture to keep, such as 'left top' for a screenshot
+   * whose heading is in that corner. Left out, the most eye-catching part is kept,
+   * which suits photos.
+   */
+  position?: string;
   /** The site's address, shown in the corner. */
   address: string;
 };
@@ -43,16 +49,18 @@ type Node = { type: string; props: Record<string, unknown> };
 const box = (style: Record<string, unknown>, children?: unknown): Node => ({ type: 'div', props: { style: { display: 'flex', ...style }, children } });
 
 /** The picture at the size it is drawn, as an address the drawing can hold. */
-async function embed(picture: Buffer, contain: boolean): Promise<string> {
+async function embed(picture: Buffer, contain: boolean, position = 'attention'): Promise<string> {
   const resized = await sharp(picture)
     .rotate()
-    .resize(PICTURE * 2, PICTURE * 2, contain ? { fit: 'contain', background: colour('surface') } : { fit: 'cover', position: 'attention' })
+    // A drawing with no background of its own sits on the frame's white, not on black.
+    .flatten({ background: colour('surface') })
+    .resize(PICTURE * 2, PICTURE * 2, contain ? { fit: 'contain', background: colour('surface') } : { fit: 'cover', position })
     .jpeg({ quality: 82 })
     .toBuffer();
   return `data:image/jpeg;base64,${resized.toString('base64')}`;
 }
 
-export async function renderOg({ title, line, badge, picture, contain = false, address }: OgCard): Promise<Buffer> {
+export async function renderOg({ title, line, badge, picture, contain = false, position, address }: OgCard): Promise<Buffer> {
   const longestWord = Math.max(...title.split(/\s+/).map((word) => word.length));
   const text = [
     badge &&
@@ -98,7 +106,7 @@ export async function renderOg({ title, line, badge, picture, contain = false, a
       picture && {
         type: 'img',
         props: {
-          src: await embed(picture, contain),
+          src: await embed(picture, contain, position),
           width: pictureSize,
           height: pictureSize,
           style: { flexShrink: 0, borderRadius: 40, border: `${FRAME}px solid ${colour('surface')}` },
