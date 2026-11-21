@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import {
   aboutSchema,
+  explainerSchema,
   experienceSchema,
   projectSchema,
   proofSchema,
@@ -12,6 +13,11 @@ import {
 const projects = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/projects' }),
   schema: ({ image }) => projectSchema(image),
+});
+
+const explainers = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/explainers' }),
+  schema: explainerSchema,
 });
 
 const about = defineCollection({
@@ -45,4 +51,4 @@ const site = defineCollection({
     }),
 });
 
-export const collections = { projects, about, experience, proof, skills, site };
+export const collections = { projects, explainers, about, experience, proof, skills, site };

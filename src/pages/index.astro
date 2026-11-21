@@ -8,6 +8,7 @@ import Experience from '../components/Experience.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ProjectFilter from '../components/ProjectFilter.astro';
 import ProjectRow from '../components/ProjectRow.astro';
+import Explainers from '../components/Explainers.astro';
 import GitHubActivity from '../components/GitHubActivity.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
@@ -44,6 +45,7 @@ const activity = await getActivity();
     </ul>
   </section>
 
+  <Explainers />
   {activity && <GitHubActivity activity={activity} />}
   <About />
   <Contact />
