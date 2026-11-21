@@ -1,0 +1,189 @@
+---
+import { getCollection } from 'astro:content';
+import { commandItems } from '../lib/command-items';
+import type { CommandGroup } from '../lib/command';
+import { featuredProjects, moreProjects } from '../lib/projects';
+import { homeSections } from '../lib/sections';
+import { getSite } from '../lib/site';
+import { THEME_LABELS } from '../lib/theme';
+
+const site = await getSite();
+const projects = await getCollection('projects');
+const featured = new Set(featuredProjects(projects).map((project) => project.id));
+
+const items = commandItems({
+  sections: await homeSections(),
+  // Featured projects have a page here. The others open their repository.
+  projects: [...featuredProjects(projects), ...moreProjects(projects)].map((project) => ({
+    title: project.data.title,
+    href: featured.has(project.id) ? `/projects/${project.id}` : (project.data.links.repo ?? '/#more-projects'),
+    keywords: project.data.stack.join(' '),
+  })),
+  explainers: [],
+  links: site.profileLinks,
+  theme: THEME_LABELS,
+});
+
+const GROUPS: CommandGroup[] = ['sections', 'projects', 'explainers', 'links', 'theme'];
+const groups = GROUPS.map((group) => ({ group, label: site.menu.groups[group], items: items.filter((item) => item.group === group) })).filter(
+  ({ items }) => items.length > 0,
+);
+---
+
+{/*
+  Every entry is in the page as built. The script only filters and moves through them.
+  Pressing outside closes the menu where the browser supports `closedby`; the script covers the rest.
+*/}
+<dialog id="command-menu" class="menu" aria-label={site.menu.title} closedby="any">
+  <div class="search-box">
+    <input
+      type="text"
+      role="combobox"
+      aria-label={site.menu.search}
+      aria-expanded="true"
+      aria-controls="command-list"
+      aria-autocomplete="list"
+      aria-activedescendant=""
+      placeholder={site.menu.search}
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="go"
+      autofocus
+    />
+  </div>
+  <div id="command-list" class="list" role="listbox" aria-label={site.menu.title}>
+    {
+      groups.map(({ label, items }) => (
+        <div role="group" aria-label={label}>
+          <p class="group-title muted" aria-hidden="true">
+            {label}
+          </p>
+          {items.map((item) =>
+            item.action ? (
+              <button type="button" class="option theme-option" role="option" id={item.id} aria-selected="false" tabindex="-1" data-action={item.action}>
+                <span class="to-dark">{THEME_LABELS.toDark}</span>
+                <span class="to-light">{THEME_LABELS.toLight}</span>
+              </button>
+            ) : (
+              <a class="option" role="option" id={item.id} href={item.href} aria-selected="false" tabindex="-1" data-keywords={item.keywords}>
+                {item.label}
+              </a>
+            ),
+          )}
+        </div>
+      ))
+    }
+    <p class="empty muted" data-menu-empty hidden>{site.menu.empty}</p>
+  </div>
+</dialog>
+
+<script>
+  import '../scripts/command-menu';
+</script>
+
+<style>
+  .menu {
+    inline-size: min(var(--menu-width), calc(100vw - 2 * var(--gutter)));
+    max-inline-size: none;
+    max-block-size: min(var(--menu-height), calc(100dvh - 2 * var(--space-7)));
+    margin-block: var(--space-7) auto;
+    padding: 0;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Only while open: a closed dialog must stay out of the page. */
+  .menu[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  /* Scrolling inside the menu, or over the dimmed page, never scrolls the page behind. */
+  .menu:modal {
+    overscroll-behavior: contain;
+  }
+
+  .menu::backdrop {
+    overflow: hidden;
+    background: var(--color-backdrop);
+    overscroll-behavior: contain;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] {
+      animation: menu-in var(--duration-fast) var(--ease-out);
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--space-2));
+    }
+  }
+
+  /* The search box has room around it, so its focus ring is whole inside the rounded corners. */
+  .search-box {
+    padding: var(--space-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  input {
+    inline-size: 100%;
+    padding: var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: none;
+    color: inherit;
+    font: inherit;
+  }
+
+  input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+
+  .list {
+    overflow-y: auto;
+    padding: var(--space-2);
+    overscroll-behavior: contain;
+  }
+
+  .group-title {
+    padding: var(--space-3) var(--space-3) var(--space-1);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+  }
+
+  .option {
+    display: block;
+    inline-size: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: none;
+    color: var(--color-text);
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .option:hover,
+  .option[aria-selected='true'] {
+    background: var(--color-tint-a);
+  }
+
+  /* Entries and groups the search has ruled out. The rules above would otherwise keep them on screen. */
+  .menu [hidden] {
+    display: none;
+  }
+
+  .empty {
+    padding: var(--space-4) var(--space-3);
+  }
+</style>

@@ -1,4 +1,5 @@
 ---
+import { THEME_LABELS } from '../lib/theme';
 ---
 
 <button type="button" class="theme-toggle" data-theme-toggle>
@@ -8,7 +9,7 @@
         fill="currentColor"
         d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
     </svg>
-    <span class="visually-hidden">Switch to dark theme</span>
+    <span class="visually-hidden">{THEME_LABELS.toDark}</span>
   </span>
   <span class="to-light">
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -20,7 +21,7 @@
         d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"
       ></path>
     </svg>
-    <span class="visually-hidden">Switch to light theme</span>
+    <span class="visually-hidden">{THEME_LABELS.toLight}</span>
   </span>
 </button>
 
@@ -53,44 +54,7 @@
 </style>
 
 <script>
-  import {
-    STORAGE_KEY,
-    getStorage,
-    isScheme,
-    nextScheme,
-    overrideFor,
-    type Scheme,
-  } from '../lib/theme';
+  import { toggleTheme } from '../scripts/theme';
 
-  const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
-  const system = window.matchMedia('(prefers-color-scheme: dark)');
-
-  const systemScheme = (): Scheme => (system.matches ? 'dark' : 'light');
-  const renderedScheme = (): Scheme => (isScheme(meta?.content) ? meta.content : systemScheme());
-
-  function apply(override: Scheme | null) {
-    if (meta) meta.content = override ?? 'light dark';
-    // The browser-bar colour follows a pinned theme, and the system otherwise.
-    for (const bar of document.querySelectorAll<HTMLMetaElement>('meta[data-bar]')) {
-      const scheme = bar.dataset.bar;
-      bar.media = override ? (scheme === override ? 'all' : 'not all') : `(prefers-color-scheme: ${scheme})`;
-    }
-  }
-
-  document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-    const override = overrideFor(nextScheme(renderedScheme()), systemScheme());
-    apply(override);
-    try {
-      const storage = getStorage();
-      if (override) storage?.setItem(STORAGE_KEY, override);
-      else storage?.removeItem(STORAGE_KEY);
-    } catch {
-      // The theme still applies for this visit; it just is not remembered.
-    }
-  });
-
-  // Keep other open tabs in step.
-  window.addEventListener('storage', (event) => {
-    if (event.key === STORAGE_KEY) apply(isScheme(event.newValue) ? event.newValue : null);
-  });
+  document.querySelector('[data-theme-toggle]')?.addEventListener('click', toggleTheme);
 </script>

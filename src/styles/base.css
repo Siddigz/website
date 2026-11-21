@@ -243,28 +243,29 @@ li:first-child > .button {
 }
 
 /*
- * Theme toggle. Both labels are in the markup; CSS shows the one that
- * matches the scheme being rendered, so the control is correct without JS.
+ * Theme toggle, and the theme entry in the command menu. Both labels are in
+ * the markup; CSS shows the one that matches the scheme being rendered, so
+ * the control is correct without JS.
  */
-.theme-toggle .to-light {
+:is(.theme-toggle, .theme-option) .to-light {
   display: none;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .theme-toggle .to-dark {
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) :is(.theme-toggle, .theme-option) .to-dark {
     display: none;
   }
 
-  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) .theme-toggle .to-light {
+  :root:not(:has(> head > meta[name='color-scheme'][content='light'])) :is(.theme-toggle, .theme-option) .to-light {
     display: inline-flex;
   }
 }
 
-:root:has(> head > meta[name='color-scheme'][content='dark']) .theme-toggle .to-dark {
+:root:has(> head > meta[name='color-scheme'][content='dark']) :is(.theme-toggle, .theme-option) .to-dark {
   display: none;
 }
 
-:root:has(> head > meta[name='color-scheme'][content='dark']) .theme-toggle .to-light {
+:root:has(> head > meta[name='color-scheme'][content='dark']) :is(.theme-toggle, .theme-option) .to-light {
   display: inline-flex;
 }
 

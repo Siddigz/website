@@ -55,5 +55,18 @@ main:
     # Read to screen reader users: the name of the group of buttons, and what changed.
     label: Filter projects
     status: Showing {n} of {total} projects.
+  # The command menu: the button in the nav, the search box, and the group names.
+  menu:
+    # Read to screen reader users on the nav button.
+    open: Open the command menu
+    title: Command menu
+    search: Search or jump to…
+    empty: Nothing matches.
+    groups:
+      sections: Sections
+      projects: Projects
+      explainers: Explainers
+      links: Links
+      theme: Theme
   # Shown on a featured project's card once its page has been opened.
   seenLabel: Seen

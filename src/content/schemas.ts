@@ -137,6 +137,19 @@ export const siteSchema = z.object({
     sameTime: z.string().includes('{time}'),
   }),
   seenLabel: z.string().min(1),
+  menu: z.object({
+    open: z.string().min(1),
+    title: z.string().min(1),
+    search: z.string().min(1),
+    empty: z.string().min(1),
+    groups: z.object({
+      sections: z.string().min(1),
+      projects: z.string().min(1),
+      explainers: z.string().min(1),
+      links: z.string().min(1),
+      theme: z.string().min(1),
+    }),
+  }),
   filter: z.object({
     all: z.string().min(1),
     label: z.string().min(1),

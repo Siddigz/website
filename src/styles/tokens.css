@@ -63,6 +63,8 @@
   /* Colours worked out from the ones above. Two colours are mixed in oklab:
      in oklch the hue drifts through pink when one of them is white or black. */
   --color-shade: oklch(40% 0.14 262);
+  /* Dims the page behind the command menu. */
+  --color-backdrop: color-mix(in oklab, var(--color-shade) 35%, transparent);
   --color-tint-a: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
   --color-tint-b: color-mix(in oklab, var(--color-accent-2) 13%, var(--color-surface));
   --color-tint-c: var(--color-tint-warm);
@@ -168,6 +170,9 @@
   --media-width: 56rem;
   --aside-width: 28rem;
   --backdrop-height: 46rem;
+  --menu-width: 34rem;
+  --menu-height: 30rem;
+  --menu-key-width: 3.5rem;
   --layer-header: 5;
   --layer-skip-link: 10;
 }

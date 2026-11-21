@@ -19,6 +19,15 @@ const links = [
     <ul class="links" role="list">
       {links.map((link) => <li><a href={link.href} data-spy={link.sections.join(' ')}>{link.label}</a></li>)}
     </ul>
+    {/* Opens the command menu. Drawn as the key that also opens it; a search icon on touch screens. */}
+    <button type="button" class="menu-open" data-menu-open aria-haspopup="dialog">
+      <kbd class="key" data-menu-key aria-hidden="true">Ctrl K</kbd>
+      <svg class="search" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5"></circle>
+        <path d="m16 16 4.5 4.5"></path>
+      </svg>
+      <span class="visually-hidden">{site.menu.open}</span>
+    </button>
     <ThemeToggle />
   </nav>
 </header>
@@ -110,6 +119,72 @@ const links = [
       text-decoration-color: var(--color-accent);
       text-decoration-thickness: var(--indicator-width);
       text-underline-offset: var(--space-2);
+    }
+  }
+
+  /* The menu button: a key cap that goes down when pressed. */
+  .menu-open {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  /* It opens nothing without scripts, so it is not offered. */
+  @media (scripting: none) {
+    .menu-open {
+      display: none;
+    }
+  }
+
+  /* A fixed width, so "Ctrl K" and "⌘K" take the same room and nothing shifts when the script picks one. */
+  .key {
+    inline-size: var(--menu-key-width);
+    padding-block: var(--space-1);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 var(--button-rise) 0 var(--color-button-edge);
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .menu-open:hover .key {
+    color: var(--color-text);
+  }
+
+  .menu-open:active .key {
+    box-shadow: none;
+    translate: 0 var(--button-rise);
+  }
+
+  .search {
+    display: none;
+    margin: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  /* No keyboard to hint at on a touch screen: show a search icon instead. */
+  @media (hover: none) and (pointer: coarse) {
+    .key {
+      display: none;
+    }
+
+    .search {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .key {
+      transition:
+        translate var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
     }
   }
 
