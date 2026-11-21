@@ -5,7 +5,8 @@ const { items } = (await getEntry('skills', 'main'))!.data;
 ---
 
 <!--
-  A strip that scrolls sideways on its own. CSS only.
+  A strip that scrolls sideways on its own. The movement is CSS only; a small
+  script makes pausing gentle (src/scripts/skills-strip.ts).
   Without motion (reduced motion set) it is a plain wrapped list.
   With motion, a second copy of the list makes the loop seamless; that copy
   is hidden from assistive technology.
@@ -32,6 +33,10 @@ const { items } = (await getEntry('skills', 'main'))!.data;
     </div>
   </div>
 </section>
+
+<script>
+  import '../scripts/skills-strip';
+</script>
 
 <style>
   .skills {
@@ -111,8 +116,9 @@ const { items } = (await getEntry('skills', 'main'))!.data;
       color: var(--color-text-muted);
     }
 
-    .viewport:hover .track,
-    .strip:has(.pause input:checked) .track {
+    /* The plain way to pause, at once. The script eases the speed instead, and says so by marking the strip. */
+    .strip:not([data-eased]) .viewport:hover .track,
+    .strip:not([data-eased]):has(.pause input:checked) .track {
       animation-play-state: paused;
     }
   }
