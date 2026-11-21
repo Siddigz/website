@@ -42,7 +42,8 @@ export default defineConfig({
   ],
   site: url,
   // The home page is the list of projects, so the bare folder address leads there.
-  redirects: { '/projects': '/#projects' },
+  // Browsers ask for /favicon.ico without being told to; it leads to the small icon.
+  redirects: { '/projects': '/#projects', '/favicon.ico': '/favicon-32.png' },
   image: { layout: 'constrained', responsiveStyles: true },
   // The stylesheets are small, so they travel inside each page: one less
   // round trip before anything can be drawn.
