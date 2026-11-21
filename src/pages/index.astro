@@ -23,7 +23,7 @@ const projects = await getCollection('projects');
 const activity = await getActivity();
 ---
 
-<BaseLayout title={site.fullName} description={site.pitch} path="/">
+<BaseLayout title={site.fullName} description={site.pitch} path="/" expect="projects">
   <Hero />
   <ProofStrip />
   <Experience />

@@ -6,6 +6,7 @@ import Nav from '../components/Nav.astro';
 import CommandMenu from '../components/CommandMenu.astro';
 import tokens from '../styles/tokens.css?raw';
 import { declaredValue, toHex } from '../lib/colour';
+import pageTransition from '../scripts/page-transition.js?raw';
 
 interface Props {
   title: string;
@@ -14,9 +15,16 @@ interface Props {
   path: string;
   /** Keep the page out of search results (test-only pages). */
   noindex?: boolean;
+  /**
+   * The id of an element near the top of the page. When the browser animates
+   * from the page before, it waits until this element is there to animate to.
+   */
+  expect?: string;
 }
 
-const { title, description, path, noindex = false } = Astro.props;
+const { title, description, path, noindex = false, expect } = Astro.props;
+// Not yet in the HTML types, so passed as a plain set of attributes.
+const blocking = { blocking: 'render' } as const;
 const canonical = new URL(path, Astro.site);
 
 // The browser's own bar (mostly on phones) takes the page background, read
@@ -55,6 +63,9 @@ const barColour = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    {expect && <link rel="expect" href={`#${expect}`} {...blocking} />}
+    {/* Listening before the first draw, for the animation between a project's card and its page. */}
+    <script is:inline set:html={pageTransition} />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
