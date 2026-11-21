@@ -200,3 +200,21 @@ test('pressing a word never moves or resizes the heading', async ({ page }) => {
   await expect(page.locator('h1 [data-letter]')).toHaveCount(0, { timeout: 5_000 });
   expect(await headingBox(page)).toEqual(before);
 });
+
+test('pointing at a word shows a small speaker, tipped up and to the right', async ({ page }) => {
+  await page.goto('/');
+  const icon = first(page).locator('svg');
+  await expect(icon).toHaveCSS('opacity', '0');
+  await first(page).hover();
+  await expect(icon).toHaveCSS('opacity', '1');
+  // A negative turn is anticlockwise: a speaker that faced right now faces up and to the right.
+  const turn = parseFloat(await icon.evaluate((svg) => getComputedStyle(svg).rotate));
+  expect(turn).toBeLessThanOrEqual(-20);
+  expect(turn).toBeGreaterThanOrEqual(-50);
+  // It sits by the word's top right corner, and never pushes the page sideways.
+  const word = (await first(page).boundingBox())!;
+  const box = (await icon.boundingBox())!;
+  expect(box.x + box.width / 2).toBeGreaterThan(word.x + word.width / 2);
+  expect(box.y).toBeLessThan(word.y + word.height / 2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+});

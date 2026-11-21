@@ -159,14 +159,18 @@ const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
     cursor: pointer;
   }
 
-  /* A small speaker over the end of the word: outside the text flow, so showing it moves nothing. */
+  /*
+   * A small speaker perched on the top corner of the word, tipped up and to
+   * the right as if calling out. Outside the text flow, so showing it moves nothing.
+   */
   .name-part :global(svg) {
     position: absolute;
     inset-block-start: 0;
     inset-inline-end: 0;
     inline-size: var(--name-icon-size);
     block-size: var(--name-icon-size);
-    translate: 0 -50%;
+    translate: 30% -70%;
+    rotate: var(--tilt-speaker);
     color: var(--color-accent);
     opacity: 0;
     pointer-events: none;
@@ -184,8 +188,23 @@ const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
    * puts it back when the wave has passed.
    */
   @media (prefers-reduced-motion: no-preference) {
+    /* It pops up with a little spring, and leans further while the word plays. */
     .name-part :global(svg) {
-      transition: opacity var(--duration-fast) var(--ease-out);
+      scale: var(--scale-speaker-rest);
+      transition:
+        opacity var(--duration-fast) var(--ease-out),
+        scale var(--duration-base) var(--ease-spring),
+        rotate var(--duration-base) var(--ease-spring);
+    }
+
+    .name-part:hover :global(svg),
+    .name-part:focus-visible :global(svg),
+    .name-part[data-playing] :global(svg) {
+      scale: 1;
+    }
+
+    .name-part[data-playing] :global(svg) {
+      rotate: var(--tilt-speaker-playing);
     }
 
     .name-part :global([data-letter]) {
