@@ -1,57 +1,56 @@
-# Siddig Ahmed — Portfolio
+# siddigz.com
 
-Personal portfolio site for Siddig Ahmed, a software engineering student focused on systems programming, Linux internals, and C/C++.
+The source of my personal site: who I am, what I have built, and a couple of
+interactive explainers. Live at [siddigz.com](https://siddigz.com).
 
-**Live site:** [siddigz.com](https://siddigz.com)
+## How it is built
 
-Built with plain HTML, CSS, and vanilla JavaScript — no frameworks, no build step, no dependencies. Static files only, so it loads fast and deploys anywhere.
+- **[Astro](https://astro.build), TypeScript in strict mode, plain CSS.** Every
+  page is built ahead of time. No UI framework is sent to the browser: each
+  interactive piece is a small script of a few kilobytes.
+- **Content is data.** Projects, experience, awards and every sentence on the
+  site live in `src/content/`. Components only lay them out.
+- **Design tokens.** Every colour, size, spacing and motion value comes from
+  `src/styles/tokens.css`, in a light and a dark theme.
+- **A small server side**, on Vercel, for the few things that must not be in a
+  static file: the contact address (handed out only for a short-lived signed
+  token), an optional resume, and a daily rebuild that keeps the GitHub
+  activity current. Secrets are settings on the host, never in this repo.
+- **Fast and private by default.** Self-hosted fonts, no third-party requests
+  to render a page, a strict content security policy, and cookie-free
+  analytics.
 
-## What's on the site
+## What is tested
 
-- **About** — intro and profile
-- **Experience** — industry and academic roles
-- **Involvement** — teams, hackathons, and leadership
-- **Projects** — featured engineering work with links and tags
-- **Skills** — languages, tools, and areas of focus
-- **Contact** — email reveal, social links, and copy-to-clipboard
+Every push runs, in order: a type check, unit and content tests, a production
+build, checks on the built files, browser tests in Chrome, Firefox and Safari's
+engine at phone, tablet and laptop sizes (including accessibility scans in both
+themes), and a speed measurement on a simulated mid-range phone with a fixed
+budget.
 
-## Highlights
+## Commands
 
-- **Light and dark mode** — CSS custom properties, toggle in the header, preference saved in `localStorage` with no flash on reload
-- **Responsive layout** — CSS Grid sections that reflow from desktop to mobile
-- **Scroll reveal** — subtle entrance animations via `IntersectionObserver`; disabled when `prefers-reduced-motion` is set
-- **Accessible by default** — semantic HTML, ARIA labels, smooth scrolling with sticky-header offsets, and an inline SVG icon sprite
-- **Minimal aesthetic** — Inter for body text, JetBrains Mono for technical labels and metadata
+| Command | What it does |
+|---|---|
+| `npm run dev` | Local site at http://localhost:4321 |
+| `npm run check` | Type check |
+| `npm test` | Unit and content tests |
+| `npm run build && npm run test:build` | Build, then checks on the output |
+| `npm run test:e2e` | Browser tests against a test build |
+| `npm run test:speed` | Speed budget on a simulated phone |
 
-## Project structure
+Copy `.env.example` to `.env` to try the server-side pieces locally. Nothing
+needs a setting to build: without them, those pieces are simply left out.
 
-```
-index.html              # Page structure and content
-style.css               # Theming, layout, and component styles
-app.js                  # Theme toggle, email reveal, scroll animations
-assets/
-  images/profile.jpg    # Profile photo
-  logos/                # Employer and org logos (light/dark variants)
-```
+## Where things are
 
-## Local development
-
-Open `index.html` in a browser, or serve the folder with any static file server:
-
-```bash
-# Python
-python -m http.server 8000
-
-# Node (npx)
-npx serve .
-```
-
-Then open [http://localhost:8000](http://localhost:8000).
-
-## Deployment
-
-The site is fully static. Deploy the repository root to any static host — no install or build command required. Production is hosted at [siddigz.com](https://siddigz.com).
-
-## License
-
-All rights reserved © Siddig Ahmed.
+| Path | What is there |
+|---|---|
+| `src/content/` | All content and wording |
+| `src/components/`, `src/pages/`, `src/layouts/` | Layout |
+| `src/lib/` | Logic, unit tested, shared by the build, the server and the browser |
+| `src/scripts/` | The browser side of each interactive piece |
+| `src/styles/tokens.css` | Design tokens |
+| `tests/` | Unit, content, build and browser tests |
+| `CLAUDE.md` | The rules this repository keeps, and how to add a project |
+| `docs/` | The design, the build plans and the hosting checklist |

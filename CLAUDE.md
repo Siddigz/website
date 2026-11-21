@@ -97,4 +97,7 @@ projects as the featured list here, in the same order, with the same one-liners.
 - `npm run check`: type check
 - `npm test`: unit and content tests
 - `npm run build && npm run test:build`: build, then budget checks on the output
-- `npm run test:e2e`: browser tests against the built site
+- `npm run test:e2e`: browser tests against a test build
+- `npm run test:speed`: the speed budget, measured on a simulated mid-range phone
+
+What the owner sets on the host is listed in `docs/vercel-checklist.md`.
