@@ -29,9 +29,9 @@ const site = await getSite();
 const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url;
 ---
 
-<BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`}>
+<BaseLayout title={`${data.title} · ${site.fullName}`} description={data.oneLiner} path={`/projects/${project.id}`} expect="project-top">
   <article class="project section container" data-project-slug={project.id}>
-    <header>
+    <header id="project-top">
       <a class="back" href="/#projects"><span aria-hidden="true">←</span> Back to projects</a>
       {
         data.award && (
@@ -65,7 +65,7 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
     <div class="body"><Content /></div>
 
     <div class="media">
-      {data.cover && <Image class="lead" src={data.cover} alt={data.coverAlt ?? ''} width={1200} />}
+      {data.cover && <Image class="lead" src={data.cover} alt={data.coverAlt ?? ''} width={1200} data-transition-image />}
       {data.gallery?.map((image) => <Image src={image.src} alt={image.alt} width={800} />)}
     </div>
 
@@ -91,6 +91,13 @@ const repoName = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
 
   h1 {
     overflow-wrap: anywhere;
+    /* Where the browser animates between pages, the title travels to and from its card on the home page. */
+    view-transition-name: project-title;
+  }
+
+  /* So does the lead picture. */
+  .media :global(.lead) {
+    view-transition-name: project-image;
   }
 
   .award {

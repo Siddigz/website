@@ -336,3 +336,26 @@ li:first-child > .button {
     opacity: 0;
   }
 }
+
+/*
+ * Going from one page of the site to another: where the browser can, and the
+ * visitor allows motion, the old page fades into the new one, and a project's
+ * title and picture travel between its card and its page.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: var(--duration-base);
+    animation-timing-function: var(--ease-out);
+  }
+}
+
+/* The picture has a different shape on each page: fill the moving frame instead of stretching. */
+::view-transition-old(project-image),
+::view-transition-new(project-image) {
+  block-size: 100%;
+  object-fit: cover;
+}
