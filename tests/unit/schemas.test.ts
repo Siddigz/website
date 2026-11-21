@@ -87,7 +87,7 @@ describe('siteSchema', () => {
   it('requires the looking-for switch to be a boolean', () => {
     const site = {
       url: 'https://siddigz.com',
-      name: { first: 'A', last: 'B' },
+      name: { first: 'A', last: 'B', audio: { first: 'a.wav', last: 'b.wav', hint: 'Plays it.' } },
       pitch: 'p',
       lookingFor: { enabled: 'yes', text: 't' },
       program: 'p',
@@ -101,6 +101,8 @@ describe('siteSchema', () => {
     };
     expect(siteSchema.safeParse(site).success).toBe(false);
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' } }).success).toBe(true);
+    // The name needs its two recordings and the hint read out on them.
+    expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, name: { first: 'A', last: 'B' } }).success).toBe(false);
     // The photo is optional, but one with no alt text is refused.
     const complete = { ...site, lookingFor: { enabled: false, text: 't' } };
     expect(siteSchema.safeParse({ ...complete, photo: { src: './me.jpg', alt: 'Me' } }).success).toBe(true);

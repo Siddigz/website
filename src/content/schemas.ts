@@ -105,7 +105,12 @@ export const skillsSchema = z.object({
 export const siteSchema = z.object({
   id: z.string().optional(),
   url: z.url(),
-  name: z.object({ first: z.string().min(1), last: z.string().min(1) }),
+  name: z.object({
+    first: z.string().min(1),
+    last: z.string().min(1),
+    /** File names in src/assets/audio/, and the hint read out on each word. */
+    audio: z.object({ first: z.string().min(1), last: z.string().min(1), hint: z.string().min(1) }),
+  }),
   pitch: z.string().min(1),
   lookingFor: z.object({ enabled: z.boolean(), text: z.string().min(1) }),
   program: z.string().min(1),
