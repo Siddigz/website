@@ -195,3 +195,161 @@ test.describe('one packet, hop by hop', () => {
     await context.close();
   });
 });
+
+test.describe('NRZ vs PAM4', () => {
+  const open = async (page: Page) => {
+    await page.goto('/explainers/nrz-vs-pam4');
+    return page.locator('[data-signal]');
+  };
+  const format = (page: Page, name: string) => page.getByRole('group', { name: 'Modulation format' }).getByRole('button', { name });
+  const readout = (page: Page, name: string) => page.locator(`[data-signal] [data-readout="${name}"]`);
+  const slider = (page: Page) => page.getByRole('slider', { name: 'Noise (σ)' });
+  const sigma = (page: Page) => page.locator('[data-signal] [data-sigma]');
+  const drawings = ['wave', 'eye', 'histogram'] as const;
+  /** A fingerprint of a drawing's pixels: its size, how many are painted, and a running sum of their colours. */
+  const pixels = (page: Page, name: string) =>
+    page.locator(`[data-signal] canvas[data-drawing="${name}"]`).evaluate((canvas: HTMLCanvasElement) => {
+      const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+      let painted = 0;
+      let sum = 0;
+      for (let index = 0; index < data.length; index += 4) {
+        if (data[index + 3]! > 0) painted += 1;
+        // Each pixel's place counts too, so two labels swapping places changes the result.
+        sum = (sum * 31 + data[index]! * 3 + data[index + 1]! * 5 + data[index + 2]! * 7 + data[index + 3]!) % 1_000_000_007;
+      }
+      return { width: canvas.width, height: canvas.height, painted, sum };
+    });
+
+  test('starts on PAM4 with a little noise', async ({ page }) => {
+    await open(page);
+    await expect(format(page, 'PAM4 (4 levels)')).toHaveAttribute('aria-pressed', 'true');
+    await expect(format(page, 'NRZ (2 levels)')).toHaveAttribute('aria-pressed', 'false');
+    await expect(sigma(page)).toHaveText('0.050');
+    await expect(readout(page, 'gap').locator('.big')).toHaveText('1/3');
+    await expect(readout(page, 'bits').locator('.big')).toHaveText('2');
+    await expect(readout(page, 'theory').locator('.big')).toHaveText('6.4e-4');
+    await expect(page.getByRole('checkbox', { name: 'Gray code labels' })).toBeChecked();
+  });
+
+  test('the page as built already holds the starting numbers', async ({ request }) => {
+    const html = await (await request.get('/explainers/nrz-vs-pam4')).text();
+    expect(html).toContain('6.4e-4');
+    expect(html).toContain('= 0.333 of full range');
+  });
+
+  test('NRZ has one full-range gap and one bit per symbol', async ({ page }) => {
+    await open(page);
+    await format(page, 'NRZ (2 levels)').click();
+    await expect(format(page, 'NRZ (2 levels)')).toHaveAttribute('aria-pressed', 'true');
+    await expect(format(page, 'PAM4 (4 levels)')).toHaveAttribute('aria-pressed', 'false');
+    await expect(readout(page, 'gap').locator('.big')).toHaveText('1');
+    await expect(readout(page, 'bits').locator('.big')).toHaveText('1');
+    await expect(page.locator('[data-signal] [data-caption]')).toContainText('NRZ is the baseline');
+    await format(page, 'PAM8 (8 levels)').click();
+    await expect(readout(page, 'gap').locator('.big')).toHaveText('1/7');
+    await expect(readout(page, 'bits').locator('.big')).toHaveText('3');
+  });
+
+  test('with no noise there are no errors, measured or predicted', async ({ page }) => {
+    await open(page);
+    await slider(page).fill('0');
+    await expect(sigma(page)).toHaveText('0.000');
+    await expect(readout(page, 'measured').locator('.big')).toHaveText('< 1 in 20,000');
+    await expect(readout(page, 'theory').locator('.big')).toHaveText('0');
+    await expect(page.locator('[data-signal] [data-wave-note]')).toContainText('0 of 40 symbols');
+  });
+
+  test('the arrow keys move the noise slider', async ({ page }) => {
+    await open(page);
+    await slider(page).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(sigma(page)).toHaveText('0.055');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await expect(sigma(page)).toHaveText('0.045');
+    // More noise, more predicted errors.
+    await slider(page).fill('0.2');
+    await expect(readout(page, 'theory').locator('.big')).not.toHaveText('6.4e-4');
+  });
+
+  test('every drawing is an image with a name, has size and is not blank', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('[data-signal] canvas')).toHaveCount(3);
+    for (const name of drawings) {
+      const canvas = page.locator(`[data-signal] canvas[data-drawing="${name}"]`);
+      await expect(canvas).toHaveAttribute('role', 'img');
+      await expect(canvas).toHaveAttribute('aria-label', /\S/);
+      const { width, height, painted } = await pixels(page, name);
+      expect(width).toBeGreaterThan(200);
+      expect(height).toBeGreaterThan(100);
+      expect(painted).toBeGreaterThan(500);
+    }
+  });
+
+  test('the drawings change with the format, the Gray code switch and Resample', async ({ page }) => {
+    await open(page);
+    const before = await pixels(page, 'wave');
+    await page.getByRole('checkbox', { name: 'Gray code labels' }).uncheck();
+    const plain = await pixels(page, 'wave');
+    expect(plain.sum).not.toBe(before.sum);
+    await page.getByRole('button', { name: 'Resample' }).click();
+    expect((await pixels(page, 'wave')).sum).not.toBe(plain.sum);
+    const pam4 = await pixels(page, 'histogram');
+    await format(page, 'NRZ (2 levels)').click();
+    expect((await pixels(page, 'histogram')).sum).not.toBe(pam4.sum);
+  });
+
+  test('the drawings are redrawn in the new colours when the theme changes', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await open(page);
+    const light = await Promise.all(drawings.map((name) => pixels(page, name)));
+    await page.getByRole('button', { name: 'Switch to dark theme' }).click();
+    for (const [index, name] of drawings.entries()) {
+      await expect.poll(async () => (await pixels(page, name)).sum).not.toBe(light[index]!.sum);
+    }
+    // And when the system changes it, with no button pressed.
+    await page.reload();
+    const again = await pixels(page, 'wave');
+    await page.evaluate(() => localStorage.removeItem('color-scheme'));
+    await page.reload();
+    const followed = await pixels(page, 'wave');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect.poll(async () => (await pixels(page, 'wave')).sum).not.toBe(followed.sum);
+    expect(again.sum).not.toBe(light[0]!.sum);
+  });
+
+  test('the drawings fit a narrow screen, and are redrawn when it changes', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page);
+    const wide = await pixels(page, 'eye');
+    await page.setViewportSize({ width: 320, height: 640 });
+    await expect.poll(async () => (await pixels(page, 'eye')).width).toBeLessThan(wide.width);
+    const box = (await page.locator('[data-signal] canvas[data-drawing="eye"]').boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(320);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  });
+
+  test('the controls work from the keyboard', async ({ page, browserName }) => {
+    const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+    await open(page);
+    await format(page, 'NRZ (2 levels)').focus();
+    await page.keyboard.press('Enter');
+    await expect(format(page, 'NRZ (2 levels)')).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press(tab);
+    await page.keyboard.press(tab);
+    await page.keyboard.press(tab);
+    await expect(page.getByRole('checkbox', { name: 'Gray code labels' })).toBeFocused();
+    await page.keyboard.press('Space');
+    await expect(page.getByRole('checkbox', { name: 'Gray code labels' })).not.toBeChecked();
+  });
+
+  test('with scripts off the numbers still read, and the controls and empty drawings are not shown', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto('/explainers/nrz-vs-pam4');
+    await expect(page.locator('[data-signal] [data-readout="theory"] .big')).toHaveText('6.4e-4');
+    await expect(page.locator('[data-signal] .controls')).toBeHidden();
+    await expect(page.locator('[data-signal] canvas:visible')).toHaveCount(0);
+    await context.close();
+  });
+});

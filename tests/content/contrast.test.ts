@@ -25,6 +25,8 @@ const PAIRS: [string, string, number][] = [
   ['violet', 'bg', 3],
   ['amber', 'surface', 3],
   ['amber', 'bg', 3],
+  ['wrong', 'surface', 3],
+  ['wrong', 'bg', 3],
 ];
 
 describe.each(['light', 'dark'])('%s theme', (scheme) => {
