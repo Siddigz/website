@@ -69,7 +69,7 @@ test('with the switch on, a Resume link sits with the other buttons at the top',
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', /noopener/);
   const order = await page.locator('#top .links > li').evaluateAll((items) => items.map((item) => (item as HTMLElement).innerText.trim()));
-  expect(order).toEqual(['GitHub', 'LinkedIn', 'Email', site.resumeLabel]);
+  expect(order).toEqual(['GitHub', 'LinkedIn', site.resumeLabel, 'Email']);
 });
 
 test('a test-only page asks not to be indexed', async ({ page }) => {

@@ -151,12 +151,8 @@ for (const address of ['/', '/dev/resume-on']) {
     await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
     await settled(page, '#top');
     expect(await places()).toEqual(before);
-    if (resumeBefore) {
-      // The button after it only slides to the right.
-      const after = (await resume.boundingBox())!;
-      expect(after.y).toBe(resumeBefore.y);
-      expect(after.x).toBeGreaterThan(resumeBefore.x);
-    }
+    // Email is the last button in the row, so the Resume button before it stays exactly where it was.
+    if (resumeBefore) expect(await resume.boundingBox()).toEqual(resumeBefore);
   });
 }
 

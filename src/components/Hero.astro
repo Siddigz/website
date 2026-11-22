@@ -58,9 +58,10 @@ const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
     </p>
     <ul class="links" role="list">
       {site.profileLinks.map((link) => <li><a class="button" href={link.href}>{link.label}</a></li>)}
-      <li><EmailReveal /></li>
       {/* Opens beside the site, so the visitor does not lose their place. */}
       {showResume && <li><a class="button" href="/resume.pdf" target="_blank" rel="noopener">{site.resumeLabel}</a></li>}
+      {/* Last in the row: when it widens into the address, nothing after it has to move. */}
+      <li><EmailReveal /></li>
     </ul>
   </div>
   {/* The photo from site.yaml. Without one, a generic figure: decorative, so hidden from screen readers. */}
