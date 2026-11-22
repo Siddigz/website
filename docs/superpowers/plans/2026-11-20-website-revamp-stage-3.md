@@ -368,6 +368,7 @@ export function changedFields(step: number): Field[];
 export function historyRows(step: number): { link: string; eDst: string; eSrc: string; ipDst: string; ttl: number }[];
 ```
 
+- Changed on 2026-11-22 at the owner's request: the section is named "Playground". Its anchor is `#playground`, the pages are at `/playground/<slug>`, their link pictures at `/og/playground/<slug>.png`, and the link back reads "Back to playground". Folder and code names keep `explainers`. Where the lines below say `#explainers`, `src/pages/explainers/` or "Back to explainers", read the new names.
 - A home section `#explainers` after "More projects": one card per explainer with title and summary.
 - A page per explainer: "Back to explainers", title, summary, then the widget named for its slug in `src/components/explainers/index.ts`. A content file with no widget fails the build with a message naming the slug.
 - The widget keeps the source's behaviour: Previous, Next hop, Reset; the packet moves along the diagram; changed values flash; the old Ethernet header peels off and a new one attaches; the note about address translation shows at the home router only; a history table grows a row per hop. Movement is a CSS transition from tokens, 300 ms or less, so with reduced motion values simply change. A click during a move finishes the move at once. The caption is announced to screen readers. The diagram scrolls sideways inside its own labelled box on narrow screens.

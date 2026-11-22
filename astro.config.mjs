@@ -71,8 +71,8 @@ export default defineConfig({
   },
   // The home page is the list of projects, so the bare folder address leads there.
   // Browsers ask for /favicon.ico without being told to; it leads to the small icon.
-  // The same goes for explainers. (The forms with a trailing slash are in vercel.json: these rules match the bare address only.)
-  redirects: { '/projects': '/#projects', '/explainers': '/#explainers', '/favicon.ico': '/favicon-32.png' },
+  // The same goes for the playground. (The forms with a trailing slash are in vercel.json: these rules match the bare address only.)
+  redirects: { '/projects': '/#projects', '/playground': '/#playground', '/favicon.ico': '/favicon-32.png' },
   image: {
     layout: 'constrained',
     responsiveStyles: true,

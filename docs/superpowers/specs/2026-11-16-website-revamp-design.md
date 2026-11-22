@@ -123,7 +123,7 @@ content as files, interactivity added only where wanted.
 |---|---|
 | `/` | Home: one normal scrolling page with the whole story |
 | `/projects/<slug>` | One brief page per featured project |
-| `/explainers/<slug>` | One page per interactive explainer |
+| `/playground/<slug>` | One page per interactive explainer. The section is named "Playground" on the site (owner's choice, 2026-11-22); the content folder keeps the name `explainers` |
 | `/404` | Not-found page |
 
 ### Home, top to bottom

@@ -88,11 +88,11 @@ test('going between pages works under the policy', async ({ page }) => {
 
 test('both explainers work under the policy', async ({ page }) => {
   const refused = await watch(page);
-  await page.goto('/explainers/one-packet-hop-by-hop');
+  await page.goto('/playground/one-packet-hop-by-hop');
   await page.getByRole('button', { name: 'Next hop' }).click();
   await expect(page.locator('[data-packet] [data-caption]')).toContainText('Step 1 of 10');
   expect(await refused()).toEqual([]);
-  await page.goto('/explainers/nrz-vs-pam4');
+  await page.goto('/playground/nrz-vs-pam4');
   await page.getByRole('slider', { name: 'Noise (σ)' }).fill('0.1');
   await page.getByRole('button', { name: 'NRZ (2 levels)' }).click();
   await expect(page.locator('[data-signal] [data-readout="bits"] .big')).toHaveText('1');

@@ -47,8 +47,8 @@
       "permanent": true
     },
     {
-      "source": "/explainers/",
-      "destination": "/#explainers",
+      "source": "/playground/",
+      "destination": "/#playground",
       "permanent": true
     }
   ]

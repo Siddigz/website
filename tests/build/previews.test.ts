@@ -49,7 +49,7 @@ describe('link previews', () => {
   it('there is a picture for the home page, each featured project and each explainer', () => {
     const made = (readdirSync(join(BUILT, 'og'), { recursive: true }) as string[]).filter((name) => name.endsWith('.png')).sort();
     expect(made).toEqual(
-      ['home.png', ...featuredSlugs().map((slug) => join('projects', `${slug}.png`)), ...explainerSlugs().map((slug) => join('explainers', `${slug}.png`))].sort(),
+      ['home.png', ...featuredSlugs().map((slug) => join('projects', `${slug}.png`)), ...explainerSlugs().map((slug) => join('playground', `${slug}.png`))].sort(),
     );
     expect(made.length).toBe(9);
   });
@@ -65,7 +65,7 @@ describe('link previews', () => {
     const sums: number[] = [];
     for (const slug of explainerSlugs()) {
       // The right-hand part of the card, where the drawing sits.
-      const { data } = await sharp(join(BUILT, 'og', 'explainers', `${slug}.png`)).extract({ left: 700, top: 120, width: 420, height: 390 }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+      const { data } = await sharp(join(BUILT, 'og', 'playground', `${slug}.png`)).extract({ left: 700, top: 120, width: 420, height: 390 }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
       const colours = new Set<string>();
       let sum = 0;
       for (let index = 0; index < data.length; index += 3) {

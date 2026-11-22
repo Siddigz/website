@@ -5,7 +5,7 @@ const site = readYaml('src/content/site.yaml').main;
 
 // Every page a visitor can reach, plus the not-found page and the test-only page.
 const pages = [...pagePaths(), '/does-not-exist', '/dev/no-looking-for'];
-const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'explainers', 'activity', 'about', 'contact'];
+const SECTIONS = ['top', 'proof', 'experience', 'skills', 'projects', 'more-projects', 'playground', 'activity', 'about', 'contact'];
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
@@ -17,7 +17,7 @@ test.describe('without JavaScript', () => {
     await expect(page.getByRole('list', { name: 'Skills' }).getByRole('listitem').first()).toBeVisible();
   });
 
-  for (const path of pagePaths().filter((path) => path.startsWith('/explainers/'))) {
+  for (const path of pagePaths().filter((path) => path.startsWith('/playground/'))) {
     test(`${path} shows its title and summary`, async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('h1')).toBeVisible();

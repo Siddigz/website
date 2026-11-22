@@ -24,7 +24,7 @@ describe('redirects', () => {
     const { redirects } = JSON.parse(readFileSync('vercel.json', 'utf8'));
     expect(redirects).toEqual([
       { source: '/projects/', destination: '/#projects', permanent: true },
-      { source: '/explainers/', destination: '/#explainers', permanent: true },
+      { source: '/playground/', destination: '/#playground', permanent: true },
     ]);
   });
 });

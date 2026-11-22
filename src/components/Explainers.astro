@@ -10,7 +10,7 @@ const explainers = await getExplainers();
 
 {
   explainers.length > 0 && (
-    <section id="explainers" class="section container">
+    <section id="playground" class="section container">
       <h2 class="section-title">{site.explainers.title}</h2>
       <div class="cards">
         {explainers.map((explainer) => (
@@ -18,7 +18,7 @@ const explainers = await getExplainers();
             {/* A small still drawing of what the explainer shows. Decoration: the title names the card. */}
             <div class="visual"><ExplainerThumb slug={explainer.id} /></div>
             <h3>
-              <a href={`/explainers/${explainer.id}`}>{explainer.data.title}</a>
+              <a href={`/playground/${explainer.id}`}>{explainer.data.title}</a>
             </h3>
             <p class="muted">{explainer.data.summary}</p>
           </article>

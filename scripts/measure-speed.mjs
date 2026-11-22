@@ -20,7 +20,7 @@ const BUDGET = { score: 95, largestContentMs: 1800, layoutShift: 0.05 };
 
 // The home page, the first project page and the first explainer, whichever those are.
 const first = (dir) => readdirSync(dir).filter((name) => name.endsWith('.md')).sort()[0]?.replace(/\.md$/, '');
-const pages = ['/', `/projects/${first('src/content/projects')}`, `/explainers/${first('src/content/explainers')}`];
+const pages = ['/', `/projects/${first('src/content/projects')}`, `/playground/${first('src/content/explainers')}`];
 
 const middle = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 

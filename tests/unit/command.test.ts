@@ -64,7 +64,7 @@ describe('commandItems', () => {
       { title: 'EcoCart', href: '/projects/ecocart', keywords: 'React' },
       { title: 'curate', href: 'https://github.com/Siddigz/curate', keywords: 'TypeScript' },
     ],
-    explainers: [{ title: 'One packet', href: '/explainers/one-packet' }],
+    explainers: [{ title: 'One packet', href: '/playground/one-packet' }],
     links: [{ label: 'GitHub', href: 'https://github.com/Siddigz' }],
     theme: { toDark: 'Switch to dark theme', toLight: 'Switch to light theme' },
   });

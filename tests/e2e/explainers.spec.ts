@@ -13,14 +13,14 @@ const explainers = readdirSync(DIR)
 test('the home page lists every explainer, between the projects and the activity', async ({ page }) => {
   await page.goto('/');
   const ids = await page.locator('main > section').evaluateAll((sections) => sections.map((section) => section.id));
-  expect(ids.indexOf('explainers')).toBe(ids.indexOf('more-projects') + 1);
-  expect(ids.indexOf('explainers')).toBeLessThan(ids.indexOf('about'));
-  const section = page.locator('#explainers');
+  expect(ids.indexOf('playground')).toBe(ids.indexOf('more-projects') + 1);
+  expect(ids.indexOf('playground')).toBeLessThan(ids.indexOf('about'));
+  const section = page.locator('#playground');
   await expect(section.getByRole('heading', { level: 2 })).toHaveText(site.explainers.title);
   const cards = section.locator('article');
   await expect(cards).toHaveCount(explainers.length);
   for (const [index, explainer] of explainers.entries()) {
-    await expect(cards.nth(index).getByRole('link', { name: explainer.title })).toHaveAttribute('href', `/explainers/${explainer.slug}`);
+    await expect(cards.nth(index).getByRole('link', { name: explainer.title })).toHaveAttribute('href', `/playground/${explainer.slug}`);
     await expect(cards.nth(index)).toContainText(explainer.summary);
   }
 });
@@ -29,11 +29,11 @@ test('the top-right links include Explainers, in page order, and it lights up wh
   await page.goto('/');
   const links = page.locator('.site-header .links a');
   await expect(links).toHaveText(['Experience', 'Projects', site.explainers.title, 'About']);
-  await expect(links.nth(2)).toHaveAttribute('href', '/#explainers');
+  await expect(links.nth(2)).toHaveAttribute('href', '/#playground');
   await links.nth(2).click();
-  await expect(page).toHaveURL(/\/#explainers$/);
-  await expect(page.locator('#explainers')).toBeInViewport();
-  await page.locator('#explainers').evaluate((section) => section.scrollIntoView({ block: 'center' }));
+  await expect(page).toHaveURL(/\/#playground$/);
+  await expect(page.locator('#playground')).toBeInViewport();
+  await page.locator('#playground').evaluate((section) => section.scrollIntoView({ block: 'center' }));
   await expect(page.locator('.site-header a[aria-current="true"]')).toHaveText(site.explainers.title);
 });
 
@@ -49,7 +49,7 @@ for (const width of [320, 375]) {
 
 test('every explainer card carries a small drawing of what it explains', async ({ page }) => {
   await page.goto('/');
-  const cards = page.locator('#explainers article');
+  const cards = page.locator('#playground article');
   for (const [index, explainer] of explainers.entries()) {
     const drawing = cards.nth(index).locator('svg');
     await expect(drawing).toHaveCount(1);
@@ -71,7 +71,7 @@ test('every explainer card carries a small drawing of what it explains', async (
 
 test('the drawings on the cards follow the theme', async ({ page }) => {
   const ink = () =>
-    page.locator('#explainers article svg').first().evaluate((drawing) => {
+    page.locator('#playground article svg').first().evaluate((drawing) => {
       const shape = drawing.querySelector('[class]')!;
       const style = getComputedStyle(shape);
       return `${style.fill} ${style.stroke}`;
@@ -87,27 +87,27 @@ for (const colorScheme of ['light', 'dark'] as const) {
   test(`the Explainers section has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
     await page.goto('/');
-    const { violations } = await new AxeBuilder({ page }).include('#explainers').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+    const { violations } = await new AxeBuilder({ page }).include('#playground').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
     expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} element(s))`)).toEqual([]);
   });
 }
 
 for (const explainer of explainers) {
   test(`${explainer.slug}: the page has its title, its summary and a way back`, async ({ page }) => {
-    const response = await page.goto(`/explainers/${explainer.slug}`);
+    const response = await page.goto(`/playground/${explainer.slug}`);
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1')).toHaveText(explainer.title);
     await expect(page.locator('main')).toContainText(explainer.summary);
     await expect(page).toHaveTitle(new RegExp(explainer.title.slice(0, 12)));
     const back = page.getByRole('link', { name: site.explainers.back }).first();
-    await expect(back).toHaveAttribute('href', '/#explainers');
+    await expect(back).toHaveAttribute('href', '/#playground');
     await back.click();
-    await expect(page).toHaveURL(/\/#explainers$/);
-    await expect(page.locator('#explainers')).toBeInViewport();
+    await expect(page).toHaveURL(/\/#playground$/);
+    await expect(page.locator('#playground')).toBeInViewport();
   });
 
   test(`${explainer.slug}: the interactive part is as wide as the page's content, so it sits squarely under the title`, async ({ page }) => {
-    await page.goto(`/explainers/${explainer.slug}`);
+    await page.goto(`/playground/${explainer.slug}`);
     const edges = await page.evaluate(() => {
       const article = document.querySelector('article.explainer')!;
       const style = getComputedStyle(article);
@@ -124,11 +124,11 @@ for (const explainer of explainers) {
   });
 
   test(`${explainer.slug}: with scripts off a line says why nothing moves; with scripts on it is not shown`, async ({ page, browser }) => {
-    await page.goto(`/explainers/${explainer.slug}`);
+    await page.goto(`/playground/${explainer.slug}`);
     await expect(page.getByText(site.explainers.noScript)).toBeHidden();
     const context = await browser.newContext({ javaScriptEnabled: false });
     const plain = await context.newPage();
-    await plain.goto(`/explainers/${explainer.slug}`);
+    await plain.goto(`/playground/${explainer.slug}`);
     await expect(plain.getByText(site.explainers.noScript)).toBeVisible();
     await context.close();
   });
@@ -137,13 +137,13 @@ for (const explainer of explainers) {
     await page.goto('/');
     await page.getByRole('button', { name: site.menu.open }).click();
     const group = page.locator('dialog#command-menu').getByRole('group', { name: site.menu.groups.explainers });
-    await expect(group.getByRole('option', { name: explainer.title })).toHaveAttribute('href', `/explainers/${explainer.slug}`);
+    await expect(group.getByRole('option', { name: explainer.title })).toHaveAttribute('href', `/playground/${explainer.slug}`);
   });
 
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`${explainer.slug}: no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
-      await page.goto(`/explainers/${explainer.slug}`);
+      await page.goto(`/playground/${explainer.slug}`);
       const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
       expect(violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} element(s))`)).toEqual([]);
     });
@@ -151,14 +151,14 @@ for (const explainer of explainers) {
 
   test(`${explainer.slug}: the page does not scroll sideways at 320px`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await page.goto(`/explainers/${explainer.slug}`);
+    await page.goto(`/playground/${explainer.slug}`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 }
 
 test.describe('one packet, hop by hop', () => {
   const open = async (page: Page) => {
-    await page.goto('/explainers/one-packet-hop-by-hop');
+    await page.goto('/playground/one-packet-hop-by-hop');
     return page.locator('[data-packet]');
   };
   const previous = (page: Page) => page.getByRole('button', { name: 'Previous' });
@@ -321,7 +321,7 @@ test.describe('one packet, hop by hop', () => {
   test('with scripts off the whole journey is in the table, and the buttons are not offered', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    await page.goto('/explainers/one-packet-hop-by-hop');
+    await page.goto('/playground/one-packet-hop-by-hop');
     await expect(page.locator('[data-packet] tbody tr:visible')).toHaveCount(11);
     await expect(page.locator('[data-packet] .controls')).toBeHidden();
     await context.close();
@@ -330,7 +330,7 @@ test.describe('one packet, hop by hop', () => {
 
 test.describe('NRZ vs PAM4', () => {
   const open = async (page: Page) => {
-    await page.goto('/explainers/nrz-vs-pam4');
+    await page.goto('/playground/nrz-vs-pam4');
     return page.locator('[data-signal]');
   };
   const format = (page: Page, name: string) => page.getByRole('group', { name: 'Modulation format' }).getByRole('button', { name });
@@ -364,7 +364,7 @@ test.describe('NRZ vs PAM4', () => {
   });
 
   test('the page as built already holds the starting numbers', async ({ request }) => {
-    const html = await (await request.get('/explainers/nrz-vs-pam4')).text();
+    const html = await (await request.get('/playground/nrz-vs-pam4')).text();
     expect(html).toContain('6.4e-4');
     expect(html).toContain('= 0.333 of full range');
   });
@@ -499,7 +499,7 @@ test.describe('NRZ vs PAM4', () => {
   test('with scripts off the numbers still read, and the controls and empty drawings are not shown', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    await page.goto('/explainers/nrz-vs-pam4');
+    await page.goto('/playground/nrz-vs-pam4');
     await expect(page.locator('[data-signal] [data-readout="theory"] .big')).toHaveText('6.4e-4');
     await expect(page.locator('[data-signal] .controls')).toBeHidden();
     await expect(page.locator('[data-signal] canvas:visible')).toHaveCount(0);

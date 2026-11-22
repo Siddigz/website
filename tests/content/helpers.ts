@@ -72,5 +72,5 @@ export const explainerSlugs = (): string[] =>
 export const pagePaths = (): string[] => [
   '/',
   ...featuredSlugs().map((slug) => `/projects/${slug}`),
-  ...explainerSlugs().map((slug) => `/explainers/${slug}`),
+  ...explainerSlugs().map((slug) => `/playground/${slug}`),
 ];

@@ -20,7 +20,7 @@ export async function homeSections(): Promise<{ id: string; label: string }[]> {
     { id: 'skills', label: sections.skills },
     { id: 'projects', label: sections.projects },
     { id: 'more-projects', label: sections.moreProjects },
-    ...(explainers.length > 0 ? [{ id: 'explainers', label: site.explainers.title }] : []),
+    ...(explainers.length > 0 ? [{ id: 'playground', label: site.explainers.title }] : []),
     ...(activity ? [{ id: 'activity', label: sections.activity }] : []),
     // About takes its title from its own content file.
     ...(about ? [{ id: 'about', label: about.data.title }] : []),

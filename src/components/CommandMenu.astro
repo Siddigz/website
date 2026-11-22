@@ -20,7 +20,7 @@ const items = commandItems({
     href: featured.has(project.id) ? `/projects/${project.id}` : (project.data.links.repo ?? '/#more-projects'),
     keywords: project.data.stack.join(' '),
   })),
-  explainers: (await getExplainers()).map((explainer) => ({ title: explainer.data.title, href: `/explainers/${explainer.id}` })),
+  explainers: (await getExplainers()).map((explainer) => ({ title: explainer.data.title, href: `/playground/${explainer.id}` })),
   links: site.profileLinks,
   theme: THEME_LABELS,
 });

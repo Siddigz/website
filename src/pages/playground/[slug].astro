@@ -23,10 +23,10 @@ if (!Widget) {
 }
 ---
 
-<BaseLayout title={`${title} · ${site.fullName}`} description={summary} path={`/explainers/${explainer.id}`} expect="explainer-top" image={`/og/explainers/${explainer.id}.png`}>
+<BaseLayout title={`${title} · ${site.fullName}`} description={summary} path={`/playground/${explainer.id}`} expect="explainer-top" image={`/og/playground/${explainer.id}.png`}>
   <article class="explainer section container">
     <header id="explainer-top">
-      <a class="back" href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>
+      <a class="back" href="/#playground"><span aria-hidden="true">←</span> {site.explainers.back}</a>
       <h1>{title}</h1>
       <p class="summary">{summary}</p>
     </header>
@@ -34,7 +34,7 @@ if (!Widget) {
     <p class="no-script">{site.explainers.noScript}</p>
     <Widget />
     <footer>
-      <a href="/#explainers"><span aria-hidden="true">←</span> {site.explainers.back}</a>
+      <a href="/#playground"><span aria-hidden="true">←</span> {site.explainers.back}</a>
     </footer>
   </article>
 </BaseLayout>
