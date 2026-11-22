@@ -68,60 +68,148 @@ test('pressing Email shows the address as a link with a Copy button, and opens t
   expect(await page.evaluate(() => (window as any).opened)).toEqual([`${MAIL}${ADDRESS}`]);
 });
 
-for (const where of ['#top', '#contact'] as const) {
-  test(`the revealed address sits on top with Copy below it, exactly as wide (${where})`, async ({ page }) => {
-    await mockServer(page);
-    await recordMail(page);
-    await page.goto('/');
-    await reveal(page, where).click();
-    const link = widget(page, where).getByRole('link', { name: ADDRESS });
-    const copy = widget(page, where).getByRole('button', { name: words.copy });
-    await expect(link).toBeVisible();
-    // Measured once the opening animation has finished.
-    await expect.poll(() => widget(page, where).locator('[data-email-result]').evaluate((box) => box.getAnimations({ subtree: true }).length)).toBe(0);
-    const address = (await link.boundingBox())!;
-    const button = (await copy.boundingBox())!;
-    // Stacked, not side by side: Copy starts where the address ends, and the two share their left and right edges.
-    expect(button.y).toBeGreaterThanOrEqual(address.y + address.height - 1);
-    expect(Math.abs(button.x - address.x)).toBeLessThanOrEqual(1);
-    expect(Math.abs(button.width - address.width)).toBeLessThanOrEqual(1);
-    // They read as one piece: nothing but a hairline between them.
-    expect(button.y - (address.y + address.height)).toBeLessThanOrEqual(2);
-    // Both are comfortable to press.
-    expect(button.height).toBeGreaterThanOrEqual(24);
-    expect(address.height).toBeGreaterThanOrEqual(24);
-  });
-}
+/** Waits until nothing in the widget, or the row it sits in, is still moving. */
+const settled = (page: Page, where: '#top' | '#contact') =>
+  expect
+    .poll(() =>
+      widget(page, where).evaluate((element) => element.getAnimations({ subtree: true }).length + (element.closest('ul')?.getAnimations().length ?? 0)),
+    )
+    .toBe(0);
 
-test('the address and Copy open with a short animation, and without one when motion is reduced', async ({ page }) => {
+test('at the top, the Email button becomes one button in two parts: the address, then a small part that copies it', async ({ page }) => {
+  await mockServer(page);
+  await recordMail(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const neighbour = page.locator('#top .links').getByRole('link', { name: 'LinkedIn' });
+  const shape = (element: Element) => {
+    const style = getComputedStyle(element);
+    return { radius: style.borderTopLeftRadius, border: style.borderTopWidth, shadow: style.boxShadow, weight: style.fontWeight, height: Math.round(element.getBoundingClientRect().height) };
+  };
+  const expected = await neighbour.evaluate(shape);
+  await reveal(page, '#top').click();
+  const link = widget(page, '#top').getByRole('link', { name: ADDRESS });
+  const copy = widget(page, '#top').getByRole('button', { name: words.copy });
+  await expect(link).toBeVisible();
+  // The pointer is still over it from the press: move it away, so the button is measured at rest, not lifted.
+  await page.mouse.move(0, 0);
+  await settled(page, '#top');
+  await expect.poll(() => widget(page, '#top').locator('[data-email-result]').evaluate((element) => getComputedStyle(element).boxShadow)).toBe(expected.shadow);
+  // The same shape as the buttons beside it: corners, edge, depth, weight and height.
+  expect(await widget(page, '#top').locator('[data-email-result]').evaluate(shape)).toEqual(expected);
+  const whole = (await widget(page, '#top').locator('[data-email-result]').boundingBox())!;
+  const address = (await link.boundingBox())!;
+  const part = (await copy.boundingBox())!;
+  // Side by side inside the one button, the copy part last, with nothing between them.
+  expect(part.x).toBeGreaterThanOrEqual(address.x + address.width - 1);
+  expect(part.x - (address.x + address.width)).toBeLessThanOrEqual(2);
+  expect(address.x).toBeGreaterThanOrEqual(whole.x);
+  expect(part.x + part.width).toBeLessThanOrEqual(whole.x + whole.width + 1);
+  expect(Math.abs(part.height - address.height)).toBeLessThanOrEqual(2);
+  // The copy part is a picture with a name, big enough to press.
+  await expect(copy.locator('svg:visible')).toHaveCount(1);
+  expect((await copy.innerText()).trim()).toBe('');
+  expect(part.width).toBeGreaterThanOrEqual(24);
+  expect(part.height).toBeGreaterThanOrEqual(24);
+});
+
+test('in Contact, the address joins the row of links with the copy picture after it', async ({ page }) => {
   await mockServer(page);
   await recordMail(page);
   await page.goto('/');
-  // Each animation that starts inside the widget is noted as it begins: its name and how long it runs.
-  const watch = () =>
-    page.evaluate(() => {
-      (window as any).started = [];
-      document.querySelector('#top [data-email]')!.addEventListener('animationstart', (event) => {
-        const { animationName, target } = event as AnimationEvent;
-        (window as any).started.push([animationName, parseFloat(getComputedStyle(target as Element).animationDuration)]);
+  await reveal(page, '#contact').click();
+  const link = widget(page, '#contact').getByRole('link', { name: ADDRESS });
+  const copy = widget(page, '#contact').getByRole('button', { name: words.copy });
+  await expect(link).toBeVisible();
+  const address = (await link.boundingBox())!;
+  const part = (await copy.boundingBox())!;
+  expect(part.x).toBeGreaterThanOrEqual(address.x + address.width - 1);
+  expect(Math.abs(part.y + part.height / 2 - (address.y + address.height / 2))).toBeLessThanOrEqual(3);
+  expect(part.width).toBeGreaterThanOrEqual(24);
+  expect(part.height).toBeGreaterThanOrEqual(24);
+});
+
+for (const address of ['/', '/dev/resume-on']) {
+  test(`on a laptop, revealing the address moves nothing up or down (${address})`, async ({ page }) => {
+    await mockServer(page);
+    await recordMail(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(address);
+    const places = () =>
+      page.evaluate(() => {
+        const box = (selector: string) => {
+          const rect = document.querySelector(selector)?.getBoundingClientRect();
+          return rect ? [Math.round(rect.top + scrollY), Math.round(rect.height)] : null;
+        };
+        // The page's length, the photo, the row of buttons, the first button in it, and whatever comes after the top section.
+        return { page: document.documentElement.scrollHeight, photo: box('[data-photo-slot]'), row: box('#top .links'), first: box('#top .links a'), after: box('#top ~ *'), footer: box('footer') };
       });
-    });
-  await watch();
+    const before = await places();
+    const resume = page.locator('#top .links').getByRole('link', { name: site.resumeLabel });
+    const resumeBefore = address === '/' ? null : (await resume.boundingBox())!;
+    await reveal(page, '#top').click();
+    await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+    await settled(page, '#top');
+    expect(await places()).toEqual(before);
+    if (resumeBefore) {
+      // The button after it only slides to the right.
+      const after = (await resume.boundingBox())!;
+      expect(after.y).toBe(resumeBefore.y);
+      expect(after.x).toBeGreaterThan(resumeBefore.x);
+    }
+  });
+}
+
+test('the button widens into the address in no more than 300 ms, and at once when motion is reduced', async ({ page }) => {
+  await mockServer(page);
+  await recordMail(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  /** The length of every movement running in the widget or the row it sits in. */
+  const running = () =>
+    widget(page, '#top').evaluate((element) =>
+      [...element.getAnimations({ subtree: true }), ...(element.closest('ul')?.getAnimations() ?? [])].map((animation) => Number(animation.effect?.getTiming().duration)),
+    );
+  const start = (await reveal(page, '#top').boundingBox())!.width;
   await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  await expect.poll(() => page.evaluate(() => (window as any).started.length)).toBeGreaterThanOrEqual(2);
-  const started: [string, number][] = await page.evaluate(() => (window as any).started);
+  const lengths = await running();
+  expect(lengths.length).toBeGreaterThanOrEqual(1);
   // Rule 18: nothing in the interface moves for longer than 300 ms.
-  for (const [name, seconds] of started) expect(seconds, name).toBeLessThanOrEqual(0.3);
-  // When it is over the box is fully there, at its own size.
-  await expect.poll(() => widget(page, '#top').locator('[data-email-result]').evaluate((box) => box.getAnimations({ subtree: true }).length)).toBe(0);
+  for (const length of lengths) expect(length).toBeLessThanOrEqual(300);
+  await settled(page, '#top');
+  // When it is over the button is at its own full width: wider than "Email", with the whole address showing.
+  const whole = (await widget(page, '#top').locator('[data-email-result]').boundingBox())!;
+  expect(whole.width).toBeGreaterThan(start);
+  expect(await widget(page, '#top').locator('[data-email-link]').evaluate((link) => link.scrollWidth <= link.clientWidth + 1)).toBe(true);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.reload();
-  await watch();
   await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  expect(await page.evaluate(() => (window as any).started)).toEqual([]);
+  expect(await running()).toEqual([]);
+});
+
+test('on a phone, where the address needs a line of its own, what is below glides down instead of jumping', async ({ page }) => {
+  await mockServer(page);
+  await recordMail(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const row = page.locator('#top .links');
+  const before = (await row.boundingBox())!.height;
+  await reveal(page, '#top').click();
+  await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+  // The row is on its way from its old height to its new one, in no more than 300 ms.
+  const gliding = await row.evaluate((element) => element.getAnimations().map((animation) => Number(animation.effect?.getTiming().duration)));
+  expect(gliding.length).toBe(1);
+  expect(gliding[0]).toBeLessThanOrEqual(300);
+  await settled(page, '#top');
+  expect((await row.boundingBox())!.height).toBeGreaterThan(before);
+  // The whole button is on screen, and the page does not scroll sideways.
+  const whole = (await widget(page, '#top').locator('[data-email-result]').boundingBox())!;
+  expect(whole.x).toBeGreaterThanOrEqual(0);
+  expect(whole.x + whole.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
 
 test('one reveal fills the other Email button too, with no further calls', async ({ page }) => {
@@ -146,7 +234,11 @@ test('Copy puts the address on the clipboard and says so', async ({ page, contex
   const copy = widget(page, '#contact').getByRole('button', { name: words.copy });
   await copy.click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(ADDRESS);
-  await expect(widget(page, '#contact').getByRole('button', { name: words.copied })).toBeVisible();
+  // The picture turns into a tick, the button's name says "Copied", and it is read out.
+  const copied = widget(page, '#contact').getByRole('button', { name: words.copied });
+  await expect(copied).toBeVisible();
+  await expect(copied).toHaveAttribute('data-done', '');
+  await expect(copied.locator('svg:visible')).toHaveCount(1);
   await expect(widget(page, '#contact').getByRole('status')).toHaveText(words.copied);
   // It goes back to "Copy", ready to be used again.
   await expect(widget(page, '#contact').getByRole('button', { name: words.copy, exact: true })).toBeVisible({ timeout: 5_000 });
@@ -195,6 +287,39 @@ test('the widget works from the keyboard', async ({ page }) => {
   await reveal(page, '#top').focus();
   await page.keyboard.press('Enter');
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeFocused();
+});
+
+test('on a narrow phone a long address breaks after the at sign, not in the middle of a word', async ({ page }) => {
+  // Longer than the usual made-up address, and still built from parts.
+  const long = ['firstname.lastname', 'example.test'].join('@');
+  await page.route('**/api/contact/token', (route) => route.fulfill({ json: { token: 't' } }));
+  await page.route('**/api/contact/address', (route) => route.fulfill({ json: { address: long } }));
+  await recordMail(page);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('/');
+  await reveal(page, '#top').click();
+  const link = widget(page, '#top').getByRole('link', { name: long });
+  await expect(link).toBeVisible();
+  await settled(page, '#top');
+  // Two lines: everything up to the at sign, then the rest.
+  const lines = await link.evaluate((element) => {
+    const range = document.createRange();
+    const tops = new Map<number, string>();
+    for (const node of element.childNodes) {
+      if (node.nodeType !== Node.TEXT_NODE) continue;
+      for (let index = 0; index < node.textContent!.length; index += 1) {
+        range.setStart(node, index);
+        range.setEnd(node, index + 1);
+        const top = Math.round(range.getBoundingClientRect().top);
+        tops.set(top, (tops.get(top) ?? '') + node.textContent![index]);
+      }
+    }
+    return [...tops.values()];
+  });
+  expect(lines).toEqual(long.split(/(?<=@)/));
+  // What is copied or read out is still the address in one piece.
+  expect(await link.evaluate((element) => element.textContent)).toBe(long);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
 
 test('revealing the address does not push the page sideways at 320px', async ({ page }) => {

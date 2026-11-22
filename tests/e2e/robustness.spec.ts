@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { pagePaths } from '../content/helpers';
+import { pagePaths, readYaml } from '../content/helpers';
+
+const site = readYaml('src/content/site.yaml').main;
 
 // Every page a visitor can reach, plus the not-found page and the test-only page.
 const pages = [...pagePaths(), '/does-not-exist', '/dev/no-looking-for'];
@@ -20,7 +22,7 @@ test.describe('without JavaScript', () => {
       await page.goto(path);
       await expect(page.locator('h1')).toBeVisible();
       await expect(page.locator('main header p')).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Back to explainers' }).first()).toBeVisible();
+      await expect(page.getByRole('link', { name: site.explainers.back }).first()).toBeVisible();
     });
   }
 

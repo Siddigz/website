@@ -76,7 +76,7 @@ main:
     groups:
       sections: Sections
       projects: Projects
-      explainers: Explainers
+      explainers: Playground
       links: Links
       theme: Theme
   # The link to the resume. Shown only while the host's RESUME_ENABLED setting is "true".
@@ -104,8 +104,8 @@ main:
     commits: Recent commits
   # The explainers: the section's title on the home page, and the link back from each one.
   explainers:
-    title: Explainers
-    back: Back to explainers
+    title: Playground
+    back: Back to playground
     # Shown on an explainer page only when the visitor's browser runs no scripts.
     noScript: The interactive part of this page needs JavaScript, which is switched off in your browser.
   # Shown on a featured project's card once its page has been opened.
