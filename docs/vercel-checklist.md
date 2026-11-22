@@ -19,7 +19,7 @@ says otherwise. After changing a setting, redeploy for it to take effect.
 | `CONTACT_TOKEN_SECRET` | Signs the one-minute tokens the Email button uses. | A random value (see below). | Done |
 | `CRON_SECRET` | Vercel sends it when it calls the daily rebuild, so nobody else can trigger one. | A random value (see below). | Done |
 | `DEPLOY_HOOK_URL` | The address that starts a new production build. The daily rebuild calls it. **Production only.** | Made in step 2. | After ship |
-| `RESUME_ENABLED` | The resume switch. Only the exact word `true` turns it on. Leave it unset for off. Not a secret. | Typed in by hand. | Only if wanted |
+| `RESUME_ENABLED` | The resume switch. Only the exact word `true` turns it on. Leave it unset for off. Not a secret. | Typed in by hand. | Off: not set anywhere (removed from Preview on 2026-11-22) |
 | `RESUME_URL` | A private `https` address of the resume PDF. Without it, a blank page is served when the switch is on. | Wherever the file is kept privately. | Only if wanted |
 
 To make a random value without it appearing on screen or in a chat, run this
