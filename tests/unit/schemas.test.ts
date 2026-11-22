@@ -87,7 +87,7 @@ describe('siteSchema', () => {
   it('requires the looking-for switch to be a boolean', () => {
     const site = {
       url: 'https://siddigz.com',
-      name: { first: 'A', last: 'B', audio: { enabled: false, first: 'a.wav', last: 'b.wav', hint: 'Plays it.' } },
+      name: { first: 'A', last: 'B' },
       pitch: 'p',
       lookingFor: { enabled: 'yes', text: 't' },
       program: 'p',
@@ -114,8 +114,8 @@ describe('siteSchema', () => {
     };
     expect(siteSchema.safeParse(site).success).toBe(false);
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' } }).success).toBe(true);
-    // The name needs its two recordings and the hint read out on them.
-    expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, name: { first: 'A', last: 'B' } }).success).toBe(false);
+    // The name needs both of its words.
+    expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, name: { first: 'A' } }).success).toBe(false);
     // A time line that has lost a place for a value is refused.
     expect(siteSchema.safeParse({ ...site, lookingFor: { enabled: false, text: 't' }, greeting: { ...site.greeting, times: '{yours} {city}' } }).success).toBe(false);
     // The photo is optional, but one with no alt text is refused.

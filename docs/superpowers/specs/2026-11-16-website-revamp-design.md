@@ -79,7 +79,7 @@ will usually ask Claude to do it, so the steps are written down as a recipe.
 - **Photos of the owner:** `site.yaml` takes an optional `photo`, shown at the
   top of the home page. Without it the slot shows a generic placeholder figure.
   How the photo is framed and styled is decided in stage 2.
-- **Voice recordings:** not available yet. Placeholder sounds stand in.
+- **Voice recordings:** none. The owner decided against the name's sound on 2026-11-22 and it was removed.
 - **Employer detail:** experience entries show organisation, title, team and
   dates only.
 - **Vercel access:** the builder has no access to the Vercel account. Anything
@@ -245,10 +245,9 @@ closes up with no gap. Changing the switch or the wording is a one-line edit.
 
 ### Name pronunciation
 
-The two words of the name at the top are separate buttons. Clicking one plays
-a short recording of that word. There is no instruction text; a small speaker
-icon appears on hover and focus. Placeholder sounds ship until real recordings
-are supplied. The audio files load only when first needed.
+Removed on 2026-11-22 at the owner's decision. The name at the top is plain
+text and the site plays no sound. (As first designed, each word of the name
+was a button that played a short recording of it.)
 
 There is no written pronunciation beside the name, by the owner's choice.
 
@@ -647,7 +646,7 @@ compact rows; stripping photo metadata.
 None of these block the build.
 
 - Photos of himself.
-- Two recordings: "Siddig" and "Ahmed".
+- (No recordings: the name's sound was dropped on 2026-11-22.)
 - A Schedule Scoop screenshot.
 - A read-only GitHub token, added to Vercel, for the activity section.
 - The Vercel dashboard checklist, when it is handed over.

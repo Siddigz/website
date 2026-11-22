@@ -60,7 +60,7 @@ export default defineConfig({
         "default-src 'self'",
         "img-src 'self' data:",
         "font-src 'self'",
-        "media-src 'self'",
+        "media-src 'none'",
         "connect-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",

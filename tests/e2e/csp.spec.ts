@@ -65,15 +65,6 @@ test('the home page’s features all work under the policy', async ({ page }) =>
   expect(await refused()).toEqual([]);
 });
 
-test('the name’s sound works under the policy, where it is switched on', async ({ page }) => {
-  const refused = await watch(page);
-  await page.goto('/dev/name-audio');
-  // The recording is fetched and played, and the letters are split and styled by the script.
-  await page.locator('h1 button[data-name-part="first"]').click();
-  await expect(page.locator('h1 [data-playing]')).toHaveCount(0, { timeout: 8_000 });
-  expect(await refused()).toEqual([]);
-});
-
 test('going between pages works under the policy', async ({ page }) => {
   const refused = await watch(page);
   await page.goto('/');

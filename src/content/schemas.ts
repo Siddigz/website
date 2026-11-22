@@ -117,8 +117,6 @@ export const siteSchema = z.object({
   name: z.object({
     first: z.string().min(1),
     last: z.string().min(1),
-    /** File names in src/assets/audio/, and the hint read out on each word. */
-    audio: z.object({ enabled: z.boolean(), first: z.string().min(1), last: z.string().min(1), hint: z.string().min(1) }),
   }),
   pitch: z.string().min(1),
   lookingFor: z.object({ enabled: z.boolean(), text: z.string().min(1) }),

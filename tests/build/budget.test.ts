@@ -93,9 +93,8 @@ describe('built site', () => {
     }
   });
 
-  it('with the name’s sound switched off, no page that ships mentions a recording', () => {
-    if (readYaml('src/content/site.yaml').main.name.audio.enabled) return;
-    const mentioning = pages.filter(([, html]) => /data-audio|\.wav|\.m4a|name-audio-hint/.test(html)).map(([path]) => path);
+  it('no page plays or mentions a sound file: the site has none', () => {
+    const mentioning = pages.filter(([, html]) => /<audio\b|data-audio|\.(wav|m4a|mp3)\b/.test(html)).map(([path]) => path);
     expect(mentioning).toEqual([]);
   });
 
@@ -171,7 +170,7 @@ describe('built site', () => {
         expect(rule(policy, 'default-src'), path).toBe("'self'");
         expect(rule(policy, 'img-src'), path).toBe("'self' data:");
         expect(rule(policy, 'font-src'), path).toBe("'self'");
-        expect(rule(policy, 'media-src'), path).toBe("'self'");
+        expect(rule(policy, 'media-src'), path).toBe("'none'");
         expect(rule(policy, 'connect-src'), path).toBe("'self'");
         expect(rule(policy, 'object-src'), path).toBe("'none'");
         expect(rule(policy, 'base-uri'), path).toBe("'self'");

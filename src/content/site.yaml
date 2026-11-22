@@ -5,15 +5,6 @@ main:
   name:
     first: Siddig
     last: Ahmed
-    # A recording of each word, in src/assets/audio/. These are placeholder
-    # tones until the real ones are brought in with scripts/import-audio.mjs.
-    audio:
-      # Off: the name is plain text. On: each word is a button that plays its recording.
-      enabled: false
-      first: name-first.wav
-      last: name-last.wav
-      # Read to screen reader users on each word of the name.
-      hint: Plays a recording of this name.
   # Draft. One sentence, at most 22 words.
   pitch: I build software people actually use, from award-winning hackathon projects to student tools, plus two software engineering internships at Ciena.
   # Set `enabled` to false to hide the line. Keep the text free of terms and years.

@@ -3,7 +3,6 @@ import { Image } from 'astro:assets';
 import { getSite } from '../lib/site';
 import { longestGreeting } from '../lib/greeting';
 import { resumeEnabled } from '../lib/resume';
-import NameButtons from './NameButtons.astro';
 import EmailReveal from './EmailReveal.astro';
 
 interface Props {
@@ -13,12 +12,9 @@ interface Props {
   photoOverride?: boolean;
   /** Test-only: show the Resume link whatever the host's switch says. */
   resumeOverride?: boolean;
-  /** Test-only: switch the name's sound on whatever site.yaml says. */
-  nameAudioOverride?: boolean;
 }
 
 const site = await getSite();
-const nameAudio = Astro.props.nameAudioOverride ?? site.name.audio.enabled;
 const showLookingFor = Astro.props.lookingForOverride ?? site.lookingFor.enabled;
 const photo = (Astro.props.photoOverride ?? true) ? site.photo : undefined;
 // Read while the site is built: the link appears with the next build after the switch is turned on.
@@ -28,16 +24,7 @@ const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
 <section id="top" class="hero section container">
   <div class="text" data-hero-text>
     <h1 translate="no">
-      {/* With the sound switched on, each word is a button that plays a recording. Otherwise the name is plain text. */}
-      {
-        nameAudio ? (
-          <NameButtons />
-        ) : (
-          <Fragment>
-            <span data-name-part="first">{site.name.first}</span> <span data-name-part="last">{site.name.last}</span>
-          </Fragment>
-        )
-      }
+      <span data-name-part="first">{site.name.first}</span> <span data-name-part="last">{site.name.last}</span>
     </h1>
     <p class="pitch">{site.pitch}</p>
     {showLookingFor && <p class="looking-for" data-looking-for>{site.lookingFor.text}</p>}
@@ -79,8 +66,6 @@ const showResume = Astro.props.resumeOverride ?? resumeEnabled(process.env);
       )
     }
   </div>
-  {/* Read out on each word of the name. Hidden, and outside the heading and the text column so it takes no place in either. */}
-  {nameAudio && <p id="name-audio-hint" hidden>{site.name.audio.hint}</p>}
 </section>
 
 <style>
