@@ -59,8 +59,7 @@ test('pressing Email shows the address as a link with a Copy button, and opens t
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('href', `${MAIL}${ADDRESS}`);
   await expect(link).toBeFocused();
-  // The Email button stays where it is: the address opens in a small box under it.
-  await expect(reveal(page, '#top')).toBeVisible();
+  await expect(reveal(page, '#top')).toBeHidden();
   await expect(widget(page, '#top').getByRole('button', { name: words.copy })).toBeVisible();
   // Two calls: a token, then the address in exchange for that token. Both from this site.
   expect(calls.map((call) => call.path)).toEqual(['/api/contact/token', '/api/contact/address']);
@@ -125,84 +124,14 @@ test('the address and Copy open with a short animation, and without one when mot
   expect(await page.evaluate(() => (window as any).started)).toEqual([]);
 });
 
-test('once revealed, the other Email button shows the address at once, with no further calls', async ({ page }) => {
+test('one reveal fills the other Email button too, with no further calls', async ({ page }) => {
   const calls = await mockServer(page);
   await recordMail(page);
   await page.goto('/');
   await reveal(page, '#contact').click();
   await expect(widget(page, '#contact').getByRole('link', { name: ADDRESS })).toBeVisible();
-  expect(calls.length).toBe(2);
-  // Only one box is open at a time, so opening the other closes this one.
-  await page.locator('#top').scrollIntoViewIfNeeded();
-  await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  await expect(widget(page, '#contact').getByRole('link', { name: ADDRESS })).toBeHidden();
-  expect(calls.length).toBe(2);
-  // The mail app was opened by the first press only.
-  expect(await page.evaluate(() => (window as any).opened.length)).toBe(1);
-});
-
-for (const width of [320, 390, 1280]) {
-  test(`revealing the address moves nothing on the page (${width} wide)`, async ({ page }) => {
-    await mockServer(page);
-    await recordMail(page);
-    await page.setViewportSize({ width, height: 800 });
-    await page.goto('/dev/resume-on');
-    // Where everything around the button sits: the buttons beside it, the photo, and the page's whole height.
-    const layout = () =>
-      page.evaluate(() => {
-        const box = (selector: string) => {
-          const { x, y, width: w, height: h } = document.querySelector(selector)!.getBoundingClientRect();
-          return [x, y + scrollY, w, h].map((value) => Math.round(value));
-        };
-        return {
-          links: [...document.querySelectorAll('#top .links > li')].map((item) => {
-            const { x, y, width: w, height: h } = item.getBoundingClientRect();
-            return [x, y + scrollY, w, h].map((value) => Math.round(value));
-          }),
-          photo: box('#top [data-photo-slot]'),
-          top: box('#top'),
-          page: document.documentElement.scrollHeight,
-        };
-      });
-    const before = await layout();
-    await reveal(page, '#top').click();
-    const link = widget(page, '#top').getByRole('link', { name: ADDRESS });
-    await expect(link).toBeVisible();
-    await expect.poll(() => widget(page, '#top').locator('[data-email-result]').evaluate((box) => box.getAnimations({ subtree: true }).length)).toBe(0);
-    expect(await layout()).toEqual(before);
-    // The box hangs by the button, and stays inside the screen.
-    const button = (await reveal(page, '#top').boundingBox())!;
-    const box = (await widget(page, '#top').locator('[data-email-result]').boundingBox())!;
-    // Just under the button, or just over it where under would run past the end of the page.
-    const under = box.y - (button.y + button.height);
-    const over = button.y - (box.y + box.height);
-    expect(Math.max(under, over)).toBeGreaterThanOrEqual(0);
-    expect(Math.max(under, over)).toBeLessThanOrEqual(16);
-    expect(box.x).toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width).toBeLessThanOrEqual(width);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
-  });
-}
-
-test('the box closes with Escape or a press elsewhere, and the Email button opens it again without asking the server', async ({ page }) => {
-  const calls = await mockServer(page);
-  await recordMail(page);
-  await page.goto('/');
-  await reveal(page, '#top').click();
-  const link = widget(page, '#top').getByRole('link', { name: ADDRESS });
-  await expect(link).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(link).toBeHidden();
-  await reveal(page, '#top').click();
-  await expect(link).toBeVisible();
-  await page.locator('#top .pitch').click();
-  await expect(link).toBeHidden();
-  // Pressing the button while the box is open closes it, like any toggle.
-  await reveal(page, '#top').click();
-  await expect(link).toBeVisible();
-  await reveal(page, '#top').click();
-  await expect(link).toBeHidden();
+  await expect(reveal(page, '#top')).toBeHidden();
   expect(calls.length).toBe(2);
   expect(await page.evaluate(() => (window as any).opened.length)).toBe(1);
 });
@@ -247,9 +176,6 @@ for (const fail of ['token', 'address'] as const) {
     await page.goto('/');
     await reveal(page, '#contact').click();
     await expect(widget(page, '#contact').getByRole('status')).toHaveText(words.failed);
-    // Shown in the small box under the button, and read out.
-    await expect(widget(page, '#contact').locator('[data-email-problem]')).toBeVisible();
-    await expect(widget(page, '#contact').locator('[data-email-problem]')).toHaveText(words.failed);
     await expect(reveal(page, '#contact')).toBeVisible();
     await expect(reveal(page, '#contact')).toBeEnabled();
     await expect(page.locator('#contact')).not.toContainText('@');
