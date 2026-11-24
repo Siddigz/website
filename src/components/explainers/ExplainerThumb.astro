@@ -35,28 +35,10 @@ const shapes = draw();
   }
 
   /* Follow a packet */
-  svg :global(.region-near) {
-    fill: var(--color-tint-a);
-  }
-
-  svg :global(.region-far) {
-    fill: var(--color-tint-b);
-  }
-
-  svg :global(.node),
-  svg :global(.amplifier) {
-    fill: var(--color-surface);
-    stroke: var(--color-text-muted);
-    stroke-width: 1.5;
-  }
-
-  svg :global(.amplifier) {
-    stroke: var(--color-amber);
-  }
-
-  svg :global(.wire) {
+  svg :global(.trail) {
     stroke: var(--color-text-muted);
     stroke-width: 2;
+    opacity: 0.5;
   }
 
   svg :global(.fiber) {
@@ -64,31 +46,60 @@ const shapes = draw();
     stroke-width: 4;
   }
 
-  svg :global(.hop) {
+  svg :global(.stop) {
+    fill: var(--color-bg);
     stroke: var(--color-text-muted);
-    stroke-width: 1.5;
-    stroke-dasharray: 3 4;
+    stroke-width: 2;
   }
 
-  svg :global(.layer-eth) {
-    fill: var(--color-layer-eth);
+  svg :global(.stop-done) {
+    fill: var(--color-text);
   }
 
-  svg :global(.layer-ip) {
-    fill: var(--color-layer-ip);
+  svg :global(.stop-now) {
+    fill: var(--color-accent);
   }
 
-  svg :global(.layer-tcp) {
-    fill: var(--color-layer-tcp);
+  /* Each layer is tinted with its own colour and edged in it, as in the demo. */
+  svg :global([class^='layer-']) {
+    fill: color-mix(in oklab, var(--layer) 12%, var(--color-surface));
+    stroke: var(--layer);
+    stroke-width: 2;
   }
 
-  svg :global(.layer-data) {
-    fill: var(--color-layer-data);
+  svg :global([class^='label-']) {
+    fill: var(--layer);
   }
 
-  svg :global(.outline) {
-    stroke: var(--color-text);
-    stroke-width: 1.5;
+  svg :global(.layer-eth),
+  svg :global(.label-eth) {
+    --layer: var(--color-layer-eth);
+  }
+
+  svg :global(.layer-ip),
+  svg :global(.label-ip) {
+    --layer: var(--color-layer-ip);
+  }
+
+  svg :global(.layer-tcp),
+  svg :global(.label-tcp) {
+    --layer: var(--color-layer-tcp);
+  }
+
+  svg :global(.layer-data),
+  svg :global(.label-data) {
+    --layer: var(--color-layer-data);
+  }
+
+  svg :global(.value) {
+    fill: var(--color-text-muted);
+    opacity: 0.55;
+  }
+
+  svg :global(.changed) {
+    fill: var(--color-changed);
+    stroke: var(--color-amber);
+    stroke-width: 1.2;
   }
 
   /* NRZ vs PAM4 */

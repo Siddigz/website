@@ -15,28 +15,57 @@ export type Shape = {
 
 export const DRAWING_SIZE = { width: 320, height: 180 };
 
-/** Follow a packet: the packet in its four layers, part-way along a row of devices. */
+/** Follow a packet: the row of stops with the packet at the second one, over the packet as four nested layers. */
 export function packetDrawing(): Shape[] {
-  const stops = [36, 98, 160, 222, 284];
-  const at = 1; // the packet sits over the second stop
-  const from = stops[at]!;
-  const to = stops[at + 1]!;
+  // The row of stops: the first is behind the packet, the second is where it is, and a stretch in the middle is fiber.
+  const trail = { y: 28, first: 34, gap: 42, count: 7, now: 1, fiber: { from: 2, to: 4 }, r: 6, rNow: 9 };
+  const stopX = (index: number) => trail.first + index * trail.gap;
+  const stops = Array.from({ length: trail.count }, (_, index): Shape => {
+    const role = index === trail.now ? 'stop-now' : index < trail.now ? 'stop-done' : 'stop';
+    return { tag: 'circle', role, attrs: { cx: stopX(index), cy: trail.y, r: index === trail.now ? trail.rNow : trail.r } };
+  });
+
+  // The packet: each layer is a box inside the one before it. In each, a short bar stands for the layer's name and
+  // longer ones for its values; the values a router has just rewritten are drawn as chips.
+  const outer = { x: 52, y: 52, width: 216, height: 116 };
+  const step = { x: 14, y: 22, bottom: 8 };
+  const bar = { inset: 11, top: 8, height: 6, gap: 6, chipGrow: 2 };
+  type Value = { changed?: true; width: number };
+  const layers: { name: string; label: number; values: Value[]; rx: number }[] = [
+    { name: 'eth', label: 30, values: [{ changed: true, width: 18 }, { changed: true, width: 18 }], rx: 9 },
+    { name: 'ip', label: 16, values: [{ width: 40 }, { changed: true, width: 26 }, { changed: true, width: 14 }], rx: 8 },
+    { name: 'tcp', label: 24, values: [{ width: 22 }], rx: 7 },
+    { name: 'data', label: 28, values: [{ width: 60 }], rx: 6 },
+  ];
+  const packet = layers.flatMap(({ name, label, values, rx }, depth): Shape[] => {
+    const box = {
+      x: outer.x + depth * step.x,
+      y: outer.y + depth * step.y,
+      width: outer.width - depth * step.x * 2,
+      height: outer.height - depth * (step.y + step.bottom),
+    };
+    // The innermost layer has nothing below its line, so the line sits in its middle.
+    const last = depth === layers.length - 1;
+    const top = last ? box.y + (box.height - bar.height) / 2 : box.y + bar.top;
+    let x = box.x + bar.inset;
+    const line: Shape[] = [{ tag: 'rect', role: `label-${name}`, attrs: { x, y: top, width: label, height: bar.height, rx: bar.height / 2 } }];
+    x += label + bar.gap;
+    for (const value of values) {
+      line.push(
+        value.changed
+          ? { tag: 'rect', role: 'changed', attrs: { x, y: top - bar.chipGrow, width: value.width, height: bar.height + bar.chipGrow * 2, rx: 3 } }
+          : { tag: 'rect', role: 'value', attrs: { x, y: top, width: value.width, height: bar.height, rx: bar.height / 2 } },
+      );
+      x += value.width + bar.gap;
+    }
+    return [{ tag: 'rect', role: `layer-${name}`, attrs: { ...box, rx } }, ...line];
+  });
+
   return [
-    { tag: 'rect', role: 'region-near', attrs: { x: 6, y: 50, width: 124, height: 112, rx: 10 } },
-    { tag: 'rect', role: 'region-far', attrs: { x: 190, y: 50, width: 124, height: 112, rx: 10 } },
-    { tag: 'line', role: 'wire', attrs: { x1: stops[0]!, x2: stops[1]!, y1: 112, y2: 112 } },
-    { tag: 'line', role: 'fiber', attrs: { x1: stops[1]!, x2: stops[3]!, y1: 112, y2: 112 } },
-    { tag: 'line', role: 'wire', attrs: { x1: stops[3]!, x2: stops[4]!, y1: 112, y2: 112 } },
-    ...stops.map(
-      (x, index): Shape =>
-        index === 2
-          ? { tag: 'polygon', role: 'amplifier', attrs: { points: `${x - 13},98 ${x - 13},126 ${x + 13},112` } }
-          : { tag: 'rect', role: 'node', attrs: { x: x - 20, y: 94, width: 40, height: 36, rx: 6 } },
-    ),
-    // The path the packet has still to travel.
-    { tag: 'path', role: 'hop', attrs: { d: `M${from} 70 Q ${(from + to) / 2} 34 ${to} 70` } },
-    ...['layer-eth', 'layer-ip', 'layer-tcp', 'layer-data'].map((role, index): Shape => ({ tag: 'rect', role, attrs: { x: from - 28 + index * 14, y: 60, width: 14, height: 18 } })),
-    { tag: 'rect', role: 'outline', attrs: { x: from - 28, y: 60, width: 56, height: 18, rx: 2 } },
+    { tag: 'line', role: 'trail', attrs: { x1: stopX(0), x2: stopX(trail.count - 1), y1: trail.y, y2: trail.y } },
+    { tag: 'line', role: 'fiber', attrs: { x1: stopX(trail.fiber.from), x2: stopX(trail.fiber.to), y1: trail.y, y2: trail.y } },
+    ...stops,
+    ...packet,
   ];
 }
 

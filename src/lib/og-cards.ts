@@ -59,19 +59,22 @@ function mix(first: string, second: string, share: number): string {
 function drawingPaint(): Record<string, Paint> {
   const surface = colour('surface');
   const muted = colour('text-muted');
+  // Each layer of the packet in its own colour, as the tokens name them.
+  const layerColours = { eth: colour('accent'), ip: colour('live'), tcp: colour('violet'), data: muted };
   return {
-    'region-near': { fill: mix(colour('accent'), surface, 0.13) },
-    'region-far': { fill: mix(colour('accent-2'), surface, 0.13) },
-    node: { fill: surface, stroke: muted },
-    amplifier: { fill: surface, stroke: colour('amber') },
-    wire: { stroke: muted, width: 2 },
+    trail: { stroke: muted, width: 2, opacity: 0.5 },
     fiber: { stroke: colour('amber'), width: 4 },
-    hop: { stroke: muted, dash: '3 4' },
-    'layer-eth': { fill: colour('accent') },
-    'layer-ip': { fill: colour('live') },
-    'layer-tcp': { fill: colour('violet') },
-    'layer-data': { fill: muted },
-    outline: { stroke: colour('text') },
+    stop: { fill: colour('bg'), stroke: muted, width: 2 },
+    'stop-done': { fill: colour('text') },
+    'stop-now': { fill: colour('accent') },
+    ...Object.fromEntries(
+      Object.entries(layerColours).flatMap(([name, hue]): [string, Paint][] => [
+        [`layer-${name}`, { fill: mix(hue, surface, 0.12), stroke: hue, width: 2 }],
+        [`label-${name}`, { fill: hue }],
+      ]),
+    ),
+    value: { fill: muted, opacity: 0.55 },
+    changed: { fill: mix(colour('amber'), surface, 0.3), stroke: colour('amber'), width: 1.2 },
     level: { stroke: muted, width: 1, dash: '4 4', opacity: 0.6 },
     threshold: { stroke: colour('wrong'), width: 1, dash: '2 3' },
     sent: { stroke: muted },
