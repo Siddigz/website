@@ -183,7 +183,8 @@ const { email } = await getSite();
     white-space: nowrap;
   }
 
+  /* Empty, it stays on the page (a line that appears already filled may not be read out) but takes no room. */
   .status:empty {
-    display: none;
+    position: absolute;
   }
 </style>

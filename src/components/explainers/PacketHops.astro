@@ -112,7 +112,7 @@ const kinds = Object.keys(GLYPHS) as Kind[];
     </div>
 
     {/* The packet: each layer wraps the ones inside it. */}
-    <div class="layer eth" data-layer="eth">
+    <div class="layer eth" data-layer="eth" role="group" aria-label={LAYER_TEXT.eth.name}>
       <div class="head" data-head="eth">
         <span class="lname">{LAYER_TEXT.eth.name}</span>
         <span class="pair">to MAC <span class="v" data-f="eDst">{start.eDst}</span></span>
@@ -120,7 +120,7 @@ const kinds = Object.keys(GLYPHS) as Kind[];
         <span class="mark" data-mark="eth">{mark('eth')}</span>
       </div>
       <p class="note muted">{LAYER_TEXT.eth.note}</p>
-      <div class="layer ip" data-layer="ip">
+      <div class="layer ip" data-layer="ip" role="group" aria-label={LAYER_TEXT.ip.name}>
         <div class="head">
           <span class="lname">{LAYER_TEXT.ip.name}</span>
           <span class="pair">to <span class="v wide" data-f="ipDst">{start.ipDst}</span></span>
@@ -129,14 +129,14 @@ const kinds = Object.keys(GLYPHS) as Kind[];
           <span class="mark" data-mark="ip">{mark('ip')}</span>
         </div>
         <p class="note muted">{LAYER_TEXT.ip.note}</p>
-        <div class="layer tcp" data-layer="tcp">
+        <div class="layer tcp" data-layer="tcp" role="group" aria-label={LAYER_TEXT.tcp.name}>
           <div class="head">
             <span class="lname">{LAYER_TEXT.tcp.name}</span>
             <span class="pair">port <span class="v" data-f="port">{start.port}</span></span>
             <span class="mark" data-mark="tcp">{mark('tcp')}</span>
           </div>
           <p class="note muted">{LAYER_TEXT.tcp.note}</p>
-          <div class="layer dat" data-layer="data">
+          <div class="layer dat" data-layer="data" role="group" aria-label={LAYER_TEXT.data.name}>
             <div class="head">
               <span class="lname">{LAYER_TEXT.data.name}</span>
               <span class="pair">your web request</span>
@@ -194,7 +194,7 @@ const kinds = Object.keys(GLYPHS) as Kind[];
         {
           rows.map((row, index) => (
             <tr hidden={index > 0} data-current={index === 0 ? '' : undefined}>
-              <td>{row.stop}</td>
+              <th scope="row">{row.stop}</th>
               <td class="m">{row.eDst}</td>
               <td class="m">{row.eSrc}</td>
               <td class="m">{row.ttl}</td>
@@ -315,7 +315,7 @@ const kinds = Object.keys(GLYPHS) as Kind[];
   .stop[aria-current] .dot {
     border-color: var(--color-accent);
     background: var(--color-accent);
-    scale: 1.6;
+    scale: var(--scale-dot-now);
   }
 
   .zones {
@@ -403,7 +403,7 @@ const kinds = Object.keys(GLYPHS) as Kind[];
   /* With room to spare, the three sit in a row: from, the device, next. */
   @media (min-width: 48rem) {
     .where {
-      grid-template: 'from a device b next' auto / minmax(0, 1fr) auto minmax(0, 1.6fr) auto minmax(0, 1fr);
+      grid-template: 'from a device b next' auto / minmax(0, 1fr) auto minmax(0, var(--device-share)) auto minmax(0, 1fr);
     }
 
     .arrow {
@@ -444,6 +444,11 @@ const kinds = Object.keys(GLYPHS) as Kind[];
     margin-block-start: var(--space-2);
   }
 
+  /* The outermost layer keeps the sliding of a new Ethernet line inside itself. */
+  .stage > .layer {
+    overflow-x: clip;
+  }
+
   .head {
     display: flex;
     flex-wrap: wrap;
@@ -473,9 +478,9 @@ const kinds = Object.keys(GLYPHS) as Kind[];
     outline: var(--border-width) solid transparent;
   }
 
-  /* Room for the longest address, so a shorter one does not change how the line wraps. */
+  /* Room for the longest address (and the padding around it), so a shorter one moves nothing beside it. */
   .v.wide {
-    min-inline-size: 12ch;
+    min-inline-size: calc(var(--address-width) + 2 * var(--space-1));
   }
 
   /* A value this stop has just rewritten: tinted and ringed, so colour is not the only sign. */
@@ -594,10 +599,16 @@ const kinds = Object.keys(GLYPHS) as Kind[];
     font-size: var(--text-sm);
   }
 
+  /* The columns are set once, by the heading row, so they do not shuffle as rows appear. */
   table {
     inline-size: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
     font-size: var(--text-sm);
+  }
+
+  tbody th {
+    font-weight: inherit;
   }
 
   th,

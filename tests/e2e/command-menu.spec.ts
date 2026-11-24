@@ -117,6 +117,10 @@ test('a search that matches nothing says so, and Enter does nothing', async ({ p
   await page.goto('/');
   const address = page.url();
   await opener(page).click();
+  // The status line is on the page before it has anything to say (one that appears already filled may not be read out), and takes no room.
+  const line = menu(page).getByRole('status');
+  expect(await line.evaluate((element) => getComputedStyle(element).display)).not.toBe('none');
+  expect((await line.boundingBox())!.height).toBe(0);
   await search(page).fill('zzzz');
   await expect(options(page)).toHaveCount(0);
   await expect(menu(page).getByText(site.menu.empty)).toBeVisible();

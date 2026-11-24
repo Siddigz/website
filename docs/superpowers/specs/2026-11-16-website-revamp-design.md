@@ -251,10 +251,6 @@ was a button that played a short recording of it.)
 
 There is no written pronunciation beside the name, by the owner's choice.
 
-While a word plays, its letters lift slightly one after another, like a small
-wave. The letters do not shake. With reduced motion set there is no wave, and
-the audio still plays.
-
 ### Skills strip
 
 One horizontal strip that scrolls sideways on its own, continuously, and loops
@@ -632,8 +628,7 @@ The owner reviews the list with the first content draft.
 graduation shown as April 2028; no experience descriptions; resume built but
 off and never exposed; real email given to visitors, hidden from scrapers;
 no blog; no AI chatbot; GitHub activity in; both per-visitor features; brief
-project pages; no "click to hear" label; empty photo slot for now; placeholder
-sounds for now; one-time README commit; Hack the North mentioned quietly;
+project pages; empty photo slot for now; one-time README commit; Hack the North mentioned quietly;
 basic analytics only; a moving skills strip; `siddigz.com` as the primary
 address.
 

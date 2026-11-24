@@ -180,9 +180,9 @@ export const LAYER_TEXT: Record<Layer, { name: string; note: string }> = {
   data: { name: 'Data', note: 'No device on the way touches it.' },
 };
 
-/** What a stop does with a layer. */
-export type Mark = 'written' | 'rewritten' | 'read' | 'none';
-export const MARK_TEXT: Record<Mark, string> = { written: 'written here', rewritten: 'rewritten here', read: 'read here', none: '' };
+/** What a stop does with a layer: writes it, replaces it whole, changes a value in it, only reads it, or leaves it shut. */
+export type Mark = 'written' | 'rewritten' | 'edited' | 'read' | 'none';
+export const MARK_TEXT: Record<Mark, string> = { written: 'written here', rewritten: 'rewritten here', edited: 'edited here', read: 'read here', none: '' };
 /** How deep into the packet a layer sits: a device that reads this many layers reaches it. */
 const DEPTH: Record<Layer, number> = { eth: 1, ip: 2, tcp: 4, data: 4 };
 
@@ -197,11 +197,17 @@ export function changedFields(step: number): Field[] {
   return FIELDS.filter((field) => here[field] !== before[field]);
 }
 
-/** What the stop does with one layer: writes it (the laptop), replaces it (a router and Ethernet), reads it, or leaves it shut. */
+/**
+ * What the stop does with one layer: writes it (the laptop), replaces it (a router and Ethernet), changes a
+ * value inside it (a router and IP: one hop fewer, and at home a new source address), reads it, or leaves it shut.
+ * It follows the values themselves, so the mark can never disagree with what is shown as changed.
+ */
 export function markFor(step: number, layer: Layer): Mark {
   const at = clamp(step);
   if (at === 0) return 'written';
-  if (layer === 'eth' && changedFields(at).includes('eDst')) return 'rewritten';
+  const changed = changedFields(at);
+  if (layer === 'eth' && (changed.includes('eDst') || changed.includes('eSrc'))) return 'rewritten';
+  if (layer === 'ip' && (changed.includes('ipSrc') || changed.includes('ttl'))) return 'edited';
   return HOPS[at]!.reads >= DEPTH[layer] ? 'read' : 'none';
 }
 

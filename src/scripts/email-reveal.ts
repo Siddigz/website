@@ -9,6 +9,7 @@
 const widgets = [...document.querySelectorAll<HTMLElement>('[data-email]')];
 const MAIL = 'mailto:';
 const COPIED_FOR_MS = 2000;
+const TIMEOUT_MS = 10_000;
 let busy = false;
 
 const part = <T extends HTMLElement>(widget: HTMLElement, name: string) => widget.querySelector<T>(`[data-email-${name}]`);
@@ -25,6 +26,8 @@ async function post(path: string, body?: unknown): Promise<any> {
     method: 'POST',
     headers: body === undefined ? undefined : { 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
+    // A server that never answers must not leave the buttons dead.
+    signal: 'timeout' in AbortSignal ? AbortSignal.timeout(TIMEOUT_MS) : undefined,
   });
   if (!response.ok) throw new Error(String(response.status));
   return response.json();
@@ -60,15 +63,12 @@ function motion(): KeyframeAnimationOptions | undefined {
   return duration > 0 ? { duration, easing: style.getPropertyValue('--ease-out').trim() || 'ease-out' } : undefined;
 }
 
-/** Shows the address everywhere, and moves the pressed button into its new shape. */
-function open(widget: HTMLElement, address: string): void {
-  const result = part(widget, 'result');
-  // The row of buttons the pressed one sits in.
-  const row = widget.closest<HTMLElement>('ul');
-  const from = { width: part(widget, 'reveal')?.offsetWidth ?? 0, height: row?.offsetHeight ?? 0 };
-  show(address);
+/** Moves the pressed button into its new shape. Garnish: the address is already showing when this runs. */
+function animate(widget: HTMLElement, from: { width: number; height: number }): void {
   const how = motion();
+  const result = part(widget, 'result');
   const link = part(widget, 'link');
+  const row = widget.closest<HTMLElement>('ul');
   if (!how || !result || !link) return;
   const to = { width: result.offsetWidth, height: row?.offsetHeight ?? 0 };
   link.animate({ opacity: [0, 1] }, how);
@@ -78,42 +78,60 @@ function open(widget: HTMLElement, address: string): void {
   } else if (from.width && to.width > from.width) {
     // Same line: the button widens from "Email" to the address, and its neighbours slide along.
     result.classList.add('opening');
-    const widen = result.animate({ inlineSize: [`${from.width}px`, `${to.width}px`] }, how);
     const settle = () => result.classList.remove('opening');
-    widen.addEventListener('finish', settle);
-    widen.addEventListener('cancel', settle);
+    try {
+      const widen = result.animate({ inlineSize: [`${from.width}px`, `${to.width}px`] }, how);
+      widen.addEventListener('finish', settle);
+      widen.addEventListener('cancel', settle);
+    } catch (error) {
+      settle();
+      throw error;
+    }
   }
 }
 
 async function reveal(widget: HTMLElement): Promise<void> {
   if (busy) return;
   busy = true;
+  const button = part(widget, 'reveal');
+  button?.setAttribute('aria-busy', 'true');
   say(widget, '');
+  let address: unknown;
   try {
     const { token } = await post('/api/contact/token');
-    const { address } = await post('/api/contact/address', { token });
+    ({ address } = await post('/api/contact/address', { token }));
     if (typeof address !== 'string' || !address) throw new Error('no address');
-    open(widget, address);
-    // The pressed button is gone, so focus moves to the link that took its place.
-    const link = part<HTMLAnchorElement>(widget, 'link');
-    link?.focus();
-    // Opens the visitor's mail app, as a plain mail link would.
-    link?.click();
   } catch {
     say(widget, 'failed', widget.dataset.failed);
+    return;
   } finally {
     busy = false;
+    button?.removeAttribute('aria-busy');
+  }
+
+  // Whether the visitor is still where they pressed: if they have moved on while waiting, they are left there.
+  const stayed = document.activeElement === button || document.activeElement === document.body || !document.activeElement;
+  // The row of buttons the pressed one sits in, as it is before the address takes the button's place.
+  const row = widget.closest<HTMLElement>('ul');
+  const from = { width: button?.offsetWidth ?? 0, height: row?.offsetHeight ?? 0 };
+  show(address);
+  const link = part<HTMLAnchorElement>(widget, 'link');
+  // The pressed button is gone, so focus moves to the link that took its place.
+  if (stayed) link?.focus();
+  // Opens the visitor's mail app, as a plain mail link would.
+  link?.click();
+  try {
+    animate(widget, from);
+  } catch {
+    // A browser that cannot animate shows the address at once, which is all that matters.
   }
 }
 
 const timers = new WeakMap<HTMLElement, number>();
 
-/** The copy part says what it does in its name, and for a moment after copying shows a tick and says "Copied". */
+/** For a moment after copying, the copy part shows a tick and "Copied" is read out once. Its own name stays "Copy". */
 function mark(widget: HTMLElement, done: boolean): void {
-  const button = part(widget, 'copy');
-  if (!button) return;
-  button.toggleAttribute('data-done', done);
-  button.setAttribute('aria-label', (done ? widget.dataset.copied : widget.dataset.copy) ?? '');
+  part(widget, 'copy')?.toggleAttribute('data-done', done);
   say(widget, done ? 'copied' : '', done ? widget.dataset.copied : '');
 }
 

@@ -189,8 +189,8 @@ const groups = GROUPS.map((group) => ({ group, label: site.menu.groups[group], i
     padding: var(--space-4) var(--space-5);
   }
 
-  /* While something matches, the line holds nothing and takes no room. */
+  /* While something matches, the line holds nothing and takes no room. It stays on the page, so that when it fills it is read out. */
   .empty:not(:has(> :not([hidden]))) {
-    display: none;
+    padding-block: 0;
   }
 </style>

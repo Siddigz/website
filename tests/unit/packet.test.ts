@@ -90,8 +90,17 @@ describe('markFor: what a stop does with each layer', () => {
     expect(marks(0)).toEqual(['written', 'written', 'written', 'written']);
   });
 
-  it.each([1, 2, 7, 8])('router %i replaces Ethernet, reads IP and leaves the rest shut', (step) => {
-    expect(marks(step)).toEqual(['rewritten', 'read', 'none', 'none']);
+  it.each([1, 2, 7, 8])('router %i replaces Ethernet, edits IP and leaves the rest shut', (step) => {
+    expect(marks(step)).toEqual(['rewritten', 'edited', 'none', 'none']);
+  });
+
+  it('never says a layer was only read at a stop that changed one of its values', () => {
+    for (let step = 1; step <= 10; step += 1) {
+      const changed = changedFields(step);
+      if (changed.includes('eDst') || changed.includes('eSrc')) expect(markFor(step, 'eth'), `stop ${step}`).toBe('rewritten');
+      if (changed.includes('ipSrc') || changed.includes('ttl')) expect(markFor(step, 'ip'), `stop ${step}`).toBe('edited');
+      if (changed.length === 0) for (const layer of LAYERS) expect(['read', 'none'], `stop ${step}`).toContain(markFor(step, layer));
+    }
   });
 
   it.each([3, 4, 5, 6])('stop %i on the fiber opens nothing', (step) => {
@@ -104,7 +113,7 @@ describe('markFor: what a stop does with each layer', () => {
   });
 
   it('has words for every mark but "none", and a name and a note for every layer', () => {
-    expect(MARK_TEXT).toEqual({ written: 'written here', rewritten: 'rewritten here', read: 'read here', none: '' });
+    expect(MARK_TEXT).toEqual({ written: 'written here', rewritten: 'rewritten here', edited: 'edited here', read: 'read here', none: '' });
     for (const layer of LAYERS) {
       expect(LAYER_TEXT[layer].name.length).toBeGreaterThan(1);
       expect(LAYER_TEXT[layer].note).toMatch(/\.$/);

@@ -240,7 +240,8 @@ if (root) {
       ctx.globalAlpha = 1;
       ctx.fillStyle = colours.wrong;
       const wrongLeft = frame.left + rightWidth;
-      const wrongWidth = (wrong / most) * frame.width;
+      // Never narrower than two stripes and the gap between them, so even a sliver of errors shows as striped.
+      const wrongWidth = wrong === 0 ? 0 : Math.max((wrong / most) * frame.width, STRIPE.paint * 2 + STRIPE.gap);
       ctx.fillRect(wrongLeft, top, wrongWidth, height);
       // Striped as well as red, so the wrong part of a bar can be told apart without its colour.
       for (let x = wrongLeft + STRIPE.paint; x < wrongLeft + wrongWidth; x += STRIPE.paint + STRIPE.gap) ctx.clearRect(x, top, STRIPE.gap, height);

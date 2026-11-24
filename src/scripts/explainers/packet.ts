@@ -35,6 +35,9 @@ if (root) {
     const changed: string[] = changedFields(step);
     const around = neighbours(step);
 
+    // The mark comes off every value first, so one that changes at two stops in a row is marked afresh and pops again.
+    for (const value of values) value.removeAttribute('data-changed');
+    void root!.offsetWidth;
     for (const value of values) {
       const field = value.dataset.f as keyof typeof state;
       value.textContent = state[field];

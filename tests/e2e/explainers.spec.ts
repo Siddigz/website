@@ -25,7 +25,7 @@ test('the home page lists every explainer, between the projects and the activity
   }
 });
 
-test('the top-right links include Explainers, in page order, and it lights up when that section is on screen', async ({ page }) => {
+test('the top-right links include the Playground, in page order, and it lights up when that section is on screen', async ({ page }) => {
   await page.goto('/');
   const links = page.locator('.site-header .links a');
   await expect(links).toHaveText(['Experience', 'Projects', site.explainers.title, 'About']);
@@ -84,7 +84,7 @@ test('the drawings on the cards follow the theme', async ({ page }) => {
 });
 
 for (const colorScheme of ['light', 'dark'] as const) {
-  test(`the Explainers section has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
+  test(`the Playground section has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
     await page.goto('/');
     const { violations } = await new AxeBuilder({ page }).include('#playground').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
@@ -198,7 +198,8 @@ test.describe('follow a packet', () => {
     await expect(value(page, 'eDst')).toHaveText('DD');
     await expect(value(page, 'ipSrc')).toHaveText('203.0.113.5');
     await expect(mark(page, 'eth')).toHaveText('rewritten here');
-    await expect(mark(page, 'ip')).toHaveText('read here');
+    // IP is not replaced, but two of its values change here, so it does not say "read".
+    await expect(mark(page, 'ip')).toHaveText('edited here');
     await expect(mark(page, 'tcp')).toHaveText('');
     await expect(mark(page, 'data')).toHaveText('');
     // The values that changed are marked, and the one that never changes is not.
@@ -311,23 +312,53 @@ test.describe('follow a packet', () => {
     });
   }
 
-  for (const size of [{ width: 320, height: 640 }, { width: 1280, height: 800 }]) {
-    test(`nothing moves from stop to stop: the buttons and the packet stay where they are (${size.width} wide)`, async ({ page }) => {
+  for (const size of [{ width: 320, height: 640 }, { width: 375, height: 700 }, { width: 768, height: 1024 }, { width: 1280, height: 800 }]) {
+    test(`nothing moves from stop to stop, up, down or sideways (${size.width} wide)`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.setViewportSize(size);
       const widget = await open(page);
-      const places = new Set<string>();
+      const places: number[][] = [];
       for (let step = 0; step <= 10; step += 1) {
-        const place = await widget.evaluate((element) => {
-          const top = (selector: string) => Math.round(element.querySelector(selector)!.getBoundingClientRect().top + scrollY);
-          return [top('[data-layer="eth"]'), top('[data-layer="data"]'), top('.caption-box'), top('[data-next]'), top('.history')].join(',');
-        });
-        places.add(place);
+        places.push(
+          await widget.evaluate((element) => {
+            // Every layer, every label-and-value pair, every mark, the caption, the buttons and the table's heading row:
+            // where each one starts, across and down, and how wide it is.
+            const parts = [...element.querySelectorAll('[data-layer], .pair, .mark, .caption-box, .controls button, .history, thead tr')];
+            return parts.flatMap((each) => {
+              const rect = each.getBoundingClientRect();
+              return [rect.left, rect.top + scrollY, rect.width];
+            });
+          }),
+        );
         if (step < 10) await next(page).click();
       }
-      expect([...places]).toHaveLength(1);
+      // The same at every stop, give or take a pixel of rounding.
+      const moved = places[0]!.map((start, index) => Math.max(...places.map((place) => Math.abs(place[index]! - start))));
+      expect(Math.max(...moved)).toBeLessThanOrEqual(1);
     });
   }
+
+  test('each layer is a named group, and each row of the table is named by its stop', async ({ page }) => {
+    const widget = await open(page);
+    for (const name of ['Ethernet', 'IP', 'TCP', 'Data']) await expect(widget.getByRole('group', { name, exact: true })).toHaveCount(1);
+    // The layers really are inside one another.
+    await expect(widget.getByRole('group', { name: 'Ethernet', exact: true }).getByRole('group', { name: 'Data', exact: true })).toHaveCount(1);
+    await expect(widget.getByRole('rowheader', { name: 'Laptop' })).toBeVisible();
+  });
+
+  test('a value that changes at two stops in a row pops both times', async ({ page }) => {
+    await open(page);
+    await next(page).click();
+    const hops = value(page, 'ttl');
+    await expect(hops).toHaveText('63');
+    await hops.evaluate((element) => {
+      (window as any).pops = 0;
+      element.addEventListener('animationstart', () => ((window as any).pops += 1));
+    });
+    await next(page).click();
+    await expect(hops).toHaveText('62');
+    await expect.poll(() => page.evaluate(() => (window as any).pops)).toBe(1);
+  });
 
   for (const size of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     test(`from the row of dots to the buttons, it fits one screen (${size.width} by ${size.height})`, async ({ page }) => {
@@ -512,29 +543,42 @@ test.describe('NRZ vs PAM4', () => {
   test('in the histogram the wrong part of a bar is striped, so it is not told apart by colour alone', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await open(page);
-    await slider(page).fill('0.2');
-    // Row by row: the longest unbroken run of red. (A few rows also carry the red dotted threshold lines, which run on.)
-    const red = await page.locator('[data-signal] canvas[data-drawing="histogram"]').evaluate((canvas: HTMLCanvasElement) => {
-      const { data, width, height } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
-      const longest: number[] = [];
-      for (let y = 0; y < height; y += 1) {
-        let run = 0;
-        let most = 0;
-        for (let x = 0; x < width; x += 1) {
-          const at = (y * width + x) * 4;
-          const isRed = data[at + 3]! > 200 && data[at]! > data[at + 1]! + 60 && data[at]! > data[at + 2]! + 60;
-          run = isRed ? run + 1 : 0;
-          most = Math.max(most, run);
+    // Row by row: how many pieces the red comes in, and the longest of them.
+    const reds = () =>
+      page.locator('[data-signal] canvas[data-drawing="histogram"]').evaluate((canvas: HTMLCanvasElement) => {
+        const { data, width, height } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+        const rows: { longest: number; runs: number }[] = [];
+        for (let y = 0; y < height; y += 1) {
+          let run = 0;
+          let longest = 0;
+          let runs = 0;
+          let first = -1;
+          let last = -1;
+          for (let x = 0; x < width; x += 1) {
+            const at = (y * width + x) * 4;
+            const isRed = data[at + 3]! > 200 && data[at]! > data[at + 1]! + 60 && data[at]! > data[at + 2]! + 60;
+            if (isRed && run === 0) runs += 1;
+            if (isRed && first < 0) first = x;
+            if (isRed) last = x;
+            run = isRed ? run + 1 : 0;
+            longest = Math.max(longest, run);
+          }
+          // A row whose red reaches most of the way across is one of the dotted threshold lines, not a bar.
+          if (longest > 0 && last - first < width / 2) rows.push({ longest, runs });
         }
-        if (most > 0) longest.push(most);
-      }
-      return { longest, scale: canvas.width / canvas.getBoundingClientRect().width };
-    });
-    expect(red.longest.length).toBeGreaterThan(20);
-    // In nearly every row with red in it, no stretch of red is wider than one stripe (plus a pixel of smoothing either side).
-    const limit = Math.ceil(3 * red.scale) + 2;
-    const striped = red.longest.filter((run) => run <= limit).length;
-    expect(striped / red.longest.length).toBeGreaterThan(0.85);
+        return { rows, scale: canvas.width / canvas.getBoundingClientRect().width };
+      });
+    // With few errors (the starting state) and with many: in nearly every row with red in it, the red comes in
+    // more than one piece, and no piece is wider than one stripe (plus a pixel of smoothing either side).
+    for (const noise of ['0.05', '0.2']) {
+      await slider(page).fill(noise);
+      const red = await reds();
+      const limit = Math.ceil(3 * red.scale) + 2;
+      const striped = red.rows.filter((row) => row.longest <= limit && row.runs >= 2).length;
+      // With few errors there are only a handful of red rows, and a row that brushes a threshold line counts against them.
+      expect(striped, noise).toBeGreaterThanOrEqual(noise === '0.2' ? 20 : 3);
+      expect(striped / red.rows.length, noise).toBeGreaterThan(noise === '0.2' ? 0.85 : 0.6);
+    }
   });
 
   test('the drawings are redrawn in the new colours when the theme changes', async ({ page }) => {

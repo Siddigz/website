@@ -73,7 +73,7 @@ main:
   # The link to the resume. Shown only while the host's RESUME_ENABLED setting is "true".
   resumeLabel: Resume
   # The titles of the home page's sections. "Highlights" and "Skills" are read
-  # to screen reader users only. About's title is in about.md; Explainers' is below.
+  # to screen reader users only. About's title is in about.md; the Playground's is below.
   sections:
     proof: Highlights
     experience: Experience
@@ -82,7 +82,7 @@ main:
     moreProjects: More projects
     activity: GitHub activity
     contact: Contact
-  # The links in the top right. (Explainers uses its section title.)
+  # The links in the top right. (Playground uses its section title.)
   nav:
     experience: Experience
     projects: Projects

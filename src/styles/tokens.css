@@ -199,6 +199,10 @@
   --rail-width-fiber: 0.25rem;
   --device-icon: 2rem;
   --mark-width: 7.5rem;
+  /* Also there: the room for the longest address, how much bigger the dot the packet is at grows, and the device's share of its row. */
+  --address-width: 12ch;
+  --scale-dot-now: 1.6;
+  --device-share: 1.6fr;
   --drawing-height: 17rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;

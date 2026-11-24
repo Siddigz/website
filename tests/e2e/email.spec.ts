@@ -37,6 +37,23 @@ async function recordMail(page: Page) {
   });
 }
 
+/**
+ * Notes every movement the page starts from script: what moved (the row of buttons, or a part of the widget)
+ * and for how long. Read after the fact, so no test has to catch a movement while it is still running.
+ */
+async function recordMoves(page: Page) {
+  await page.addInitScript(() => {
+    (window as any).moves = [];
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (keyframes: any, options: any) {
+      const what = this.matches('ul') ? 'row' : this.matches('[data-email-result]') ? 'button' : this.matches('[data-email-link]') ? 'address' : 'other';
+      (window as any).moves.push({ what, duration: typeof options === 'number' ? options : Number(options?.duration), properties: Object.keys(keyframes ?? {}) });
+      return animate.call(this, keyframes, options);
+    };
+  });
+}
+const moves = (page: Page): Promise<{ what: string; duration: number; properties: string[] }[]> => page.evaluate(() => (window as any).moves);
+
 const widget = (page: Page, where: '#top' | '#contact') => page.locator(`${where} [data-email]`);
 const reveal = (page: Page, where: '#top' | '#contact') => widget(page, where).getByRole('button', { name: words.button, exact: true });
 
@@ -159,46 +176,50 @@ for (const address of ['/', '/dev/resume-on']) {
 test('the button widens into the address in no more than 300 ms, and at once when motion is reduced', async ({ page }) => {
   await mockServer(page);
   await recordMail(page);
+  await recordMoves(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
-  /** The length of every movement running in the widget or the row it sits in. */
-  const running = () =>
-    widget(page, '#top').evaluate((element) =>
-      [...element.getAnimations({ subtree: true }), ...(element.closest('ul')?.getAnimations() ?? [])].map((animation) => Number(animation.effect?.getTiming().duration)),
-    );
   const start = (await reveal(page, '#top').boundingBox())!.width;
   await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  const lengths = await running();
-  expect(lengths.length).toBeGreaterThanOrEqual(1);
+  const started = await moves(page);
+  // The button itself widens, and the address fades in. The row keeps its height, so it does not move.
+  expect(started.map((move) => move.what).sort()).toEqual(['address', 'button']);
+  expect(started.find((move) => move.what === 'button')!.properties).toEqual(['inlineSize']);
   // Rule 18: nothing in the interface moves for longer than 300 ms.
-  for (const length of lengths) expect(length).toBeLessThanOrEqual(300);
+  for (const move of started) expect(move.duration).toBeLessThanOrEqual(300);
   await settled(page, '#top');
-  // When it is over the button is at its own full width: wider than "Email", with the whole address showing.
+  // When it is over the button is at its own full width: wider than "Email", with the whole address showing, and nothing left behind on it.
   const whole = (await widget(page, '#top').locator('[data-email-result]').boundingBox())!;
   expect(whole.width).toBeGreaterThan(start);
   expect(await widget(page, '#top').locator('[data-email-link]').evaluate((link) => link.scrollWidth <= link.clientWidth + 1)).toBe(true);
+  await expect(widget(page, '#top').locator('[data-email-result]')).not.toHaveClass(/opening/);
+  expect(await widget(page, '#top').locator('[data-email-result]').getAttribute('style')).toBeNull();
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.reload();
   await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  expect(await running()).toEqual([]);
+  expect(await moves(page)).toEqual([]);
 });
 
 test('on a phone, where the address needs a line of its own, what is below glides down instead of jumping', async ({ page }) => {
   await mockServer(page);
   await recordMail(page);
+  await recordMoves(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const row = page.locator('#top .links');
   const before = (await row.boundingBox())!.height;
   await reveal(page, '#top').click();
   await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
-  // The row is on its way from its old height to its new one, in no more than 300 ms.
-  const gliding = await row.evaluate((element) => element.getAnimations().map((animation) => Number(animation.effect?.getTiming().duration)));
-  expect(gliding.length).toBe(1);
-  expect(gliding[0]).toBeLessThanOrEqual(300);
+  // The row goes from its old height to its new one, in no more than 300 ms. The button does not also widen.
+  const started = await moves(page);
+  const glide = started.filter((move) => move.what === 'row');
+  expect(glide).toHaveLength(1);
+  expect(glide[0]!.properties).toEqual(['blockSize']);
+  expect(glide[0]!.duration).toBeLessThanOrEqual(300);
+  expect(started.filter((move) => move.what === 'button')).toEqual([]);
   await settled(page, '#top');
   expect((await row.boundingBox())!.height).toBeGreaterThan(before);
   // The whole button is on screen, and the page does not scroll sideways.
@@ -206,6 +227,86 @@ test('on a phone, where the address needs a line of its own, what is below glide
   expect(whole.x).toBeGreaterThanOrEqual(0);
   expect(whole.x + whole.width).toBeLessThanOrEqual(390);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+});
+
+test('where the browser cannot animate, the address still shows, the mail app opens and nothing is called a failure', async ({ page }) => {
+  await mockServer(page);
+  await recordMail(page);
+  await page.addInitScript(() => {
+    Element.prototype.animate = () => {
+      throw new Error('no animation here');
+    };
+  });
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  await reveal(page, '#top').click();
+  const link = widget(page, '#top').getByRole('link', { name: ADDRESS });
+  await expect(link).toBeVisible();
+  await expect(link).toBeFocused();
+  await expect(widget(page, '#top').getByRole('status')).toHaveText('');
+  await expect(widget(page, '#top').locator('[data-email-result]')).not.toHaveClass(/opening/);
+  expect(await page.evaluate(() => (window as any).opened)).toEqual([`${MAIL}${ADDRESS}`]);
+  expect(errors).toEqual([]);
+});
+
+test('while the address is being fetched the button says it is busy, and a second press asks nothing more', async ({ page }) => {
+  const calls: string[] = [];
+  let release = () => {};
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route('**/api/contact/*', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    calls.push(path);
+    if (path.endsWith('/token')) {
+      await held;
+      return route.fulfill({ json: { token: 't' } });
+    }
+    return route.fulfill({ json: { address: ADDRESS } });
+  });
+  await recordMail(page);
+  await page.goto('/');
+  await reveal(page, '#top').click();
+  await expect(reveal(page, '#top')).toHaveAttribute('aria-busy', 'true');
+  await reveal(page, '#top').click();
+  await reveal(page, '#contact').click();
+  expect(calls).toEqual(['/api/contact/token']);
+  release();
+  await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+  expect(calls).toEqual(['/api/contact/token', '/api/contact/address']);
+});
+
+test('a visitor who has moved on while waiting is not pulled back to the address', async ({ page }) => {
+  let release = () => {};
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route('**/api/contact/*', async (route) => {
+    if (new URL(route.request().url()).pathname.endsWith('/token')) {
+      await held;
+      return route.fulfill({ json: { token: 't' } });
+    }
+    return route.fulfill({ json: { address: ADDRESS } });
+  });
+  await recordMail(page);
+  await page.goto('/');
+  await reveal(page, '#top').click();
+  const elsewhere = page.locator('#top .links').getByRole('link', { name: 'GitHub' });
+  await elsewhere.focus();
+  release();
+  await expect(widget(page, '#top').getByRole('link', { name: ADDRESS })).toBeVisible();
+  await expect(elsewhere).toBeFocused();
+});
+
+test('the line that reports a failure is on the page from the start, empty and taking no room', async ({ page }) => {
+  await page.goto('/');
+  for (const where of ['#top', '#contact'] as const) {
+    const status = widget(page, where).getByRole('status');
+    await expect(status).toHaveText('');
+    // Not `display: none`: a line that appears already filled may never be read out.
+    expect(await status.evaluate((element) => getComputedStyle(element).display)).not.toBe('none');
+    const button = (await reveal(page, where).boundingBox())!;
+    const whole = (await widget(page, where).boundingBox())!;
+    expect(Math.abs(whole.width - button.width)).toBeLessThanOrEqual(1);
+  }
 });
 
 test('one reveal fills the other Email button too, with no further calls', async ({ page }) => {
@@ -230,14 +331,14 @@ test('Copy puts the address on the clipboard and says so', async ({ page, contex
   const copy = widget(page, '#contact').getByRole('button', { name: words.copy });
   await copy.click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(ADDRESS);
-  // The picture turns into a tick, the button's name says "Copied", and it is read out.
-  const copied = widget(page, '#contact').getByRole('button', { name: words.copied });
-  await expect(copied).toBeVisible();
-  await expect(copied).toHaveAttribute('data-done', '');
-  await expect(copied.locator('svg:visible')).toHaveCount(1);
+  // The picture turns into a tick and "Copied" is read out once, from the status line. The button keeps its name.
+  await expect(copy).toHaveAttribute('data-done', '');
+  await expect(copy.locator('svg:visible')).toHaveCount(1);
+  await expect(copy).toHaveAccessibleName(words.copy);
   await expect(widget(page, '#contact').getByRole('status')).toHaveText(words.copied);
-  // It goes back to "Copy", ready to be used again.
-  await expect(widget(page, '#contact').getByRole('button', { name: words.copy, exact: true })).toBeVisible({ timeout: 5_000 });
+  // It goes back to the clipboard, ready to be used again, and the status line empties.
+  await expect(copy).not.toHaveAttribute('data-done', '', { timeout: 5_000 });
+  await expect(widget(page, '#contact').getByRole('status')).toHaveText('');
 });
 
 test('a refused clipboard leaves the address selected, so it can still be copied by hand', async ({ page }) => {
