@@ -15,7 +15,7 @@ export type Shape = {
 
 export const DRAWING_SIZE = { width: 320, height: 180 };
 
-/** One packet, hop by hop: the packet in its four layers, part-way along a row of devices. */
+/** Follow a packet: the packet in its four layers, part-way along a row of devices. */
 export function packetDrawing(): Shape[] {
   const stops = [36, 98, 160, 222, 284];
   const at = 1; // the packet sits over the second stop
@@ -59,7 +59,7 @@ export function signalDrawing(): Shape[] {
 
 /** Each explainer's drawing, by the name of its content file. */
 export const DRAWINGS: Record<string, () => Shape[]> = {
-  'one-packet-hop-by-hop': packetDrawing,
+  'follow-a-packet': packetDrawing,
   'nrz-vs-pam4': signalDrawing,
 };
 

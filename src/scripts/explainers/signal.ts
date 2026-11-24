@@ -48,6 +48,8 @@ if (root) {
 
   type Frame = { ctx: CanvasRenderingContext2D; left: number; top: number; width: number; height: number };
   const LABEL_ROOM = 74;
+  /** The wrong part of a histogram bar: this much painted, then this much left clear, in the drawing's own units. */
+  const STRIPE = { paint: 3, gap: 1.5 };
   const EDGE = 8;
 
   /** Sizes a canvas to its box at the screen's own sharpness and clears it. */
@@ -237,7 +239,11 @@ if (root) {
       ctx.fillRect(frame.left, top, rightWidth, height);
       ctx.globalAlpha = 1;
       ctx.fillStyle = colours.wrong;
-      ctx.fillRect(frame.left + rightWidth, top, (wrong / most) * frame.width, height);
+      const wrongLeft = frame.left + rightWidth;
+      const wrongWidth = (wrong / most) * frame.width;
+      ctx.fillRect(wrongLeft, top, wrongWidth, height);
+      // Striped as well as red, so the wrong part of a bar can be told apart without its colour.
+      for (let x = wrongLeft + STRIPE.paint; x < wrongLeft + wrongWidth; x += STRIPE.paint + STRIPE.gap) ctx.clearRect(x, top, STRIPE.gap, height);
     }
     ctx.strokeStyle = colours.muted;
     ctx.lineWidth = 1;

@@ -1,32 +1,39 @@
 /*
- * Steps the packet explainer through its eleven stops. The page as built
- * already shows the first stop and holds every history row; this script
- * changes the values, the sentences and which rows show. Movement is left to
- * CSS, so with reduced motion everything simply changes.
+ * Steps the packet demo through its eleven stops. The page as built already
+ * shows the first stop and holds every row of the journey; this script changes
+ * the values, the words, the device, the marks on each layer and which rows
+ * show. Movement is left to CSS, so with reduced motion everything simply changes.
  */
-import { HOPS, LAST_STEP, NEW_HEADER_AT, changeLine, changedFields, stateAt, stepLine } from '../../lib/explainers/packet';
+import { HOPS, LAST_STEP, LAYERS, MARK_TEXT, changedFields, markFor, neighbours, stateAt, stepLine } from '../../lib/explainers/packet';
 
 const root = document.querySelector<HTMLElement>('[data-packet]');
 
 if (root) {
   const find = <T extends Element = HTMLElement>(selector: string) => root.querySelector<T>(selector);
-  const stops: number[] = JSON.parse(root.dataset.stops ?? '[]');
-  const values = [...root.querySelectorAll<HTMLElement>('[data-f]')];
-  const rows = [...root.querySelectorAll<HTMLTableRowElement>('tbody tr')];
+  const all = <T extends Element = HTMLElement>(selector: string) => [...root.querySelectorAll<T>(selector)];
+  const stops = all('[data-stop]');
+  const values = all('[data-f]');
+  const glyphs = all('[data-glyph]');
+  const rows = all<HTMLTableRowElement>('tbody tr');
   const previous = find('[data-previous]');
   const next = find('[data-next]');
   const reset = find('[data-reset]');
-  const info = find('[data-info]');
   let step = 0;
 
   const enable = (button: HTMLElement | null, on: boolean) => button?.setAttribute('aria-disabled', String(!on));
   const usable = (button: HTMLElement | null) => button?.getAttribute('aria-disabled') !== 'true';
+  const write = (selector: string, text: string) => {
+    const element = find(selector);
+    if (element) element.textContent = text;
+  };
 
   function show(to: number): void {
     const forward = to === step + 1;
     step = to;
+    const hop = HOPS[step]!;
     const state = stateAt(step);
     const changed: string[] = changedFields(step);
+    const around = neighbours(step);
 
     for (const value of values) {
       const field = value.dataset.f as keyof typeof state;
@@ -34,35 +41,32 @@ if (root) {
       value.toggleAttribute('data-changed', changed.includes(field));
     }
 
-    const stepText = find('[data-step]');
-    const captionText = find('[data-caption-text]');
-    const changedLine = find('[data-changed-line]');
-    if (stepText) stepText.textContent = stepLine(step);
-    if (captionText) captionText.textContent = HOPS[step]!.caption;
-    if (changedLine) changedLine.textContent = changeLine(step);
+    stops.forEach((stop, index) => {
+      if (index === step) stop.setAttribute('aria-current', 'step');
+      else stop.removeAttribute('aria-current');
+      stop.toggleAttribute('data-passed', index < step);
+    });
 
-    // The note about address translation belongs to the home router alone.
-    const nat = find('[data-nat]');
-    const verdict = find('[data-verdict]');
-    if (nat) nat.hidden = step !== 1;
-    if (verdict) verdict.hidden = step !== LAST_STEP;
-    if (info) info.textContent = step === LAST_STEP ? (info.dataset.delivered ?? '') : '';
+    write('[data-step]', stepLine(step));
+    write('[data-caption-text]', hop.caption);
+    write('[data-name]', hop.name);
+    write('[data-does]', hop.does);
+    write('[data-from]', around.from);
+    write('[data-next-name]', around.next);
+    for (const glyph of glyphs) glyph.toggleAttribute('hidden', glyph.dataset.glyph !== hop.kind);
+
+    for (const layer of LAYERS) write(`[data-mark="${layer}"]`, MARK_TEXT[markFor(step, layer)]);
 
     rows.forEach((row, index) => {
       row.hidden = index > step;
       row.toggleAttribute('data-current', index === step);
     });
 
-    find<SVGGElement>('[data-token]')?.style.setProperty('--packet-x', String(stops[step] ?? 0));
-
-    // At the server, the Ethernet and IP headers have been read and removed.
-    const ethernet = find('[data-seg="eth"]');
-    const ip = find('[data-seg="ip"]');
-    for (const segment of [ethernet, ip]) segment?.toggleAttribute('data-gone', step === LAST_STEP);
-    // Where a router swaps the Ethernet header, the bar shows the old one leave and the new one arrive.
+    // Where a router replaces the Ethernet layer, its line shows the old one leave and the new one arrive.
+    const ethernet = find('[data-head="eth"]');
     if (ethernet) {
       ethernet.removeAttribute('data-swap');
-      if (forward && step !== LAST_STEP && NEW_HEADER_AT.includes(step)) {
+      if (forward && markFor(step, 'eth') === 'rewritten') {
         void ethernet.offsetWidth; // so the animation starts again
         ethernet.setAttribute('data-swap', '');
       }

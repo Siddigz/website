@@ -338,10 +338,15 @@ setting is named `GITHUB_ACTIVITY_TOKEN`, set for Production and Preview.
 The owner's two interactive demos, ported as pages and restyled to the site's
 theme, including dark mode:
 
-1. One packet, hop by hop: which headers change
+1. Follow a packet across the internet (first ported as "One packet, hop by
+   hop: which headers change")
 2. NRZ vs PAM4: levels, noise and misread symbols
 
-They keep their behaviour. They contain no employer or vendor product names.
+The section is named "Playground" on the site. The owner said on 2026-11-22
+that the two source files need not be followed strictly: the demos may be
+changed where that makes them fit the site or explain better, as long as they
+still explain as much. The packet demo was rebuilt on that footing on
+2026-11-24. They contain no employer or vendor product names.
 
 ### Light and dark mode
 

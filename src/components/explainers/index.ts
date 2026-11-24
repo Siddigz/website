@@ -4,7 +4,7 @@ import PacketHops from './PacketHops.astro';
 import SignalLevels from './SignalLevels.astro';
 
 export const WIDGETS: Record<string, typeof PacketHops> = {
-  'one-packet-hop-by-hop': PacketHops,
+  'follow-a-packet': PacketHops,
   'nrz-vs-pam4': SignalLevels,
 };
 

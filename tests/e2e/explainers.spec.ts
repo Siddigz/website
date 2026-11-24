@@ -156,119 +156,196 @@ for (const explainer of explainers) {
   });
 }
 
-test.describe('one packet, hop by hop', () => {
+test.describe('follow a packet', () => {
   const open = async (page: Page) => {
-    await page.goto('/playground/one-packet-hop-by-hop');
+    await page.goto('/playground/follow-a-packet');
     return page.locator('[data-packet]');
   };
   const previous = (page: Page) => page.getByRole('button', { name: 'Previous' });
   const next = (page: Page) => page.getByRole('button', { name: 'Next hop' });
   const reset = (page: Page) => page.getByRole('button', { name: 'Reset' });
   const caption = (page: Page) => page.locator('[data-packet] [data-caption]');
-  const value = (page: Page, field: string) => page.locator(`[data-packet] .cards [data-f="${field}"]`);
+  const value = (page: Page, field: string) => page.locator(`[data-packet] [data-f="${field}"]`);
+  const mark = (page: Page, layer: string) => page.locator(`[data-packet] [data-mark="${layer}"]`);
   const rows = (page: Page) => page.locator('[data-packet] tbody tr:visible');
+  const route = (page: Page) => page.getByRole('list', { name: 'The stops from the laptop to the web server' });
+  const forward = async (page: Page, times: number) => {
+    for (let step = 0; step < times; step += 1) await next(page).click();
+  };
 
-  test('starts at the laptop, with nowhere to go back to', async ({ page }) => {
+  test('starts at the laptop, which writes every layer, with nowhere to go back to', async ({ page }) => {
     const widget = await open(page);
-    await expect(caption(page)).toContainText('Step 0 of 10 · now at: Laptop');
+    await expect(caption(page)).toContainText('Stop 1 of 11 · Laptop');
     await expect(previous(page)).toBeDisabled();
     await expect(next(page)).toBeEnabled();
+    await expect(widget.locator('[data-name]')).toHaveText('Laptop');
+    await expect(widget.locator('[data-does]')).toHaveText('Builds the packet');
+    await expect(widget.locator('[data-from]')).toHaveText('Start');
+    await expect(widget.locator('[data-next-name]')).toHaveText('Home router');
     await expect(value(page, 'ttl')).toHaveText('64');
     await expect(value(page, 'ipDst')).toHaveText('198.51.100.7');
+    for (const layer of ['eth', 'ip', 'tcp', 'data']) await expect(mark(page, layer)).toHaveText('written here');
     await expect(rows(page)).toHaveCount(1);
-    await expect(widget.getByText('The packet was just created on the laptop.')).toBeVisible();
   });
 
-  test('the home router rewrites the headers and swaps the source address', async ({ page }) => {
+  test('the home router replaces Ethernet, reads IP, and swaps the source address', async ({ page }) => {
     const widget = await open(page);
     await next(page).click();
-    await expect(caption(page)).toContainText('Step 1 of 10 · now at: Home router');
+    await expect(caption(page)).toContainText('Stop 2 of 11 · Home router');
+    await expect(widget.locator('[data-does]')).toHaveText('Reads IP, rewrites Ethernet');
+    await expect(widget.locator('[data-from]')).toHaveText('Laptop');
     await expect(value(page, 'ttl')).toHaveText('63');
     await expect(value(page, 'eDst')).toHaveText('DD');
     await expect(value(page, 'ipSrc')).toHaveText('203.0.113.5');
-    await expect(widget.locator('[data-nat]')).toBeVisible();
-    await expect(widget.getByText('Changed at this step: Ethernet dst MAC, Ethernet src MAC, IP src, TTL.')).toBeVisible();
+    await expect(mark(page, 'eth')).toHaveText('rewritten here');
+    await expect(mark(page, 'ip')).toHaveText('read here');
+    await expect(mark(page, 'tcp')).toHaveText('');
+    await expect(mark(page, 'data')).toHaveText('');
     // The values that changed are marked, and the one that never changes is not.
-    await expect(value(page, 'ttl')).toHaveAttribute('data-changed', '');
+    for (const field of ['eDst', 'eSrc', 'ipSrc', 'ttl']) await expect(value(page, field)).toHaveAttribute('data-changed', '');
     await expect(value(page, 'ipDst')).not.toHaveAttribute('data-changed', '');
     await expect(rows(page)).toHaveCount(2);
     await expect(previous(page)).toBeEnabled();
 
     await next(page).click();
-    await expect(caption(page)).toContainText('Step 2 of 10 · now at: ISP router');
-    await expect(widget.locator('[data-nat]')).toBeHidden();
+    await expect(caption(page)).toContainText('Stop 3 of 11 · ISP router');
     await expect(value(page, 'ipSrc')).not.toHaveAttribute('data-changed', '');
     await expect(rows(page)).toHaveCount(3);
   });
 
-  test('a device that only carries the light changes nothing', async ({ page }) => {
+  test('a changed value is marked by more than colour', async ({ page }) => {
+    await open(page);
+    await next(page).click();
+    const ring = (field: string) => value(page, field).evaluate((element) => getComputedStyle(element).outlineColor);
+    expect(await ring('ttl')).not.toBe(await ring('ipDst'));
+  });
+
+  test('a device that only carries the light opens nothing and changes nothing', async ({ page }) => {
     const widget = await open(page);
-    for (let step = 0; step < 4; step += 1) await next(page).click();
-    await expect(caption(page)).toContainText('Step 4 of 10 · now at: Amplifier 1');
-    await expect(widget.getByText('Nothing in the packet changed at this step.')).toBeVisible();
+    await forward(page, 4);
+    await expect(caption(page)).toContainText('Stop 5 of 11 · Amplifier 1');
+    await expect(widget.locator('[data-does]')).toHaveText('Boosts the light');
+    for (const layer of ['eth', 'ip', 'tcp', 'data']) await expect(mark(page, layer)).toHaveText('');
     await expect(widget.locator('[data-changed]')).toHaveCount(0);
   });
 
-  test('the packet is delivered at step 10, and Reset starts again', async ({ page }) => {
+  test('the switch reads Ethernet only; the server reads everything, and Reset starts again', async ({ page }) => {
     const widget = await open(page);
-    for (let step = 0; step < 10; step += 1) await next(page).click();
-    await expect(caption(page)).toContainText('Step 10 of 10 · now at: Web server');
+    await forward(page, 9);
+    await expect(caption(page)).toContainText('Stop 10 of 11 · Data-centre switch');
+    await expect(mark(page, 'eth')).toHaveText('read here');
+    await expect(mark(page, 'ip')).toHaveText('');
+    await next(page).click();
+    await expect(caption(page)).toContainText('Stop 11 of 11 · Web server');
     await expect(next(page)).toBeDisabled();
-    await expect(widget.getByText('Packet delivered.')).toBeVisible();
-    await expect(widget.locator('[data-verdict]')).toBeVisible();
+    await expect(widget.locator('[data-next-name]')).toHaveText('Delivered');
+    for (const layer of ['eth', 'ip', 'tcp', 'data']) await expect(mark(page, layer)).toHaveText('read here');
     await expect(value(page, 'ttl')).toHaveText('60');
     await expect(rows(page)).toHaveCount(11);
-    await expect(rows(page).last()).toContainText('Delivered at Web server');
+    await expect(rows(page).last()).toContainText('Web server');
     await reset(page).click();
-    await expect(caption(page)).toContainText('Step 0 of 10');
+    await expect(caption(page)).toContainText('Stop 1 of 11');
     await expect(rows(page)).toHaveCount(1);
-    await expect(widget.locator('[data-verdict]')).toBeHidden();
     await expect(previous(page)).toBeDisabled();
-  });
-
-  test('at the server the removed headers are struck through, not faded: their text keeps its full contrast', async ({ page }) => {
-    const widget = await open(page);
-    for (let step = 0; step < 10; step += 1) await next(page).click();
-    for (const name of ['eth', 'ip']) {
-      const segment = widget.locator(`[data-seg="${name}"]`);
-      await expect(segment).toHaveAttribute('data-gone', '');
-      // An automated scan does not see text faded by its container, so it is checked here.
-      const style = await segment.evaluate((element) => {
-        const computed = getComputedStyle(element);
-        return { opacity: computed.opacity, line: computed.textDecorationLine };
-      });
-      expect(style.opacity).toBe('1');
-      expect(style.line).toContain('line-through');
-    }
-    await reset(page).click();
-    await expect(widget.locator('[data-gone]')).toHaveCount(0);
   });
 
   test('Previous goes back a stop', async ({ page }) => {
     await open(page);
-    await next(page).click();
-    await next(page).click();
+    await forward(page, 2);
     await previous(page).click();
-    await expect(caption(page)).toContainText('Step 1 of 10');
+    await expect(caption(page)).toContainText('Stop 2 of 11');
     await expect(value(page, 'ttl')).toHaveText('63');
     await expect(rows(page)).toHaveCount(2);
   });
 
-  test('the packet in the drawing moves to the stop it is at', async ({ page }) => {
+  test('the row of dots is a list of the eleven stops, on one line, and marks where the packet is', async ({ page }) => {
     await open(page);
-    const x = () => page.locator('[data-packet] [data-token]').evaluate((token) => token.getBoundingClientRect().x);
-    const start = await x();
-    await next(page).click();
-    await expect.poll(x).toBeGreaterThan(start + 5);
+    const stops = route(page).getByRole('listitem');
+    await expect(stops).toHaveCount(11);
+    await expect(stops.first()).toHaveText('Laptop');
+    await expect(stops.last()).toHaveText('Web server');
+    const dots = await route(page).locator('.dot').evaluateAll((items) => items.map((item) => item.getBoundingClientRect()).map((box) => ({ x: box.x, y: Math.round(box.y + box.height / 2) })));
+    for (let index = 1; index < dots.length; index += 1) {
+      expect(dots[index]!.x).toBeGreaterThan(dots[index - 1]!.x);
+      expect(Math.abs(dots[index]!.y - dots[0]!.y)).toBeLessThanOrEqual(1);
+    }
+    for (const step of [0, 1, 5, 10]) {
+      while ((await route(page).getByRole('listitem').evaluateAll((items) => items.findIndex((item) => item.getAttribute('aria-current') === 'step'))) < step) await next(page).click();
+      await expect(route(page).locator('[aria-current="step"]')).toHaveCount(1);
+      await expect(route(page).locator('[data-passed]')).toHaveCount(step);
+    }
   });
+
+  test('only the drawing of the device the packet is at is shown', async ({ page }) => {
+    const widget = await open(page);
+    const shown = () => widget.locator('[data-glyph]:visible').evaluateAll((glyphs) => glyphs.map((glyph) => (glyph as HTMLElement).dataset.glyph));
+    expect(await shown()).toEqual(['laptop']);
+    await next(page).click();
+    expect(await shown()).toEqual(['router']);
+    await forward(page, 3);
+    expect(await shown()).toEqual(['amplifier']);
+  });
+
+  for (const width of [320, 390, 768, 1280]) {
+    test(`nothing in it has to be scrolled sideways, the table included (${width} wide)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      const widget = await open(page);
+      await forward(page, 10);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+      const wide = await widget.evaluate((element) =>
+        // Only boxes that scroll or clip count here; anything that merely spills out of its box is caught just below.
+        [element, ...element.querySelectorAll('*')]
+          .filter((each) => !each.closest('.visually-hidden') && getComputedStyle(each).overflowX !== 'visible' && each.scrollWidth > each.clientWidth + 1 && each.clientWidth > 0)
+          .map((each) => each.className || each.tagName),
+      );
+      expect(wide).toEqual([]);
+      const outside = await widget.evaluate((element) => {
+        const outer = element.getBoundingClientRect();
+        return [...element.querySelectorAll('*')].filter((each) => {
+          if (each.closest('.visually-hidden')) return false;
+          const box = each.getBoundingClientRect();
+          return box.width > 0 && (box.left < outer.left - 1 || box.right > outer.right + 1);
+        }).length;
+      });
+      expect(outside).toBe(0);
+    });
+  }
+
+  for (const size of [{ width: 320, height: 640 }, { width: 1280, height: 800 }]) {
+    test(`nothing moves from stop to stop: the buttons and the packet stay where they are (${size.width} wide)`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.setViewportSize(size);
+      const widget = await open(page);
+      const places = new Set<string>();
+      for (let step = 0; step <= 10; step += 1) {
+        const place = await widget.evaluate((element) => {
+          const top = (selector: string) => Math.round(element.querySelector(selector)!.getBoundingClientRect().top + scrollY);
+          return [top('[data-layer="eth"]'), top('[data-layer="data"]'), top('.caption-box'), top('[data-next]'), top('.history')].join(',');
+        });
+        places.add(place);
+        if (step < 10) await next(page).click();
+      }
+      expect([...places]).toHaveLength(1);
+    });
+  }
+
+  for (const size of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    test(`from the row of dots to the buttons, it fits one screen (${size.width} by ${size.height})`, async ({ page }) => {
+      await page.setViewportSize(size);
+      const widget = await open(page);
+      const header = (await page.locator('.site-header').boundingBox())!;
+      const stage = (await widget.locator('[data-stage]').boundingBox())!;
+      expect(stage.height).toBeLessThanOrEqual(size.height - header.height);
+    });
+  }
 
   for (const colorScheme of ['light', 'dark'] as const) {
     for (const steps of [1, 10]) {
-      test(`step ${steps} has no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
+      test(`after ${steps} hop(s) there are no detectable accessibility violations (${colorScheme})`, async ({ page }) => {
         await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
         await open(page);
-        for (let step = 0; step < steps; step += 1) await next(page).click();
-        await expect(caption(page)).toContainText(`Step ${steps} of 10`);
+        await forward(page, steps);
+        await expect(caption(page)).toContainText(`Stop ${steps + 1} of 11`);
         const { violations } = await new AxeBuilder({ page })
           .include('[data-packet]')
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -283,13 +360,13 @@ test.describe('one packet, hop by hop', () => {
     await next(page).focus();
     await page.keyboard.press('Enter');
     await page.keyboard.press('Space');
-    await expect(caption(page)).toContainText('Step 2 of 10');
+    await expect(caption(page)).toContainText('Stop 3 of 11');
     await previous(page).focus();
     await page.keyboard.press('Enter');
-    await expect(caption(page)).toContainText('Step 1 of 10');
+    await expect(caption(page)).toContainText('Stop 2 of 11');
     await reset(page).focus();
     await page.keyboard.press('Enter');
-    await expect(caption(page)).toContainText('Step 0 of 10');
+    await expect(caption(page)).toContainText('Stop 1 of 11');
   });
 
   test('the caption is announced to screen readers when it changes', async ({ page }) => {
@@ -297,33 +374,28 @@ test.describe('one packet, hop by hop', () => {
     await expect(caption(page)).toHaveAttribute('role', 'status');
   });
 
-  test('with reduced motion the values simply change', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+  test('a router’s new Ethernet layer slides in, in no more than 300 ms; with reduced motion the values simply change', async ({ page }) => {
     await open(page);
     await next(page).click();
-    await expect(caption(page)).toContainText('Step 1 of 10');
+    const head = page.locator('[data-packet] [data-head="eth"]');
+    await expect(head).toHaveAttribute('data-swap', '');
+    expect(await head.evaluate((element) => parseFloat(getComputedStyle(element).animationDuration))).toBeLessThanOrEqual(0.3);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await next(page).click();
+    await expect(caption(page)).toContainText('Stop 2 of 11');
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-  });
-
-  test('on a narrow screen the drawing scrolls inside its own box, which the keyboard can reach', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 640 });
-    await open(page);
-    // One picture to a screen reader, named in words; its details are in the captions and the table.
-    const box = page.getByRole('img', { name: 'Network path from a laptop to a web server' });
-    await expect(box).toHaveAttribute('tabindex', '0');
-    expect(await box.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
-    // Its smallest labels are still a readable size.
-    const smallest = await box.locator('text').evaluateAll((labels) => Math.min(...labels.map((label) => label.getBoundingClientRect().height)));
-    expect(smallest).toBeGreaterThanOrEqual(11);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 
   test('with scripts off the whole journey is in the table, and the buttons are not offered', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    await page.goto('/playground/one-packet-hop-by-hop');
+    await page.goto('/playground/follow-a-packet');
     await expect(page.locator('[data-packet] tbody tr:visible')).toHaveCount(11);
     await expect(page.locator('[data-packet] .controls')).toBeHidden();
+    // The packet still reads, as it leaves the laptop.
+    await expect(page.locator('[data-packet] [data-name]')).toHaveText('Laptop');
+    await expect(page.locator('[data-packet] [data-route] [aria-current="step"]')).toHaveText('Laptop');
     await context.close();
   });
 });
@@ -435,6 +507,34 @@ test.describe('NRZ vs PAM4', () => {
     const pam4 = await pixels(page, 'histogram');
     await format(page, 'NRZ (2 levels)').click();
     expect((await pixels(page, 'histogram')).sum).not.toBe(pam4.sum);
+  });
+
+  test('in the histogram the wrong part of a bar is striped, so it is not told apart by colour alone', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await open(page);
+    await slider(page).fill('0.2');
+    // Row by row: the longest unbroken run of red. (A few rows also carry the red dotted threshold lines, which run on.)
+    const red = await page.locator('[data-signal] canvas[data-drawing="histogram"]').evaluate((canvas: HTMLCanvasElement) => {
+      const { data, width, height } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+      const longest: number[] = [];
+      for (let y = 0; y < height; y += 1) {
+        let run = 0;
+        let most = 0;
+        for (let x = 0; x < width; x += 1) {
+          const at = (y * width + x) * 4;
+          const isRed = data[at + 3]! > 200 && data[at]! > data[at + 1]! + 60 && data[at]! > data[at + 2]! + 60;
+          run = isRed ? run + 1 : 0;
+          most = Math.max(most, run);
+        }
+        if (most > 0) longest.push(most);
+      }
+      return { longest, scale: canvas.width / canvas.getBoundingClientRect().width };
+    });
+    expect(red.longest.length).toBeGreaterThan(20);
+    // In nearly every row with red in it, no stretch of red is wider than one stripe (plus a pixel of smoothing either side).
+    const limit = Math.ceil(3 * red.scale) + 2;
+    const striped = red.longest.filter((run) => run <= limit).length;
+    expect(striped / red.longest.length).toBeGreaterThan(0.85);
   });
 
   test('the drawings are redrawn in the new colours when the theme changes', async ({ page }) => {

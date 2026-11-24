@@ -193,8 +193,12 @@
   --media-width: 56rem;
   --aside-width: 28rem;
   --backdrop-height: 46rem;
-  /* Wide enough that the drawing's smallest labels stay a readable size. */
-  --diagram-width: 80rem;
+  /* The packet demo: a dot in its row of stops, the line between dots (thicker where it is fiber), the device's drawing, and the room kept for a layer's mark. */
+  --trail-dot: 0.875rem;
+  --rail-width: 0.125rem;
+  --rail-width-fiber: 0.25rem;
+  --device-icon: 2rem;
+  --mark-width: 7.5rem;
   --drawing-height: 17rem;
   --layer-edge: 0.25rem;
   --menu-width: 34rem;
