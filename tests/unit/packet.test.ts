@@ -55,7 +55,7 @@ describe('the packet’s journey', () => {
   });
 
   it('names the three stretches, and where the fiber runs', () => {
-    expect(ZONES).toEqual(['Home', 'Fiber, about 450 km', 'Data centre']);
+    expect(ZONES).toEqual(['Home', 'Fiber, about 250 km', 'Data centre']);
     expect(HOPS.slice(FIBER.from, FIBER.to + 1).map((hop) => hop.kind)).toEqual(['modem', 'amplifier', 'amplifier', 'modem']);
   });
 });

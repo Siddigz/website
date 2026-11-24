@@ -168,7 +168,7 @@ export const LAST_STEP = HOPS.length - 1;
 /** The row of stops, named for screen readers. */
 export const ROUTE_LABEL = 'The stops from the laptop to the web server';
 /** The three stretches of the journey, written under the row of stops. */
-export const ZONES = ['Home', 'Fiber, about 450 km', 'Data centre'] as const;
+export const ZONES = ['Home', 'Fiber, about 250 km', 'Data centre'] as const;
 /** The stops joined by the long fiber: the line between them is drawn as light. */
 export const FIBER = { from: 3, to: 6 } as const;
 
