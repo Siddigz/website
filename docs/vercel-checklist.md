@@ -46,9 +46,12 @@ the browser's console.
 
 ## 4. Firewall
 
-Firewall → add a rate limit rule: path starts with `/api/contact/`, at most
-10 requests per minute per visitor (by IP address), then deny. The site also
-limits this itself; the rule is the stronger of the two.
+Done on 2026-11-24. Firewall → Rules → the rule "Contact rate limit": path
+starts with `/api/contact/`, at most 10 requests per 60 seconds per visitor
+(by IP address, fixed window), then answer "Too Many Requests (429)". One
+press of the Email button makes two requests, so a visitor can press it five
+times a minute. The site also limits this itself; the rule is the stronger
+of the two.
 
 Leave bot protection (a challenge page) off for this path unless the Email
 button has been tried on the preview with it on: the button calls these
