@@ -1,0 +1,262 @@
+---
+// "NRZ vs PAM4": controls, four readouts and three drawings. The page is built
+// with the readouts for the starting state, so the numbers read without
+// scripts; the script (src/scripts/explainers/signal.ts) draws and updates.
+// Maths and wording come from src/lib/explainers/signal.ts.
+import { SEED_OFFSET, START, readouts, simulate, waveNote, waveform } from '../../lib/explainers/signal';
+
+const text = readouts(START.levels, START.sigma, simulate(START.levels, START.sigma, START.seed + SEED_OFFSET.histogram).errors);
+const note = waveNote(waveform(START.levels, START.sigma, START.seed).wrong);
+
+const formats = [
+  { levels: 2, label: 'NRZ (2 levels)' },
+  { levels: 4, label: 'PAM4 (4 levels)' },
+  { levels: 8, label: 'PAM8 (8 levels)' },
+];
+const cards = [
+  { name: 'gap', label: 'Gap between levels', value: text.gap },
+  { name: 'bits', label: 'Bits per symbol', value: text.bits },
+  { name: 'measured', label: 'Measured symbol error rate', value: text.measured },
+  { name: 'theory', label: 'Theoretical symbol error rate', value: text.theory },
+];
+---
+
+<div class="signal" data-signal>
+  <p class="intro">
+    A transmitter sends one of M brightness levels spread across a fixed range from 0 to 1. The receiver sees the level plus Gaussian noise (σ) and
+    picks the nearest level. More levels means smaller gaps, so the same noise causes more mistakes.
+  </p>
+
+  <div class="controls panel">
+    <div class="row">
+      <div class="formats" role="group" aria-label="Modulation format">
+        {formats.map(({ levels, label }) => <button type="button" data-levels={levels} aria-pressed={levels === START.levels ? 'true' : 'false'}>{label}</button>)}
+      </div>
+      <label class="toggle"><input type="checkbox" data-gray checked={START.gray} /> Gray code labels</label>
+      <button type="button" class="plain" data-resample>Resample</button>
+    </div>
+    <div class="slider">
+      <label for="signal-sigma">Noise (σ)</label>
+      <input type="range" id="signal-sigma" min="0" max="0.3" step="0.005" value={START.sigma} data-slider />
+      <output class="sigma" for="signal-sigma" data-sigma>{START.sigma.toFixed(3)}</output>
+    </div>
+    <p class="note muted">Try σ = 0.08 on NRZ, then switch to PAM4 without moving the slider.</p>
+  </div>
+
+  <div class="cards">
+    {
+      cards.map(({ name, label, value }) => (
+        <div class="card" data-readout={name}>
+          <span class="k muted">{label}</span>
+          <span class="big">{value[0]}</span>
+          <span class="s muted">{value[1]}</span>
+        </div>
+      ))
+    }
+  </div>
+  {/* Not a live region: the slider's own value is announced as it moves, and that is enough to follow along. */}
+  <p class="caption" data-caption>{text.caption}</p>
+
+  <div class="drawings">
+    <section>
+      <h2>1. Received waveform</h2>
+      <p class="legend muted">
+        Gray line: what was sent. Blue dots and line: what the receiver measured. Red dotted lines: decision thresholds. Red dot with × : decided as
+        the wrong level.
+      </p>
+      <canvas data-drawing="wave" role="img" aria-label="Received waveform: forty symbols as sent and as measured, with the misread ones marked."
+      ></canvas>
+      <p class="legend muted" data-wave-note>{note}</p>
+    </section>
+
+    <section>
+      <h2>2. Eye diagram</h2>
+      <p class="legend muted">
+        Each faint trace is one symbol period, shown across 2 unit intervals (UI), with the sampling instant at the center. Open space between the
+        stacked eyes is where a clean decision is possible. Red dotted lines: decision thresholds.
+      </p>
+      <canvas data-drawing="eye" role="img" aria-label="Eye diagram: three hundred symbol periods laid over each other."></canvas>
+    </section>
+
+    <section>
+      <h2>3. Histogram at sampling instant</h2>
+      <p class="legend muted">
+        20,000 simulated symbols, sampled at the center. Bar length = how many symbols landed at that amplitude. Blue = decided correctly, red with
+        stripes = decided wrong. Red where the tails cross a red dotted threshold is where errors come from.
+      </p>
+      <canvas data-drawing="histogram" role="img" aria-label="Histogram of the amplitudes of 20,000 received symbols, split into decided correctly and decided wrong."
+      ></canvas>
+    </section>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/explainers/signal';
+</script>
+
+<style>
+  /* As wide as the rest of the page, so it sits squarely under the title. */
+  .signal {
+    display: grid;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+
+  /* Text keeps a comfortable line length; the controls and drawings use the full width. */
+  .intro,
+  .legend {
+    max-inline-size: var(--measure);
+  }
+
+  .panel {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .row,
+  .slider {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  /* Three buttons joined into one control. */
+  .formats {
+    display: inline-flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-accent);
+    border-radius: var(--radius-md);
+  }
+
+  .formats button {
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    background: var(--color-surface);
+    color: var(--color-accent);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .formats button + button {
+    border-inline-start: var(--border-width) solid var(--color-accent);
+  }
+
+  .formats button[aria-pressed='true'] {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  /* Inside the joined control the ring would be clipped, so it sits within the button. */
+  .formats button:focus-visible {
+    outline-offset: calc(-2 * var(--focus-width));
+    outline-color: currentColor;
+  }
+
+  .plain {
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  input {
+    accent-color: var(--color-accent);
+  }
+
+  .slider input {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+  }
+
+  /* Digits of equal width, and room for the widest value, so the slider never changes length. */
+  .sigma,
+  .big {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sigma {
+    min-inline-size: 3.5em;
+    font-weight: var(--weight-label);
+  }
+
+  .note,
+  .legend,
+  .k,
+  .s {
+    font-size: var(--text-sm);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-2);
+  }
+
+  .card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    min-inline-size: 0;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .big {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+  }
+
+  .caption {
+    /* Room for two lines, so the drawings do not jump as the sentence changes. */
+    min-block-size: calc(var(--text-base) * var(--leading-normal) * 2);
+    font-weight: var(--weight-label);
+  }
+
+  .drawings {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .drawings section {
+    display: grid;
+    gap: var(--space-2);
+    min-inline-size: 0;
+  }
+
+  h2 {
+    font-size: var(--text-lg);
+  }
+
+  /* The height is fixed here, before the script runs, so drawing never moves the page. */
+  canvas {
+    display: block;
+    inline-size: 100%;
+    block-size: var(--drawing-height);
+  }
+
+  /* Without scripts nothing can be adjusted or drawn. The explanation and the starting numbers stay. */
+  @media (scripting: none) {
+    .controls,
+    .drawings {
+      display: none;
+    }
+  }
+</style>

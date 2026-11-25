@@ -1,0 +1,103 @@
+# Site-wide settings. One entry, keyed `main`.
+# `url` is the one place the site address lives: astro.config.mjs reads it.
+main:
+  url: https://siddigz.com
+  name:
+    first: Siddig
+    last: Ahmed
+  # Draft. One sentence, at most 22 words.
+  pitch: I build software people actually use, from award-winning hackathon projects to student tools, plus two software engineering internships at Ciena.
+  # Set `enabled` to false to hide the line. Keep the text free of terms and years.
+  lookingFor:
+    enabled: true
+    text: Open to software engineering internships
+  program: Computer Science (Honours), Minor in Mathematics
+  school: Carleton University
+  gpa: 3.96/4.00
+  expectedGraduation: April 2028
+  # Shown at the top of the home page. Remove these lines to show a generic figure instead.
+  photo:
+    src: ../assets/about/portrait.jpg
+    alt: Siddig Ahmed, smiling, in glasses and a blue-grey polo shirt.
+  links:
+    github: https://github.com/Siddigz
+    linkedin: https://linkedin.com/in/siddigz
+  # This site's own repository. Its commits count towards the recent activity.
+  repository: https://github.com/Siddigz/website
+  contactNote: The quickest way to reach me is a message on LinkedIn.
+  # The Email button. The address itself is a private setting on the host and
+  # is never in this repo: the button fetches it when pressed.
+  email:
+    button: Email
+    copy: Copy
+    copied: Copied
+    failed: That didn’t work. Message me on LinkedIn instead.
+    # Shown in Contact when the visitor's browser runs no scripts.
+    noScript: Email needs JavaScript. Message me on LinkedIn instead.
+  # Where "my time" in the greeting is.
+  home:
+    city: Ottawa
+    timeZone: America/Toronto
+  # The line above the buttons at the top of the home page. `neutral` is in the
+  # page as built; the visitor's browser swaps in one opening and one time line.
+  greeting:
+    neutral: Hello, and welcome.
+    morning: Good morning.
+    afternoon: Good afternoon.
+    evening: Good evening.
+    night: You’re up late.
+    # Replaces the time-of-day words on a later visit.
+    returning: Welcome back.
+    times: It’s {yours} for you and {mine} in {city}.
+    # When the visitor's clock reads the same as mine.
+    sameTime: It’s {time} for both of us.
+  # The buttons above "More projects". The category names come from the projects themselves.
+  filter:
+    all: All
+    # Read to screen reader users: the name of the group of buttons, and what changed.
+    label: Filter projects
+    status: Showing {n} of {total} projects.
+  # The command menu: the button in the nav, the search box, and the group names.
+  menu:
+    # Read to screen reader users on the nav button.
+    open: Open the command menu
+    title: Command menu
+    search: Search or jump to…
+    empty: Nothing matches.
+    groups:
+      sections: Sections
+      projects: Projects
+      explainers: Playground
+      links: Links
+      theme: Theme
+  # The link to the resume. Shown only while the host's RESUME_ENABLED setting is "true".
+  resumeLabel: Resume
+  # The titles of the home page's sections. "Highlights" and "Skills" are read
+  # to screen reader users only. About's title is in about.md; the Playground's is below.
+  sections:
+    proof: Highlights
+    experience: Experience
+    skills: Skills
+    projects: Featured projects
+    moreProjects: More projects
+    activity: GitHub activity
+    contact: Contact
+  # The links in the top right. (Playground uses its section title.)
+  nav:
+    experience: Experience
+    projects: Projects
+    about: About
+  # The words in the GitHub activity section. {n} is the year's count.
+  activity:
+    total: "{n} contributions in the last year"
+    less: Less
+    more: More
+    commits: Recent commits
+  # The explainers: the section's title on the home page, and the link back from each one.
+  explainers:
+    title: Playground
+    back: Back to playground
+    # Shown on an explainer page only when the visitor's browser runs no scripts.
+    noScript: The interactive part of this page needs JavaScript, which is switched off in your browser.
+  # Shown on a featured project's card once its page has been opened.
+  seenLabel: Seen

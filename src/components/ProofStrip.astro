@@ -1,0 +1,70 @@
+---
+import { getSite } from '../lib/site';
+import { getCollection } from 'astro:content';
+
+const items = (await getCollection('proof')).sort((a, b) => a.data.order - b.data.order);
+const site = await getSite();
+---
+
+<section id="proof" class="proof container">
+  <h2 class="visually-hidden">{site.sections.proof}</h2>
+  <ul role="list">
+    {
+      items.map(({ data }) => (
+        <li>
+          {data.link ? (
+            <a class="label" href={data.link}>{data.label}</a>
+          ) : (
+            <span class="label">{data.label}</span>
+          )}
+          {[data.detail].flat().map((line) => (
+            <span class="detail muted" data-detail-line>{line}</span>
+          ))}
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .proof {
+    padding-block: var(--space-5);
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  li {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+  }
+
+  .label {
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-heading);
+    line-height: var(--leading-tight);
+  }
+
+  a.label {
+    text-decoration-color: var(--color-border);
+  }
+
+  a.label:hover {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .detail {
+    display: block;
+    font-size: var(--text-sm);
+  }
+</style>

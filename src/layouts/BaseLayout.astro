@@ -1,0 +1,104 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import { Font } from 'astro:assets';
+import Nav from '../components/Nav.astro';
+import CommandMenu from '../components/CommandMenu.astro';
+import tokens from '../styles/tokens.css?raw';
+import { declaredValue, toHex } from '../lib/colour';
+import pageTransition from '../scripts/page-transition.js?raw';
+import themeEarly from '../scripts/theme-early.js?raw';
+import { getSite } from '../lib/site';
+import { onVercel } from '../lib/build-env';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path of this page, used for the canonical address. */
+  path: string;
+  /** Keep the page out of search results (test-only pages). */
+  noindex?: boolean;
+  /**
+   * The id of an element near the top of the page. When the browser animates
+   * from the page before, it waits until this element is there to animate to.
+   */
+  expect?: string;
+  /**
+   * The picture other sites show when this page is shared: a path on this
+   * site, 1200 by 630. Pages without one of their own use the home page's.
+   */
+  image?: string;
+  /** What that picture shows, in words. */
+  imageAlt?: string;
+}
+
+const { title, description, path, noindex = false, expect, image = '/og/home.png' } = Astro.props;
+const imageAlt = Astro.props.imageAlt ?? `${title}. ${description}`;
+const site = await getSite();
+// Not yet in the HTML types, so passed as a plain set of attributes.
+const blocking = { blocking: 'render' } as const;
+const canonical = new URL(path, Astro.site);
+
+// The browser's own bar (mostly on phones) takes the page background, read
+// from the design tokens so the two can never drift apart.
+const barColour = {
+  light: toHex(declaredValue(tokens, '--color-bg-light')),
+  dark: toHex(declaredValue(tokens, '--color-bg-dark')),
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content={barColour.light} media="(prefers-color-scheme: light)" data-bar="light" />
+    <meta name="theme-color" content={barColour.dark} media="(prefers-color-scheme: dark)" data-bar="dark" />
+    {/* Applies a stored theme choice before the first draw. Its text is fixed, so the security policy can allow it by its hash. */}
+    <script is:inline set:html={themeEarly} />
+    {/* Self-hosted fonts, both fetched early: the name at the top and the text under it. */}
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-figtree" preload />
+    {/* The site's icon: drawn, with a small picture for browsers that want one, and a larger one for phone home screens. */}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {/* What other sites show when this page is shared. */}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={path === '/' ? 'website' : 'article'} />
+    <meta property="og:site_name" content={site.fullName} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+    {expect && <link rel="expect" href={`#${expect}`} {...blocking} />}
+    {/* Listening before the first draw, for the animation between a project's card and its page. */}
+    <script is:inline set:html={pageTransition} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <CommandMenu />
+    {/*
+      Page-view counting by the host: no cookies, nothing identifying, same address as the site.
+      Only in builds made on the host, so local and test builds never ask for it.
+    */}
+    {onVercel && <script is:inline defer src="/_vercel/insights/script.js" />}
+    <script>
+      // The greeting from the visitor's clock, and the marks on projects they have opened.
+      import '../scripts/visitor';
+    </script>
+  </body>
+</html>

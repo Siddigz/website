@@ -1,0 +1,43 @@
+---
+import { getSite } from '../lib/site';
+import EmailReveal from './EmailReveal.astro';
+
+const site = await getSite();
+---
+
+<section id="contact" class="section container">
+  <h2 class="section-title">{site.sections.contact}</h2>
+  <p class="muted">{site.contactNote}</p>
+  <ul role="list">
+    {site.profileLinks.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+    <li><EmailReveal look="link" /></li>
+  </ul>
+  {/* Without scripts the Email button cannot work, so it is hidden and this line, shown only then, says why. */}
+  <p class="muted no-script">{site.email.noScript}</p>
+</section>
+
+<style>
+  section {
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-block-start: var(--space-4);
+    font-weight: var(--weight-medium);
+  }
+
+  .no-script {
+    display: none;
+    margin-block-start: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  @media (scripting: none) {
+    .no-script {
+      display: block;
+    }
+  }
+</style>

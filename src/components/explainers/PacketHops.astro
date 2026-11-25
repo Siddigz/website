@@ -1,0 +1,682 @@
+---
+// "Follow a packet across the internet". A row of dots shows how far the
+// packet has got; the middle shows the device it is at; the packet itself is
+// drawn as four layers, one inside the other, with what this device does to
+// each. Under the buttons, a table keeps the whole journey. The page is built
+// showing the first stop; the script (src/scripts/explainers/packet.ts) steps
+// through the rest. Data and sentences come from src/lib/explainers/packet.ts.
+import {
+  FIBER,
+  HOPS,
+  LAST_STEP,
+  LAYERS,
+  LAYER_TEXT,
+  MARK_TEXT,
+  ROUTE_LABEL,
+  ZONES,
+  DELIVERED,
+  START,
+  historyRows,
+  longestStepLine,
+  markFor,
+  neighbours,
+  stateAt,
+  stepLine,
+  type Kind,
+  type Layer,
+} from '../../lib/explainers/packet';
+
+const start = stateAt(0);
+const first = HOPS[0]!;
+const around = neighbours(0);
+const rows = historyRows(LAST_STEP);
+const mark = (layer: Layer) => MARK_TEXT[markFor(0, layer)];
+
+// Everything that changes from stop to stop is also laid out unseen, in the same place, in every form it
+// takes. Each box is then always as tall as its tallest form, so stepping never moves what is below it.
+const captions = [...new Set(HOPS.map((hop) => hop.caption))];
+const longestStep = longestStepLine();
+const names = [...new Set([START, ...HOPS.map((hop) => hop.name), DELIVERED])];
+const devices = [...new Map(HOPS.map((hop) => [`${hop.name}|${hop.does}`, hop])).values()];
+
+// A small drawing for each kind of device, in a 24 by 24 box.
+const GLYPHS: Record<Kind, string> = {
+  laptop: '<rect x="5" y="6" width="14" height="9" rx="1.5"/><path d="M3 18.5h18"/>',
+  router: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M7.5 12h9"/>',
+  modem: '<rect x="4.5" y="7" width="15" height="10" rx="2"/><circle cx="12" cy="12" r="1.5"/>',
+  amplifier: '<path d="M6 5.5v13L18.5 12z"/>',
+  switch: '<rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M6 13h1.5M9.5 13H11M13 13h1.5M16.5 13H18"/>',
+  server: '<rect x="6.5" y="3" width="11" height="18" rx="1.5"/><path d="M9.5 8h5M9.5 12h5"/>',
+};
+const kinds = Object.keys(GLYPHS) as Kind[];
+---
+
+<div class="packet" data-packet>
+  <div class="stage" data-stage>
+    {/* How far the packet has got. Each dot is a stop, named for screen readers; the thick line is the fiber. */}
+    <ol class="trail" role="list" aria-label={ROUTE_LABEL} data-route>
+      {
+        HOPS.map((hop, index) => (
+          <li class:list={['stop', { fiber: index > FIBER.from && index <= FIBER.to }]} data-stop aria-current={index === 0 ? 'step' : undefined}>
+            <span class="dot" />
+            <span class="visually-hidden">{hop.name}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="zones muted">{ZONES.map((zone) => <span>{zone}</span>)}</p>
+
+    {/* Where the packet is now, between where it came from and where it goes next. */}
+    <div class="where">
+      <p class="near from">
+        <span class="k muted">From</span>
+        <span class="swap">
+          <span data-from>{around.from}</span>
+          {names.map((name) => <span class="sizer" aria-hidden="true">{name}</span>)}
+        </span>
+      </p>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="device">
+        <span class="glyph" aria-hidden="true">
+          {
+            kinds.map((kind) => (
+              <span data-glyph={kind} hidden={kind !== first.kind}>
+                <svg viewBox="0 0 24 24" set:html={GLYPHS[kind]} />
+              </span>
+            ))
+          }
+        </span>
+        <p class="swap">
+          <span class="device-text">
+            <span class="device-name" data-name>{first.name}</span>
+            <span class="does muted" data-does>{first.does}</span>
+          </span>
+          {
+            devices.map((hop) => (
+              <span class="device-text sizer" aria-hidden="true">
+                <span class="device-name">{hop.name}</span>
+                <span class="does">{hop.does}</span>
+              </span>
+            ))
+          }
+        </p>
+      </div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <p class="near next">
+        <span class="k muted">Next</span>
+        <span class="swap">
+          <span data-next-name>{around.next}</span>
+          {names.map((name) => <span class="sizer" aria-hidden="true">{name}</span>)}
+        </span>
+      </p>
+    </div>
+
+    {/* The packet: each layer wraps the ones inside it. */}
+    <div class="layer eth" data-layer="eth" role="group" aria-label={LAYER_TEXT.eth.name}>
+      <div class="head" data-head="eth">
+        <span class="lname">{LAYER_TEXT.eth.name}</span>
+        <span class="pair">to MAC <span class="v" data-f="eDst">{start.eDst}</span></span>
+        <span class="pair">from MAC <span class="v" data-f="eSrc">{start.eSrc}</span></span>
+        <span class="mark" data-mark="eth">{mark('eth')}</span>
+      </div>
+      <p class="note muted">{LAYER_TEXT.eth.note}</p>
+      <div class="layer ip" data-layer="ip" role="group" aria-label={LAYER_TEXT.ip.name}>
+        <div class="head">
+          <span class="lname">{LAYER_TEXT.ip.name}</span>
+          <span class="pair">to <span class="v wide" data-f="ipDst">{start.ipDst}</span></span>
+          <span class="pair">from <span class="v wide" data-f="ipSrc">{start.ipSrc}</span></span>
+          <span class="pair">hops left (TTL) <span class="v" data-f="ttl">{start.ttl}</span></span>
+          <span class="mark" data-mark="ip">{mark('ip')}</span>
+        </div>
+        <p class="note muted">{LAYER_TEXT.ip.note}</p>
+        <div class="layer tcp" data-layer="tcp" role="group" aria-label={LAYER_TEXT.tcp.name}>
+          <div class="head">
+            <span class="lname">{LAYER_TEXT.tcp.name}</span>
+            <span class="pair">port <span class="v" data-f="port">{start.port}</span></span>
+            <span class="mark" data-mark="tcp">{mark('tcp')}</span>
+          </div>
+          <p class="note muted">{LAYER_TEXT.tcp.note}</p>
+          <div class="layer dat" data-layer="data" role="group" aria-label={LAYER_TEXT.data.name}>
+            <div class="head">
+              <span class="lname">{LAYER_TEXT.data.name}</span>
+              <span class="pair">your web request</span>
+              <span class="mark" data-mark="data">{mark('data')}</span>
+            </div>
+            <p class="note muted">{LAYER_TEXT.data.note}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="caption-box">
+      {/* Read out when it changes, so a screen reader follows the packet too. */}
+      <p class="caption" role="status" data-caption>
+        <span class="step" data-step>{stepLine(0)}</span>
+        <span data-caption-text>{first.caption}</span>
+      </p>
+      {
+        captions.map((caption) => (
+          <p class="caption sizer" aria-hidden="true">
+            <span class="step">{longestStep}</span>
+            <span>{caption}</span>
+          </p>
+        ))
+      }
+    </div>
+
+    <div class="controls">
+      <button type="button" data-previous aria-disabled="true">Previous</button>
+      <button type="button" class="main" data-next>Next hop</button>
+      <button type="button" data-reset>Reset</button>
+    </div>
+  </div>
+
+  {/* On a narrow screen the layers' notes move here, out of the packet, so the packet and the buttons fit one screen. */}
+  <ul class="notes-below" role="list">
+    {
+      LAYERS.map((layer) => (
+        <li>
+          <span class="lname">{LAYER_TEXT[layer].name}.</span> {LAYER_TEXT[layer].note}
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="history">
+    <h2 class="history-title" id="packet-history">The whole journey</h2>
+    <p class="muted history-note">What the packet says once each stop is done with it. The IP destination is {start.ipDst} on every row.</p>
+    <table aria-labelledby="packet-history">
+      <thead>
+        <tr><th scope="col">Stop</th><th scope="col">Ethernet to</th><th scope="col">Ethernet from</th><th scope="col">Hops left</th></tr>
+      </thead>
+      <tbody>
+        {/* Every row is here from the start. The script shows them as the packet reaches each stop; without scripts they all show. */}
+        {
+          rows.map((row, index) => (
+            <tr hidden={index > 0} data-current={index === 0 ? '' : undefined}>
+              <th scope="row">{row.stop}</th>
+              <td class="m">{row.eDst}</td>
+              <td class="m">{row.eSrc}</td>
+              <td class="m">{row.ttl}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/explainers/packet';
+</script>
+
+<style>
+  .packet,
+  .stage,
+  .history {
+    display: grid;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+
+  .packet {
+    gap: var(--space-6);
+  }
+
+  /* Closer together on a narrow screen, so the packet and the buttons fit it. */
+  .stage {
+    gap: var(--space-3);
+  }
+
+  /* Each layer of the packet has one colour. */
+  .eth {
+    --layer: var(--color-layer-eth);
+  }
+
+  .ip {
+    --layer: var(--color-layer-ip);
+  }
+
+  .tcp {
+    --layer: var(--color-layer-tcp);
+  }
+
+  .dat {
+    --layer: var(--color-layer-data);
+  }
+
+  /* A value and its unseen other forms share one cell: the cell is as big as the biggest. */
+  .swap {
+    display: grid;
+    min-inline-size: 0;
+  }
+
+  .swap > *,
+  .caption-box > * {
+    grid-area: 1 / 1;
+  }
+
+  .sizer {
+    visibility: hidden;
+  }
+
+  /* The row of stops. Each stop is a dot with the line that leads to it. */
+  .trail {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0 calc(var(--trail-dot) / 2);
+    list-style: none;
+  }
+
+  .stop {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    min-inline-size: 0;
+  }
+
+  .stop:first-child {
+    flex: none;
+  }
+
+  .stop::before {
+    content: '';
+    flex: 1;
+    block-size: var(--rail-width);
+    background: var(--color-button-edge);
+  }
+
+  .stop:first-child::before {
+    content: none;
+  }
+
+  /* The fiber itself: thicker, and the colour of light. */
+  .stop.fiber::before {
+    block-size: var(--rail-width-fiber);
+    background: var(--color-amber);
+  }
+
+  .dot {
+    flex: none;
+    box-sizing: border-box;
+    inline-size: var(--trail-dot);
+    block-size: var(--trail-dot);
+    border: var(--focus-width) solid var(--color-text-muted);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+  }
+
+  .stop[data-passed] .dot {
+    background: var(--color-text-muted);
+  }
+
+  /* Where the packet is: bigger and in the accent colour. Scaled, so the row keeps its spacing. */
+  .stop[aria-current] .dot {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    scale: var(--scale-dot-now);
+  }
+
+  .zones {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-2);
+    margin-block-start: calc(-1 * var(--space-2));
+    font-size: var(--text-sm);
+  }
+
+  .zones span:last-child {
+    text-align: end;
+  }
+
+  .where {
+    display: grid;
+    grid-template: 'device device' auto 'from next' auto / minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+  }
+
+  .arrow {
+    display: none;
+    color: var(--color-text-muted);
+  }
+
+  /* On a narrow screen the label and the name share a line. */
+  .near {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    line-height: var(--leading-tight);
+  }
+
+  .from {
+    grid-area: from;
+  }
+
+  .next {
+    grid-area: next;
+    justify-content: end;
+  }
+
+  .k {
+    font-weight: var(--weight-label);
+  }
+
+  .device {
+    grid-area: device;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-inline-size: 0;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .glyph svg {
+    display: block;
+    inline-size: var(--device-icon);
+    block-size: var(--device-icon);
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .device-text {
+    display: grid;
+    line-height: var(--leading-tight);
+  }
+
+  .device-name {
+    font-weight: var(--weight-bold);
+  }
+
+  .does {
+    font-size: var(--text-sm);
+  }
+
+  /* With room to spare, the three sit in a row: from, the device, next. */
+  @media (min-width: 48rem) {
+    .where {
+      grid-template: 'from a device b next' auto / minmax(0, 1fr) auto minmax(0, var(--device-share)) auto minmax(0, 1fr);
+    }
+
+    .arrow {
+      display: block;
+    }
+
+    .near {
+      display: grid;
+      gap: 0;
+      font-size: var(--text-base);
+    }
+
+    .next {
+      text-align: end;
+    }
+
+    .stage {
+      gap: var(--space-4);
+    }
+
+    .device {
+      padding-block: var(--space-3);
+    }
+  }
+
+  /* A layer is a box; the layers it wraps sit inside it. */
+  .layer {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    border-block-start: var(--layer-edge) solid var(--layer);
+    border-radius: var(--radius-md);
+    background: color-mix(in oklab, var(--layer) 12%, var(--color-surface));
+  }
+
+  .layer > .layer {
+    margin-block-start: var(--space-2);
+  }
+
+  /* The outermost layer keeps the sliding of a new Ethernet line inside itself. */
+  .stage > .layer {
+    overflow-x: clip;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .lname {
+    font-weight: var(--weight-bold);
+  }
+
+  .pair {
+    white-space: nowrap;
+  }
+
+  .v,
+  .m {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-label);
+  }
+
+  .v {
+    display: inline-block;
+    padding-inline: var(--space-1);
+    border-radius: var(--radius-sm);
+    outline: var(--border-width) solid transparent;
+  }
+
+  /* Room for the longest address (and the padding around it), so a shorter one moves nothing beside it. */
+  .v.wide {
+    min-inline-size: calc(var(--address-width) + 2 * var(--space-1));
+  }
+
+  /* A value this stop has just rewritten: tinted and ringed, so colour is not the only sign. */
+  [data-changed] {
+    background: var(--color-changed);
+    outline-color: var(--color-text);
+  }
+
+  /* What this device does with the layer. It keeps its room when it has nothing to say. */
+  .mark {
+    min-inline-size: var(--mark-width);
+    margin-inline-start: auto;
+    font-weight: var(--weight-label);
+    text-align: end;
+  }
+
+  /* Empty, it still holds its line, so the lines under it never shift. */
+  .mark:empty::before {
+    content: '\00a0';
+  }
+
+  .note,
+  .notes-below {
+    font-size: var(--text-sm);
+  }
+
+  /* Each layer's note sits inside it where there is room; on a narrow screen they are listed under the buttons instead. */
+  .note {
+    display: none;
+  }
+
+  .notes-below {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-text-muted);
+  }
+
+  .notes-below .lname {
+    color: var(--color-text);
+  }
+
+  @media (min-width: 48rem) {
+    .note {
+      display: block;
+    }
+
+    .notes-below {
+      display: none;
+    }
+  }
+
+  .caption-box {
+    display: grid;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .caption {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .step {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .controls button {
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .controls .main {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .controls button[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* `hidden` must win over the display values set above. */
+  .packet [hidden] {
+    display: none;
+  }
+
+  .history {
+    gap: var(--space-2);
+  }
+
+  .history-title {
+    font-size: var(--text-lg);
+  }
+
+  .history-note {
+    font-size: var(--text-sm);
+  }
+
+  /* The columns are set once, by the heading row, so they do not shuffle as rows appear. */
+  table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: var(--text-sm);
+  }
+
+  tbody th {
+    font-weight: inherit;
+  }
+
+  th,
+  td {
+    padding: var(--space-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+    text-align: start;
+    vertical-align: bottom;
+  }
+
+  tr[data-current] td {
+    background: var(--color-tint-c);
+  }
+
+  /* Without scripts the buttons cannot work: they go, and the table shows the whole journey. */
+  @media (scripting: none) {
+    .controls {
+      display: none;
+    }
+
+    .packet tbody tr[hidden] {
+      display: table-row;
+    }
+  }
+
+  /* Movement, only for visitors who allow it. Without it, values simply change. */
+  @media (prefers-reduced-motion: no-preference) {
+    .dot {
+      transition:
+        scale var(--duration-base) var(--ease-spring),
+        background-color var(--duration-fast) var(--ease-out);
+    }
+
+    /* A router replaces the Ethernet layer: the old one leaves, the new one arrives. */
+    .head[data-swap] {
+      animation: header-swap var(--duration-base) var(--ease-out);
+    }
+
+    [data-changed] {
+      animation: value-pop var(--duration-base) var(--ease-out);
+    }
+  }
+
+  @keyframes header-swap {
+    0% {
+      opacity: 1;
+      translate: 0;
+    }
+
+    45% {
+      opacity: 0;
+      translate: calc(-1 * var(--space-6)) 0;
+    }
+
+    55% {
+      opacity: 0;
+      translate: var(--space-6) 0;
+    }
+
+    100% {
+      opacity: 1;
+      translate: 0;
+    }
+  }
+
+  @keyframes value-pop {
+    from {
+      scale: 1.25;
+    }
+  }
+</style>

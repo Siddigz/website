@@ -1,0 +1,174 @@
+/*
+ * Checks on what other sites and search engines see: the link preview tags
+ * and pictures, the sitemap, robots.txt and the structured data.
+ * Run `npm run build` first.
+ */
+import { describe, it, expect } from 'vitest';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import sharp from 'sharp';
+import { BUILT, explainerSlugs, featuredSlugs, pagePaths, readProjects, readYaml } from '../content/helpers';
+
+const site = readYaml('src/content/site.yaml').main;
+const ORIGIN = new URL(site.url).origin;
+const fileFor = (path: string) => join(BUILT, path === '/' ? 'index.html' : `${path}/index.html`);
+const pages = pagePaths().map((path) => ({ path, html: readFileSync(fileFor(path), 'utf8') }));
+const meta = (html: string, property: string) =>
+  new RegExp(`<meta (?:property|name)="${property}" content="([^"]*)"`).exec(html)?.[1]?.replaceAll('&amp;', '&').replaceAll('&#39;', "'").replaceAll('&quot;', '"');
+
+describe('link previews', () => {
+  it('there is a real page for every address the tests expect', () => {
+    expect(pages.length).toBe(1 + featuredSlugs().length + explainerSlugs().length);
+  });
+
+  it.each(pages)('$path carries every tag a preview needs', ({ path, html }) => {
+    const canonical = /<link rel="canonical" href="([^"]+)"/.exec(html)?.[1];
+    expect(meta(html, 'og:url')).toBe(canonical);
+    expect(canonical).toBe(`${ORIGIN}${path === '/' ? '/' : path}`);
+    expect(meta(html, 'og:title')).toBe(/<title>([^<]*)<\/title>/.exec(html)?.[1]?.replaceAll('&amp;', '&'));
+    expect(meta(html, 'og:description')).toBe(meta(html, 'description'));
+    expect(meta(html, 'og:description')!.length).toBeGreaterThan(20);
+    expect(meta(html, 'og:site_name')).toBe(`${site.name.first} ${site.name.last}`);
+    expect(meta(html, 'og:type')).toBe(path === '/' ? 'website' : 'article');
+    expect(meta(html, 'twitter:card')).toBe('summary_large_image');
+    expect(meta(html, 'og:image:width')).toBe('1200');
+    expect(meta(html, 'og:image:height')).toBe('630');
+    expect(meta(html, 'og:image:alt')!.length).toBeGreaterThan(10);
+  });
+
+  it.each(pages)('$path points at a picture on this site that exists, is 1200 by 630 and is light', async ({ html }) => {
+    const image = meta(html, 'og:image')!;
+    expect(image.startsWith(`${ORIGIN}/og/`)).toBe(true);
+    const file = join(BUILT, new URL(image).pathname);
+    expect(existsSync(file), file).toBe(true);
+    const { width, height, format } = await sharp(file).metadata();
+    expect([width, height, format]).toEqual([1200, 630, 'png']);
+    expect(statSync(file).size).toBeLessThan(300 * 1024);
+  });
+
+  it('there is a picture for the home page, each featured project and each explainer', () => {
+    const made = (readdirSync(join(BUILT, 'og'), { recursive: true }) as string[]).filter((name) => name.endsWith('.png')).sort();
+    expect(made).toEqual(
+      ['home.png', ...featuredSlugs().map((slug) => join('projects', `${slug}.png`)), ...explainerSlugs().map((slug) => join('playground', `${slug}.png`))].sort(),
+    );
+    expect(made.length).toBe(9);
+  });
+
+  it('every project page and every explainer uses its own picture; the home page has the one with the name', () => {
+    for (const { path, html } of pages) {
+      const expected = path === '/' ? `${ORIGIN}/og/home.png` : `${ORIGIN}/og${path}.png`;
+      expect(meta(html, 'og:image'), path).toBe(expected);
+    }
+  });
+
+  it('the explainers’ pictures are not blank where their drawing goes, and differ from each other', async () => {
+    const sums: number[] = [];
+    for (const slug of explainerSlugs()) {
+      // The right-hand part of the card, where the drawing sits.
+      const { data } = await sharp(join(BUILT, 'og', 'playground', `${slug}.png`)).extract({ left: 700, top: 120, width: 420, height: 390 }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+      const colours = new Set<string>();
+      let sum = 0;
+      for (let index = 0; index < data.length; index += 3) {
+        colours.add(`${data[index]},${data[index + 1]},${data[index + 2]}`);
+        sum = (sum * 31 + data[index]!) % 1_000_000_007;
+      }
+      expect(colours.size, slug).toBeGreaterThan(4);
+      sums.push(sum);
+    }
+    expect(new Set(sums).size).toBe(sums.length);
+  });
+
+  it('a project’s preview says what the project is', () => {
+    for (const project of readProjects().filter((entry) => featuredSlugs().includes(entry.slug))) {
+      const html = readFileSync(fileFor(`/projects/${project.slug}`), 'utf8');
+      expect(meta(html, 'og:description')).toBe(project.data.oneLiner);
+      expect(meta(html, 'og:image:alt')).toContain(project.data.title);
+    }
+  });
+});
+
+describe('sitemap and robots.txt', () => {
+  const index = readFileSync(join(BUILT, 'sitemap-index.xml'), 'utf8');
+  const files = [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]!);
+  const listed = files.flatMap((address) =>
+    [...readFileSync(join(BUILT, new URL(address).pathname), 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]!),
+  );
+
+  it('lists exactly the real pages, on the site’s own address', () => {
+    for (const address of files) expect(address.startsWith(`${ORIGIN}/`)).toBe(true);
+    // Each page is listed at the address it calls its own.
+    expect([...listed].sort()).toEqual(pagePaths().map((path) => `${ORIGIN}${path}`).sort());
+  });
+
+  it('lists no test page, picture, server address or not-found page', () => {
+    for (const address of listed) expect(address).not.toMatch(/\/(dev|og|api)\/|404|resume/);
+  });
+
+  it('robots.txt lets everything in, keeps the server addresses out and points at the sitemap', () => {
+    const robots = readFileSync(join(BUILT, 'robots.txt'), 'utf8');
+    expect(robots).toMatch(/^User-agent: \*$/m);
+    expect(robots).toMatch(/^Allow: \/$/m);
+    expect(robots).toMatch(/^Disallow: \/api\/$/m);
+    expect(robots).toContain(`Sitemap: ${ORIGIN}/sitemap-index.xml`);
+  });
+});
+
+describe('structured data', () => {
+  const home = readFileSync(fileFor('/'), 'utf8');
+  const blocks = [...home.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1]!));
+
+  it('the home page describes one person, with the same links as the page', () => {
+    expect(blocks.length).toBe(1);
+    const person = blocks[0];
+    expect(person['@context']).toBe('https://schema.org');
+    expect(person['@type']).toBe('Person');
+    expect(person.name).toBe(`${site.name.first} ${site.name.last}`);
+    expect(person.url).toBe(`${ORIGIN}/`);
+    expect(person.description).toBe(site.pitch);
+    expect(person.sameAs).toEqual([site.links.github, site.links.linkedin]);
+    expect(person.image.startsWith(`${ORIGIN}/`)).toBe(true);
+    expect(existsSync(join(BUILT, new URL(person.image).pathname))).toBe(true);
+  });
+
+  it('holds no way to contact the person directly', () => {
+    const text = JSON.stringify(blocks);
+    for (const field of ['email', 'telephone', 'address', 'contactPoint']) expect(text).not.toContain(`"${field}"`);
+    expect(text).not.toContain('@' + 'gmail');
+  });
+
+  it('other pages carry none', () => {
+    for (const { path, html } of pages.slice(1)) expect(html, path).not.toContain('application/ld+json');
+  });
+});
+
+describe('the site icon', () => {
+  const tokens = readFileSync('src/styles/tokens.css', 'utf8');
+  const html = pagePaths().map((path) => ({ path, html: readFileSync(fileFor(path), 'utf8') }));
+
+  it.each(html)('$path links the drawn icon, the small picture and the phone icon', ({ html: page }) => {
+    expect(page).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+    expect(page).toContain('<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">');
+    expect(page).toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png">');
+  });
+
+  it('the two pictures are 32 and 180 pixels across', async () => {
+    for (const [file, size] of [['favicon-32.png', 32], ['apple-touch-icon.png', 180]] as const) {
+      const { width, height, format } = await sharp(join(BUILT, file)).metadata();
+      expect([width, height, format], file).toEqual([size, size, 'png']);
+    }
+  });
+
+  it('the drawn icon holds shapes only, on the accent colour', async () => {
+    const { declaredValue, toHex } = await import('../../src/lib/colour');
+    const svg = readFileSync(join(BUILT, 'favicon.svg'), 'utf8');
+    expect(svg).not.toMatch(/<text|font-family|<style|<image|href/);
+    expect(svg.toLowerCase()).toContain(toHex(declaredValue(tokens, '--color-accent-light')));
+    expect(statSync(join(BUILT, 'favicon.svg')).size).toBeLessThan(8 * 1024);
+  });
+
+  it('a bare /favicon.ico leads to the small picture', () => {
+    const { routes } = JSON.parse(readFileSync(join(BUILT, '..', 'config.json'), 'utf8'));
+    const rule = routes.find((route: any) => route.headers?.Location === '/favicon-32.png');
+    expect(new RegExp(rule.src).test('/favicon.ico')).toBe(true);
+  });
+});

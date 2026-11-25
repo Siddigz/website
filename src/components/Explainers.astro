@@ -1,0 +1,98 @@
+---
+// The home page's list of explainers: one card each, with its title and summary.
+import ExplainerThumb from './explainers/ExplainerThumb.astro';
+import { getExplainers } from '../lib/explainer-list';
+import { getSite } from '../lib/site';
+
+const site = await getSite();
+const explainers = await getExplainers();
+---
+
+{
+  explainers.length > 0 && (
+    <section id="playground" class="section container">
+      <h2 class="section-title">{site.explainers.title}</h2>
+      <div class="cards">
+        {explainers.map((explainer) => (
+          <article class="card">
+            {/* A small still drawing of what the explainer shows. Decoration: the title names the card. */}
+            <div class="visual"><ExplainerThumb slug={explainer.id} /></div>
+            <h3>
+              <a href={`/playground/${explainer.id}`}>{explainer.data.title}</a>
+            </h3>
+            <p class="muted">{explainer.data.summary}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    overflow: clip;
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .card:hover,
+  .card:focus-within {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      transition:
+        box-shadow var(--duration-base) var(--ease-out),
+        translate var(--duration-base) var(--ease-spring);
+    }
+
+    .card:hover,
+    .card:focus-within {
+      translate: 0 calc(var(--lift-card) * -1);
+    }
+  }
+
+  /* The drawing fills the top of the card, edge to edge, like a project's cover. */
+  .visual {
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
+    padding: var(--space-3);
+    border-block-end: var(--border-width) solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .visual :global(svg) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  h3 {
+    font-size: var(--text-xl);
+  }
+
+  h3 a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  /* The whole card is the link target; the title stays the accessible name. */
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+</style>

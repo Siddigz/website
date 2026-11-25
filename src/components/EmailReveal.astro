@@ -1,0 +1,190 @@
+---
+// A button that fetches the contact address when pressed. The address is not
+// in the page: it comes from the server, in exchange for a short-lived token.
+import { getSite } from '../lib/site';
+
+interface Props {
+  /** `button` looks like the site's other buttons; `link` suits a row of plain links. */
+  look?: 'button' | 'link';
+}
+
+const { look = 'button' } = Astro.props;
+const { email } = await getSite();
+---
+
+<span class="email" data-email data-copy={email.copy} data-copied={email.copied} data-failed={email.failed}>
+  <button type="button" class:list={[look === 'button' ? 'button' : 'plain']} data-email-reveal>{email.button}</button>
+  {/*
+    What the Email button turns into: one button in two parts. The script puts
+    the address first, as a link that opens the mail app; the small part after
+    it copies the address.
+  */}
+  <span class:list={['result', look === 'button' ? 'button' : 'plain-result']} data-email-result hidden>
+    <button type="button" class="copy" aria-label={email.copy} data-email-copy>
+      <svg class="icon to-copy" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="6" y="5" width="12" height="16" rx="2"></rect>
+        <path d="M9.5 5V4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1M9.5 11h5M9.5 15h5"></path>
+      </svg>
+      <svg class="icon done" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+      </svg>
+    </button>
+  </span>
+  {/* Says what happened: a failure stays on screen; "Copied" is shown by the tick and read out from here. */}
+  <span class="status" role="status" data-email-status></span>
+</span>
+
+<script>
+  import '../scripts/email-reveal';
+</script>
+
+<style>
+  .email {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  /* The buttons do nothing without scripts, so they are not offered. */
+  @media (scripting: none) {
+    .email {
+      display: none;
+    }
+  }
+
+  /* Looks like the plain links beside it. */
+  .plain {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent);
+    font-weight: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: var(--indicator-width);
+    text-underline-offset: var(--underline-offset);
+    cursor: pointer;
+  }
+
+  /*
+   * Once revealed, at the top of the page: the same button as its neighbours,
+   * in two parts. The parts carry the padding, so the button keeps its height.
+   */
+  .result.button {
+    align-items: stretch;
+    max-inline-size: 100%;
+    padding: 0;
+    overflow: clip;
+  }
+
+  /* In Contact: the address as one more link in the row, with the copy picture after it. */
+  .plain-result {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* The rules above would otherwise keep the empty result on screen. */
+  .result[hidden],
+  [data-email-reveal][hidden] {
+    display: none;
+  }
+
+  /* A plain block: its words wrap as one run of text, breaking only where the script allows. */
+  .result.button :global(a) {
+    display: block;
+    min-inline-size: 0;
+    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+    color: inherit;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .result.button :global(a:hover) {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: var(--indicator-width);
+    text-underline-offset: var(--underline-offset);
+  }
+
+  /* While the button is widening, the address stays on one line and is uncovered from the left. */
+  .result.opening :global(a) {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+
+  .copy {
+    display: grid;
+    place-items: center;
+    flex: none;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .result.button .copy {
+    padding-inline: var(--space-3) var(--space-4);
+    border-inline-start: var(--border-width) solid var(--color-button-edge);
+    background: var(--color-tint-a);
+  }
+
+  .plain-result .copy {
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+  }
+
+  .copy:hover {
+    background: var(--color-tap);
+    color: var(--color-text);
+  }
+
+  .icon {
+    grid-area: 1 / 1;
+    inline-size: var(--icon-size);
+    block-size: var(--icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* One picture at a time: the clipboard, or for a moment after copying, a tick. */
+  .done,
+  .copy[data-done] .to-copy {
+    visibility: hidden;
+  }
+
+  .copy[data-done] .done {
+    visibility: visible;
+  }
+
+  /* Inside the button's rounded ends a ring drawn outside would be cut off, so it is drawn just inside. */
+  .result.button :global(a:focus-visible),
+  .result.button .copy:focus-visible {
+    outline-offset: calc(-1 * var(--focus-width) - var(--border-width));
+    border-radius: inherit;
+  }
+
+  .status {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+  }
+
+  /* The tick on the button shows it; here "Copied" is only read out. */
+  .status[data-kind='copied'] {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Empty, it stays on the page (a line that appears already filled may not be read out) but takes no room. */
+  .status:empty {
+    position: absolute;
+  }
+</style>

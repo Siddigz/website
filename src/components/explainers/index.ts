@@ -1,0 +1,10 @@
+// The interactive part of each explainer, by the name of its content file.
+// A content file with no entry here stops the build (see src/pages/playground/[slug].astro).
+import PacketHops from './PacketHops.astro';
+import SignalLevels from './SignalLevels.astro';
+
+export const WIDGETS: Record<string, typeof PacketHops> = {
+  'follow-a-packet': PacketHops,
+  'nrz-vs-pam4': SignalLevels,
+};
+

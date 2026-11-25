@@ -1,0 +1,31 @@
+---
+// Test-only pages. They exist only in a test build (`npm run build:test`);
+// a normal build makes none, so nothing here can reach the live site.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import { fixtures } from '../../lib/build-env';
+
+export function getStaticPaths() {
+  // The top of the home page with the looking-for line switched off and no
+  // photo, so both fallbacks can be checked without editing site.yaml.
+  const pages = [
+    { params: { page: 'no-looking-for' }, props: { lookingFor: false, photo: false } },
+    // The top of the home page as it looks with the resume switched on.
+    { params: { page: 'resume-on' }, props: { resume: true } },
+  ];
+  return fixtures ? pages : [];
+}
+
+interface Props {
+  lookingFor?: boolean;
+  photo?: boolean;
+  resume?: boolean;
+}
+
+const { page } = Astro.params;
+const { lookingFor, photo, resume } = Astro.props;
+---
+
+<BaseLayout title="Test page" description="Test page." path={`/dev/${page}`} noindex>
+  <Hero lookingForOverride={lookingFor} photoOverride={photo} resumeOverride={resume} />
+</BaseLayout>

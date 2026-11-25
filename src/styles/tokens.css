@@ -1,0 +1,267 @@
+/*
+ * Design tokens. Every colour, type, spacing and motion value used by a
+ * component comes from here. The look is the one the owner chose in stage 2:
+ * warm and playful, cream and navy, with a blue accent.
+ */
+:root {
+  /* Follow the system by default. The theme toggle pins a scheme by changing
+     the <meta name="color-scheme"> content; rules below map it back to CSS.
+     This file uses no CSS nesting on purpose (see tests/content/styles.test.ts). */
+  color-scheme: light dark;
+
+  /* Raw colour values, light and dark */
+  --color-bg-light: oklch(97.5% 0.014 85);
+  --color-bg-dark: oklch(19% 0.04 275);
+  --color-surface-light: oklch(100% 0 0);
+  --color-surface-dark: oklch(24% 0.045 275);
+  --color-text-light: oklch(25% 0.05 275);
+  --color-text-dark: oklch(95% 0.012 85);
+  --color-text-muted-light: oklch(43% 0.045 275);
+  --color-text-muted-dark: oklch(81% 0.03 275);
+  /* The accent is a royal blue; the second accent is a cooler blue-green used beside it. */
+  --color-accent-light: oklch(47% 0.2 262);
+  --color-accent-dark: oklch(81% 0.1 255);
+  --color-accent-2-light: oklch(54% 0.12 225);
+  --color-accent-2-dark: oklch(83% 0.1 210);
+  --color-border-light: oklch(89% 0.028 85);
+  --color-border-dark: oklch(34% 0.05 275);
+  /* Text on a solid accent fill. */
+  --color-on-accent-light: oklch(99% 0.005 85);
+  --color-on-accent-dark: oklch(19% 0.04 275);
+  /* The "available" light. */
+  --color-live-light: oklch(58% 0.17 150);
+  --color-live-dark: oklch(78% 0.19 150);
+  /* Two more hues for drawings in the explainers: a violet, and an amber for fibre and light. */
+  --color-violet-light: oklch(50% 0.19 300);
+  --color-violet-dark: oklch(80% 0.11 300);
+  --color-amber-light: oklch(56% 0.13 70);
+  --color-amber-dark: oklch(83% 0.13 85);
+  /* A symbol the receiver misread, and the thresholds it decides by. */
+  --color-wrong-light: oklch(54% 0.21 27);
+  --color-wrong-dark: oklch(74% 0.16 25);
+  /* A third pill tint, beside the two mixed from the accents further down. */
+  --color-tint-warm-light: oklch(93% 0.07 95);
+  --color-tint-warm-dark: oklch(34% 0.06 95);
+  /* Behind the top of the page: three soft glows, and stars that only show in the dark. */
+  --color-glow-a-light: oklch(88% 0.07 255 / 0.55);
+  --color-glow-a-dark: oklch(42% 0.14 262 / 0.4);
+  --color-glow-b-light: oklch(91% 0.06 205 / 0.5);
+  --color-glow-b-dark: oklch(42% 0.09 220 / 0.28);
+  --color-glow-c-light: oklch(93% 0.11 95 / 0.55);
+  --color-glow-c-dark: oklch(40% 0.1 250 / 0.3);
+  --color-star-light: transparent;
+  --color-star-dark: oklch(96% 0.05 95 / 0.85);
+
+  /* Colour tokens. Fallback first, for browsers without light-dark(). */
+  --color-bg: var(--color-bg-light);
+  --color-surface: var(--color-surface-light);
+  --color-text: var(--color-text-light);
+  --color-text-muted: var(--color-text-muted-light);
+  --color-accent: var(--color-accent-light);
+  --color-accent-2: var(--color-accent-2-light);
+  --color-border: var(--color-border-light);
+  --color-on-accent: var(--color-on-accent-light);
+  --color-live: var(--color-live-light);
+  --color-violet: var(--color-violet-light);
+  --color-amber: var(--color-amber-light);
+  --color-wrong: var(--color-wrong-light);
+  --color-tint-warm: var(--color-tint-warm-light);
+  --color-glow-a: var(--color-glow-a-light);
+  --color-glow-b: var(--color-glow-b-light);
+  --color-glow-c: var(--color-glow-c-light);
+  --color-star: var(--color-star-light);
+
+  /* Colours worked out from the ones above. Two colours are mixed in oklab:
+     in oklch the hue drifts through pink when one of them is white or black. */
+  --color-shade: oklch(40% 0.14 262);
+  /* White in both themes: the paper that charts and screenshots are drawn on. */
+  --color-paper: oklch(100% 0 0);
+  /* Dims the page behind the command menu. */
+  --color-backdrop: color-mix(in oklab, var(--color-shade) 35%, transparent);
+  --color-tint-a: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
+  --color-tint-b: color-mix(in oklab, var(--color-accent-2) 13%, var(--color-surface));
+  --color-tint-c: var(--color-tint-warm);
+  --color-button-edge: color-mix(in oklab, var(--color-text) 22%, var(--color-border));
+  --color-button-edge-main: color-mix(in oklab, var(--color-accent) 62%, black);
+  --color-selection: color-mix(in oklab, var(--color-accent) 26%, transparent);
+  --color-tap: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  --color-live-ring: color-mix(in oklab, var(--color-live) 60%, transparent);
+  /* The activity grid: an empty day, then four steps up to the full green. */
+  --color-heat-0: color-mix(in oklab, var(--color-text) 9%, var(--color-bg));
+  --color-heat-1: color-mix(in oklab, var(--color-live) 28%, var(--color-bg));
+  --color-heat-2: color-mix(in oklab, var(--color-live) 52%, var(--color-bg));
+  --color-heat-3: color-mix(in oklab, var(--color-live) 76%, var(--color-bg));
+  --color-heat-4: var(--color-live);
+  /* The four layers of a packet, in the packet explainer. */
+  --color-layer-eth: var(--color-accent);
+  --color-layer-ip: var(--color-live);
+  --color-layer-tcp: var(--color-violet);
+  --color-layer-data: var(--color-text-muted);
+  /* A value that has just changed. */
+  --color-changed: color-mix(in oklab, var(--color-amber) 30%, var(--color-surface));
+  --gradient-accent: linear-gradient(100deg, var(--color-accent), var(--color-accent-2));
+
+  /* Type */
+  --font-sans: var(--font-figtree);
+  --font-heading: var(--font-bricolage);
+  /* Addresses and numbers in the explainers. Fonts every device already has. */
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  --text-3xl: clamp(2.75rem, 1.6rem + 5vw, 4.75rem);
+  --leading-tight: 1.15;
+  --leading-normal: 1.6;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-label: 600;
+  --weight-bold: 700;
+  --weight-heading: 800;
+  --tracking-heading: -0.02em;
+  --tracking-display: -0.035em;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+
+  /* Shape */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 999px;
+  --radius-card: 1.5rem;
+  --radius-button: var(--radius-full);
+  --radius-photo: 2.25rem;
+  --radius-thumb: 0.875rem;
+  --radius-pill: var(--radius-full);
+  --radius-media: 1.5rem;
+  --border-width: 1px;
+  --indicator-width: 2px;
+  --focus-width: 2px;
+  --underline-offset: 0.2em;
+  --photo-edge: 0.375rem;
+  --button-depth: 0.25rem;
+  --button-rise: 0.125rem;
+  --heat-gap: clamp(0.0625rem, 0.3vw, 0.1875rem);
+  --radius-heat: 22%;
+  --squiggle-width: 4.5rem;
+  --squiggle-height: 0.5rem;
+  --live-ping-reach: 0.375rem;
+  /* The small picture on a button that has no words, such as copying the address. */
+  --icon-size: 1.125rem;
+
+  /* Depth: shadows carry a little of the accent. */
+  --shadow-card: 0 1px 2px color-mix(in oklab, var(--color-shade) 8%, transparent), 0 1rem 2rem -1rem color-mix(in oklab, var(--color-shade) 28%, transparent);
+  --shadow-card-hover: 0 2px 4px color-mix(in oklab, var(--color-shade) 10%, transparent), 0 1.75rem 3rem -1.25rem color-mix(in oklab, var(--color-shade) 42%, transparent);
+  --shadow-photo: 0 1.5rem 3rem -1.25rem color-mix(in oklab, var(--color-shade) 50%, transparent);
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-marquee: 60s;
+  /* How long the skills strip takes to glide to a stop or back up to speed. */
+  --duration-glide: 300ms;
+  --duration-ping: 1.6s;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lift-card: 0.375rem;
+  --tilt-card: 2deg;
+  --perspective-card: 60rem;
+  --tilt-photo: 2.5deg;
+  --tilt-photo-hover: -1deg;
+  --scale-photo-hover: 1.02;
+  --turn-icon: 30deg;
+
+  /* Layout */
+  --content-width: 72rem;
+  --measure: 65ch;
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+  --thumb-size: clamp(3.5rem, 2.5rem + 5vw, 5rem);
+  --thumb-width: calc(var(--thumb-size) * 1.6);
+  --logo-size: clamp(4.5rem, 3.5rem + 5vw, 6.5rem);
+  --avatar-size: clamp(9rem, 2rem + 25vw, 22rem);
+  --avatar-size-narrow: 28rem;
+  --header-offset: 7rem;
+  --media-width: 56rem;
+  --aside-width: 28rem;
+  --backdrop-height: 46rem;
+  /* The packet demo: a dot in its row of stops, the line between dots (thicker where it is fiber), the device's drawing, and the room kept for a layer's mark. */
+  --trail-dot: 0.875rem;
+  --rail-width: 0.125rem;
+  --rail-width-fiber: 0.25rem;
+  --device-icon: 2rem;
+  --mark-width: 7.5rem;
+  /* Also there: the room for the longest address, how much bigger the dot the packet is at grows, and the device's share of its row. */
+  --address-width: 12ch;
+  --scale-dot-now: 1.6;
+  --device-share: 1.6fr;
+  --drawing-height: 17rem;
+  --layer-edge: 0.25rem;
+  --menu-width: 34rem;
+  --menu-height: 30rem;
+  --menu-key-width: 3.5rem;
+  --layer-header: 5;
+  --layer-skip-link: 10;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='dark']) {
+  color-scheme: dark;
+}
+
+:root:has(> head > meta[name='color-scheme'][content='light']) {
+  color-scheme: light;
+}
+
+/* Dark values for browsers without light-dark(). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-text: var(--color-text-dark);
+    --color-text-muted: var(--color-text-muted-dark);
+    --color-accent: var(--color-accent-dark);
+    --color-accent-2: var(--color-accent-2-dark);
+    --color-border: var(--color-border-dark);
+    --color-on-accent: var(--color-on-accent-dark);
+    --color-live: var(--color-live-dark);
+    --color-violet: var(--color-violet-dark);
+    --color-amber: var(--color-amber-dark);
+    --color-wrong: var(--color-wrong-dark);
+    --color-tint-warm: var(--color-tint-warm-dark);
+    --color-glow-a: var(--color-glow-a-dark);
+    --color-glow-b: var(--color-glow-b-dark);
+    --color-glow-c: var(--color-glow-c-dark);
+    --color-star: var(--color-star-dark);
+  }
+}
+
+/* Where light-dark() exists, colours follow the scheme, including a pinned one. */
+@supports (color: light-dark(white, black)) {
+  :root {
+    --color-bg: light-dark(var(--color-bg-light), var(--color-bg-dark));
+    --color-surface: light-dark(var(--color-surface-light), var(--color-surface-dark));
+    --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
+    --color-text-muted: light-dark(var(--color-text-muted-light), var(--color-text-muted-dark));
+    --color-accent: light-dark(var(--color-accent-light), var(--color-accent-dark));
+    --color-accent-2: light-dark(var(--color-accent-2-light), var(--color-accent-2-dark));
+    --color-border: light-dark(var(--color-border-light), var(--color-border-dark));
+    --color-on-accent: light-dark(var(--color-on-accent-light), var(--color-on-accent-dark));
+    --color-live: light-dark(var(--color-live-light), var(--color-live-dark));
+    --color-violet: light-dark(var(--color-violet-light), var(--color-violet-dark));
+    --color-amber: light-dark(var(--color-amber-light), var(--color-amber-dark));
+    --color-wrong: light-dark(var(--color-wrong-light), var(--color-wrong-dark));
+    --color-tint-warm: light-dark(var(--color-tint-warm-light), var(--color-tint-warm-dark));
+    --color-glow-a: light-dark(var(--color-glow-a-light), var(--color-glow-a-dark));
+    --color-glow-b: light-dark(var(--color-glow-b-light), var(--color-glow-b-dark));
+    --color-glow-c: light-dark(var(--color-glow-c-light), var(--color-glow-c-dark));
+    --color-star: light-dark(var(--color-star-light), var(--color-star-dark));
+  }
+}

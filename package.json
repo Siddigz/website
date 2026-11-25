@@ -1,0 +1,41 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run tests/unit tests/content",
+    "test:build": "vitest run tests/build",
+    "build:test": "SITE_FIXTURES=1 astro build",
+    "test:e2e": "npm run build:test && playwright test",
+    "test:speed": "npm run build:test && node scripts/measure-speed.mjs"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^11.0.22",
+    "astro": "^7.4.13"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@astrojs/sitemap": "^3.7.6",
+    "@axe-core/playwright": "^4.14.0",
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource/bricolage-grotesque": "^5.3.0",
+    "@fontsource/figtree": "^5.3.0",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "chrome-launcher": "1.2.3",
+    "lighthouse": "13.6.0",
+    "satori": "^0.63.2",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1",
+    "yaml": "^2.9.1"
+  }
+}

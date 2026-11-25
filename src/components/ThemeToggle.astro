@@ -1,0 +1,60 @@
+---
+import { THEME_LABELS } from '../lib/theme';
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle>
+  <span class="to-dark">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+    </svg>
+    <span class="visually-hidden">{THEME_LABELS.toDark}</span>
+  </span>
+  <span class="to-light">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.5" fill="currentColor"></circle>
+      <path
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"
+      ></path>
+    </svg>
+    <span class="visually-hidden">{THEME_LABELS.toLight}</span>
+  </span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+
+  /* The icon turns a little when pointed at. */
+  @media (prefers-reduced-motion: no-preference) {
+    .theme-toggle svg {
+      transition: rotate var(--duration-base) var(--ease-spring);
+    }
+
+    .theme-toggle:hover svg {
+      rotate: var(--turn-icon);
+    }
+  }
+
+  .to-dark {
+    display: inline-flex;
+  }
+</style>
+
+<script>
+  import { toggleTheme } from '../scripts/theme';
+
+  document.querySelector('[data-theme-toggle]')?.addEventListener('click', toggleTheme);
+</script>

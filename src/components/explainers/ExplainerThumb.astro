@@ -1,0 +1,141 @@
+---
+// The small still drawing on an explainer's card. The shapes come from
+// src/lib/explainers/drawings.ts (the link preview picture uses the same
+// ones); the colours here come from the design tokens, so it follows the theme.
+// Decorative: the card is named by its title.
+import { DRAWINGS, DRAWING_SIZE } from '../../lib/explainers/drawings';
+
+interface Props {
+  /** The name of the explainer's content file. */
+  slug: string;
+}
+
+const draw = DRAWINGS[Astro.props.slug];
+if (!draw) {
+  throw new Error(`src/content/explainers/${Astro.props.slug}.md has no drawing: add "${Astro.props.slug}" to DRAWINGS in src/lib/explainers/drawings.ts`);
+}
+const shapes = draw();
+---
+
+<svg viewBox={`0 0 ${DRAWING_SIZE.width} ${DRAWING_SIZE.height}`} aria-hidden="true">
+  {
+    shapes.map((shape) => {
+      const Tag = shape.tag;
+      return <Tag class={shape.role} {...shape.attrs} />;
+    })
+  }
+</svg>
+
+<style>
+  /* Sizes are in the drawing's own units: it scales as a whole. The shapes are made from a list, so they are reached through the drawing rather than by this component's own marker. */
+  svg > :global(*) {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Follow a packet */
+  svg :global(.trail) {
+    stroke: var(--color-text-muted);
+    stroke-width: 2;
+    opacity: 0.5;
+  }
+
+  svg :global(.fiber) {
+    stroke: var(--color-amber);
+    stroke-width: 4;
+  }
+
+  svg :global(.stop) {
+    fill: var(--color-bg);
+    stroke: var(--color-text-muted);
+    stroke-width: 2;
+  }
+
+  svg :global(.stop-done) {
+    fill: var(--color-text);
+  }
+
+  svg :global(.stop-now) {
+    fill: var(--color-accent);
+  }
+
+  /* Each layer is tinted with its own colour and edged in it, as in the demo. */
+  svg :global([class^='layer-']) {
+    fill: color-mix(in oklab, var(--layer) 12%, var(--color-surface));
+    stroke: var(--layer);
+    stroke-width: 2;
+  }
+
+  svg :global([class^='label-']) {
+    fill: var(--layer);
+  }
+
+  svg :global(.layer-eth),
+  svg :global(.label-eth) {
+    --layer: var(--color-layer-eth);
+  }
+
+  svg :global(.layer-ip),
+  svg :global(.label-ip) {
+    --layer: var(--color-layer-ip);
+  }
+
+  svg :global(.layer-tcp),
+  svg :global(.label-tcp) {
+    --layer: var(--color-layer-tcp);
+  }
+
+  svg :global(.layer-data),
+  svg :global(.label-data) {
+    --layer: var(--color-layer-data);
+  }
+
+  svg :global(.value) {
+    fill: var(--color-text-muted);
+    opacity: 0.55;
+  }
+
+  svg :global(.changed) {
+    fill: var(--color-changed);
+    stroke: var(--color-amber);
+    stroke-width: 1.2;
+  }
+
+  /* NRZ vs PAM4 */
+  svg :global(.level) {
+    stroke: var(--color-text-muted);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+    opacity: 0.6;
+  }
+
+  svg :global(.threshold) {
+    stroke: var(--color-wrong);
+    stroke-width: 1;
+    stroke-dasharray: 2 3;
+  }
+
+  svg :global(.sent) {
+    stroke: var(--color-text-muted);
+    stroke-width: 1.5;
+  }
+
+  svg :global(.received) {
+    stroke: var(--color-accent);
+    stroke-width: 2;
+  }
+
+  svg :global(.dot) {
+    fill: var(--color-accent);
+  }
+
+  svg :global(.dot-bad) {
+    fill: var(--color-wrong);
+  }
+
+  svg :global(.cross) {
+    stroke: var(--color-wrong);
+    stroke-width: 2;
+  }
+</style>

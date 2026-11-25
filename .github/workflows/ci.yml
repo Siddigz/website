@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Type check
+        run: npm run check
+      - name: Unit and content tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Budget checks on the built site
+        run: npm run test:build
+      - name: Browser tests
+        run: npm run test:e2e
+      # Measured even when a browser test failed, so one failure never hides the speed result.
+      - name: Speed on a simulated mid-range phone
+        if: ${{ !cancelled() }}
+        run: npm run test:speed

@@ -1,0 +1,140 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { CATEGORY_LABELS } from '../content/schemas';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { data } = Astro.props.project;
+---
+
+<li class="row" data-category={data.category}>
+  {
+    data.cover &&
+      (data.coverFit === 'contain' ? (
+        // Keeps the image's own shape, so nothing is cut off.
+        <Image class="thumb whole" src={data.cover} alt="" width={256} />
+      ) : (
+        <Image class="thumb" src={data.cover} alt="" width={256} height={160} fit="cover" position={data.coverPosition} />
+      ))
+  }
+  <div class="text">
+    <h3>{data.links.repo ? <a href={data.links.repo}>{data.title}</a> : data.title}</h3>
+    <p class="muted">{data.oneLiner}</p>
+    <div class="meta muted">
+      <ul class="stack" role="list" aria-label="Built with" translate="no">
+        {data.stack.map((item) => <li>{item}</li>)}
+      </ul>
+      {
+        data.award && (
+          <span class="award">
+            {data.award.name} · {data.award.event}
+          </span>
+        )
+      }
+      {data.links.live && <a href={data.links.live} aria-label={`Live: ${data.title}`}>Live</a>}
+      {data.links.video && <a href={data.links.video} aria-label={`Demo: ${data.title}`}>Demo</a>}
+    </div>
+  </div>
+  <span class="category muted">{CATEGORY_LABELS[data.category]}</span>
+</li>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    padding-block: var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  /* A row the filter has taken out. The rule above would otherwise keep it on screen. */
+  .row[hidden] {
+    display: none;
+  }
+
+  /* While the filter changes, every row moves and fades the same way. */
+  .row {
+    view-transition-class: filter-row;
+  }
+
+  /* A thumbnail takes a first column only on rows that have one. */
+  .row:has(.thumb) {
+    grid-template-columns: var(--thumb-width) 1fr auto;
+  }
+
+  /* Every thumbnail gets the same wide box, so the text beside them lines up. */
+  .thumb {
+    inline-size: var(--thumb-width);
+    block-size: var(--thumb-size);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-thumb);
+    background: var(--color-surface);
+    object-fit: cover;
+  }
+
+  /* Screenshots and diagrams show in full, with the box showing around them. */
+  .thumb.whole {
+    object-fit: contain;
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  h3 {
+    font-size: var(--text-base);
+    overflow-wrap: anywhere;
+  }
+
+  h3 a {
+    color: var(--color-text);
+  }
+
+  p,
+  .meta,
+  .category {
+    font-size: var(--text-sm);
+  }
+
+  .meta,
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .stack,
+  .category {
+    font-weight: var(--weight-label);
+  }
+
+  .award {
+    color: var(--color-accent);
+    font-weight: var(--weight-bold);
+  }
+
+  .category {
+    white-space: nowrap;
+  }
+
+  /* On narrow screens the category drops under the text. */
+  @media (max-width: 36rem) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    .row:has(.thumb) {
+      grid-template-columns: var(--thumb-width) 1fr;
+    }
+
+    .category {
+      grid-column: -2 / -1;
+    }
+  }
+</style>

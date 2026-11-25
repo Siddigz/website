@@ -1,0 +1,30 @@
+# The proof strip. Awards are worded exactly as given.
+peoples-choice:
+  label: People’s Choice
+  detail: cuHacking 7
+  link: https://www.linkedin.com/feed/update/urn:li:activity:7484996503888101377/
+  order: 1
+best-ai-environment:
+  label: Best AI for Environmental Impact
+  detail: AGI Ventures Canada Hackathon 3.0
+  link: https://www.linkedin.com/feed/update/urn:li:activity:7372464027039412224/
+  order: 2
+scholarship:
+  # One scholarship promised on admission, paid under a different name each year.
+  label: $16,000 in scholarships
+  detail:
+    - Faculty Scholarship, 2024
+    - Jacob Freedman Scholarship, 2025 & 2026
+  order: 3
+honour-list:
+  label: Deans’ Honour List
+  # A list shows each entry on its own line.
+  detail:
+    - 2024–25
+    - 2025–26
+  link: https://carleton.ca/awards/awards/deans-honour-list/
+  order: 4
+gpa:
+  label: GPA 3.96/4.00
+  detail: Carleton University
+  order: 5

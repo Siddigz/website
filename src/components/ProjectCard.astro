@@ -1,0 +1,186 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { getSite } from '../lib/site';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { id, data } = Astro.props.project;
+const contain = data.coverFit === 'contain';
+const { seenLabel } = await getSite();
+---
+
+<article class="card" data-seen-slug={id}>
+  {
+    data.cover && contain && (
+      /* Charts and screenshots: the whole image, never cropped. */
+      <Image class="cover contain" src={data.cover} alt={data.coverAlt ?? ''} width={800} sizes="(min-width: 48rem) 34rem, 100vw" />
+    )
+  }
+  {
+    data.cover && !contain && (
+      /* Photos: cropped to fill the frame. */
+      <Image
+        class="cover"
+        src={data.cover}
+        alt={data.coverAlt ?? ''}
+        width={800}
+        height={500}
+        fit="cover"
+        position={data.coverPosition}
+        sizes="(min-width: 48rem) 34rem, 100vw"
+      />
+    )
+  }
+  <div class="body">
+    {
+      data.award && (
+        <p class="award pill">
+          {data.award.name} · {data.award.event}
+        </p>
+      )
+    }
+    <h3><a href={`/projects/${id}`}>{data.title}</a></h3>
+    <p class="muted">{data.oneLiner}</p>
+    {data.result && <p class="result">{data.result}</p>}
+    <ul class="stack muted" role="list" aria-label="Built with" translate="no">
+      {data.stack.map((item) => <li class="pill">{item}</li>)}
+    </ul>
+  </div>
+  {/* Shown by the visitor's browser once this project's page has been opened. Over a corner, so it moves nothing. */}
+  <p class="seen pill" data-seen hidden>{seenLabel}</p>
+</article>
+
+<script>
+  // Tells each card where the mouse is, so it can lean that way.
+  // Values run from -1 to 1, measured from the centre of the card.
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    for (const card of document.querySelectorAll<HTMLElement>('.card')) {
+      let frame = 0;
+      card.addEventListener('pointermove', (event) => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const box = card.getBoundingClientRect();
+          const x = (event.clientX - box.left) / box.width;
+          const y = (event.clientY - box.top) / box.height;
+          card.style.setProperty('--pointer-dx', (x * 2 - 1).toFixed(3));
+          card.style.setProperty('--pointer-dy', (y * 2 - 1).toFixed(3));
+        });
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--pointer-dx', '0');
+        card.style.setProperty('--pointer-dy', '0');
+      });
+    }
+  }
+</script>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    overflow: clip;
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .card:hover,
+  .card:focus-within {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /*
+   * The card lifts when pointed at and leans towards the mouse, like a card
+   * held in the hand. The script above says where the mouse is. Movement is
+   * only for visitors who allow it.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      transform: perspective(var(--perspective-card))
+        rotateX(calc(var(--pointer-dy, 0) * var(--tilt-card) * -1))
+        rotateY(calc(var(--pointer-dx, 0) * var(--tilt-card)));
+      transition:
+        box-shadow var(--duration-base) var(--ease-out),
+        translate var(--duration-base) var(--ease-spring),
+        transform var(--duration-fast) var(--ease-out);
+    }
+
+    .card:hover,
+    .card:focus-within {
+      translate: 0 calc(var(--lift-card) * -1);
+    }
+  }
+
+  .cover {
+    inline-size: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: left top;
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  /* Charts are drawn on white, so their frame is white too, in both themes: the picture then reads as filling the card's rounded top instead of sitting in it as a square patch. */
+  .cover.contain {
+    padding: var(--space-3);
+    object-fit: contain;
+    object-position: center;
+    background: var(--color-paper);
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5);
+  }
+
+  h3 {
+    font-size: var(--text-xl);
+  }
+
+  h3 a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  /* The whole card is the link target; the title stays the accessible name. */
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .award {
+    background: var(--color-tint-b);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .seen {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-end: var(--space-3);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+  }
+
+  .result {
+    font-weight: var(--weight-medium);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-start: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+  }
+</style>

@@ -1,0 +1,32 @@
+# The moving skills strip, in display order. Skills that large tech
+# companies screen for come first. Every entry is backed by a project on this
+# site or by the resume's active skills lines.
+main:
+  items:
+    - Python
+    - TypeScript
+    - JavaScript
+    - Java
+    - C++
+    - C
+    - SQL
+    - React
+    - React Native
+    - Node.js
+    - FastAPI
+    - Flask
+    - PostgreSQL
+    - MongoDB
+    - Redis
+    - Neo4j
+    - PyTorch
+    - TensorFlow
+    - NumPy
+    - Docker
+    - GitHub Actions
+    - CI/CD
+    - Git
+    - Linux
+    - Bash
+    - CMake
+    - HTML/CSS

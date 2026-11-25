@@ -1,0 +1,236 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { getExplainers } from '../lib/explainer-list';
+import { getSite } from '../lib/site';
+
+const site = await getSite();
+
+// Same order as the sections on the home page. `sections` are the ids that
+// count as "being in" this link's part of the page.
+const hasExplainers = (await getExplainers()).length > 0;
+const links = [
+  { href: '/#experience', label: site.nav.experience, sections: ['experience'] },
+  { href: '/#projects', label: site.nav.projects, sections: ['projects', 'more-projects'] },
+  // The one section a visitor would not guess is there.
+  ...(hasExplainers ? [{ href: '/#playground', label: site.explainers.title, sections: ['playground'] }] : []),
+  { href: '/#about', label: site.nav.about, sections: ['about'] },
+];
+---
+
+<header class="site-header">
+  <nav class="nav container" aria-label="Main">
+    <a class="home" href="/">{site.fullName}</a>
+    <ul class="links" role="list">
+      {links.map((link) => <li><a href={link.href} data-spy={link.sections.join(' ')}>{link.label}</a></li>)}
+    </ul>
+    {/* Opens the command menu. Drawn as the key that also opens it; a search icon on touch screens. */}
+    <button type="button" class="menu-open" data-menu-open aria-haspopup="dialog">
+      <kbd class="key" data-menu-key aria-hidden="true">Ctrl K</kbd>
+      <svg class="search" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5"></circle>
+        <path d="m16 16 4.5 4.5"></path>
+      </svg>
+      <span class="visually-hidden">{site.menu.open}</span>
+    </button>
+    <ThemeToggle />
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--layer-header);
+    border-block-end: var(--border-width) solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-3);
+  }
+
+  .home {
+    margin-inline-end: auto;
+    color: var(--color-text);
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    gap: var(--space-5);
+    font-size: var(--text-sm);
+  }
+
+  .links a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .links a:hover,
+  .links a[aria-current='true'] {
+    color: var(--color-text);
+  }
+
+  /*
+   * A mark under the link of the section being read. Where the browser can
+   * tie one element's position to another's, a single mark slides between
+   * links; elsewhere the current link is simply underlined.
+   */
+  @supports (position-anchor: --nav-current) {
+    .links {
+      position: relative;
+    }
+
+    .links a[aria-current='true'] {
+      anchor-name: --nav-current;
+    }
+
+    .links::before {
+      content: '';
+      position: absolute;
+      position-anchor: --nav-current;
+      inset-block-start: calc(anchor(bottom) + var(--space-1));
+      inset-inline-start: anchor(left);
+      inset-inline-end: anchor(right);
+      border-block-end: var(--indicator-width) solid var(--color-accent);
+      border-radius: var(--radius-full);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .links:has(a[aria-current='true'])::before {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .links::before {
+        transition:
+          inset var(--duration-base) var(--ease-out),
+          opacity var(--duration-fast) var(--ease-out);
+      }
+    }
+  }
+
+  @supports not (position-anchor: --nav-current) {
+    .links a[aria-current='true'] {
+      text-decoration: underline;
+      text-decoration-color: var(--color-accent);
+      text-decoration-thickness: var(--indicator-width);
+      text-underline-offset: var(--space-2);
+    }
+  }
+
+  /* The menu button: a key cap that goes down when pressed. */
+  .menu-open {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  /* It opens nothing without scripts, so it is not offered. */
+  @media (scripting: none) {
+    .menu-open {
+      display: none;
+    }
+  }
+
+  /* A fixed width, so "Ctrl K" and "⌘K" take the same room and nothing shifts when the script picks one. */
+  .key {
+    inline-size: var(--menu-key-width);
+    padding-block: var(--space-1);
+    border: var(--border-width) solid var(--color-button-edge);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 var(--button-rise) 0 var(--color-button-edge);
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .menu-open:hover .key {
+    color: var(--color-text);
+  }
+
+  .menu-open:active .key {
+    box-shadow: none;
+    translate: 0 var(--button-rise);
+  }
+
+  .search {
+    display: none;
+    margin: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  /* No keyboard to hint at on a touch screen: show a search icon instead. */
+  @media (hover: none) and (pointer: coarse) {
+    .key {
+      display: none;
+    }
+
+    .search {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .key {
+      transition:
+        translate var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
+    }
+  }
+
+  /* On narrow screens the links drop to their own row, a little closer together so all of them fit. */
+  @media (max-width: 30rem) {
+    .links {
+      order: 3;
+      flex-basis: 100%;
+      gap: var(--space-4);
+    }
+  }
+</style>
+
+<script>
+  // Marks the nav link of the section that sits under the middle of the screen.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.site-header a[data-spy]')];
+  const linkFor = new Map<Element, HTMLAnchorElement>();
+  for (const link of links) {
+    for (const id of (link.dataset.spy ?? '').split(' ')) {
+      const section = document.getElementById(id);
+      if (section) linkFor.set(section, link);
+    }
+  }
+
+  if (linkFor.size > 0) {
+    const inView = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) inView.add(entry.target);
+          else inView.delete(entry.target);
+        }
+        const [section] = inView;
+        const current = section ? linkFor.get(section) : undefined;
+        for (const link of links) {
+          if (link === current) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        }
+      },
+      // A line just above the middle of the screen: one section crosses it at a time.
+      { rootMargin: '-45% 0px -55% 0px' },
+    );
+    for (const section of linkFor.keys()) observer.observe(section);
+  }
+</script>

@@ -1,0 +1,134 @@
+---
+import { getSite } from '../lib/site';
+import { getEntry } from 'astro:content';
+
+const { items } = (await getEntry('skills', 'main'))!.data;
+const site = await getSite();
+---
+
+<!--
+  A strip that scrolls sideways on its own. The movement is CSS only; a small
+  script makes pausing gentle (src/scripts/skills-strip.ts).
+  Without motion (reduced motion set) it is a plain wrapped list.
+  With motion, a second copy of the list makes the loop seamless; that copy
+  is hidden from assistive technology.
+-->
+<section id="skills" class="skills">
+  <h2 class="visually-hidden">{site.sections.skills}</h2>
+  <div class="strip">
+    <div class="container">
+      {/* Inside the container, so the strip is exactly as wide as the other sections. */}
+      <div class="viewport" data-skills-viewport>
+        <div class="track" data-track>
+          <ul aria-label={site.sections.skills} role="list" translate="no">
+            {items.map((skill) => <li class="pill">{skill}</li>)}
+          </ul>
+          <ul class="copy" aria-hidden="true" role="list" translate="no">
+            {items.map((skill) => <li class="pill">{skill}</li>)}
+          </ul>
+        </div>
+      </div>
+      <label class="pause">
+        <input type="checkbox" aria-label="Pause the skills strip" />
+        <span>Pause</span>
+      </label>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/skills-strip';
+</script>
+
+<style>
+  .skills {
+    padding-block: var(--space-4);
+  }
+
+  .track,
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  li {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-label);
+    white-space: nowrap;
+  }
+
+  /* Three tints in turn, for variety. The colour carries no meaning. */
+  li:nth-child(3n + 2) {
+    background: var(--color-tint-b);
+  }
+
+  li:nth-child(3n) {
+    background: var(--color-tint-c);
+  }
+
+  /* Static by default: no second copy and nothing to pause. */
+  .copy,
+  .pause {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Clip the moving track so it can never widen the page, and fade both ends. */
+    .viewport {
+      overflow: clip;
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black var(--space-6),
+        black calc(100% - var(--space-6)),
+        transparent
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent,
+        black var(--space-6),
+        black calc(100% - var(--space-6)),
+        transparent
+      );
+    }
+
+    .track {
+      flex-wrap: nowrap;
+      gap: 0;
+      inline-size: max-content;
+      animation: marquee var(--duration-marquee) linear infinite;
+    }
+
+    ul {
+      flex-wrap: nowrap;
+      padding-inline-end: var(--space-2);
+    }
+
+    .copy {
+      display: flex;
+    }
+
+    .pause {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-block-start: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* The plain way to pause, at once. The script eases the speed instead, and says so by marking the strip. */
+    .strip:not([data-eased]) .viewport:hover .track,
+    .strip:not([data-eased]):has(.pause input:checked) .track {
+      animation-play-state: paused;
+    }
+  }
+
+  /* The track holds two identical lists, so half its width is one full loop. */
+  @keyframes marquee {
+    to {
+      translate: -50% 0;
+    }
+  }
+</style>

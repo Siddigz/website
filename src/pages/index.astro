@@ -1,0 +1,79 @@
+---
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import SkillsStrip from '../components/SkillsStrip.astro';
+import Experience from '../components/Experience.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ProjectFilter from '../components/ProjectFilter.astro';
+import ProjectRow from '../components/ProjectRow.astro';
+import Explainers from '../components/Explainers.astro';
+import GitHubActivity from '../components/GitHubActivity.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import { featuredProjects, moreProjects } from '../lib/projects';
+import { getSite } from '../lib/site';
+import { getActivity } from '../lib/activity';
+
+const site = await getSite();
+const projects = await getCollection('projects');
+
+// Fetched while the site is built. Null (no token, GitHub unreachable)
+// leaves the section out; the rest of the page does not depend on it.
+const activity = await getActivity();
+
+// Structured data: tells search engines this page is about one person, and
+// which profiles are theirs. No way to contact them is included.
+const portrait = site.photo && (await getImage({ src: site.photo.src, width: 448, height: 448, fit: 'cover' }));
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.fullName,
+  url: new URL('/', Astro.site).href,
+  description: site.pitch,
+  ...(portrait ? { image: new URL(portrait.src, Astro.site).href } : {}),
+  sameAs: site.profileLinks.map((link) => link.href),
+};
+---
+
+<BaseLayout title={site.fullName} description={site.pitch} path="/" expect="projects">
+  <script type="application/ld+json" slot="head" is:inline set:html={JSON.stringify(person)} />
+  <Hero />
+  <ProofStrip />
+  <Experience />
+  <SkillsStrip />
+
+  <section id="projects" class="section container">
+    <h2 class="section-title">{site.sections.projects}</h2>
+    <div class="cards">
+      {featuredProjects(projects).map((project) => <ProjectCard project={project} />)}
+    </div>
+  </section>
+
+  <section id="more-projects" class="section container">
+    <h2 class="section-title">{site.sections.moreProjects}</h2>
+    <ProjectFilter categories={moreProjects(projects).map((project) => project.data.category)} />
+    <ul class="rows" role="list">
+      {moreProjects(projects).map((project) => <ProjectRow project={project} />)}
+    </ul>
+  </section>
+
+  <Explainers />
+  {activity && <GitHubActivity activity={activity} />}
+  <About />
+  <Contact />
+</BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .rows {
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+</style>
