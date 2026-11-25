@@ -18,7 +18,7 @@ says otherwise. After changing a setting, redeploy for it to take effect.
 | `CONTACT_ADDRESS` | The address the Email button reveals. | Typed in by hand. | Done |
 | `CONTACT_TOKEN_SECRET` | Signs the one-minute tokens the Email button uses. | A random value (see below). | Done |
 | `CRON_SECRET` | Vercel sends it when it calls the daily rebuild, so nobody else can trigger one. | A random value (see below). | Done |
-| `DEPLOY_HOOK_URL` | The address that starts a new production build. The daily rebuild calls it. **Production only.** | Made in step 2. | After ship |
+| `DEPLOY_HOOK_URL` | The address that starts a new production build. The daily rebuild calls it. **Production only.** | Made in step 2. | Done |
 | `RESUME_ENABLED` | The resume switch. Only the exact word `true` turns it on. Leave it unset for off. Not a secret. | Typed in by hand. | Off: not set anywhere (removed from Preview on 2026-11-22) |
 | `RESUME_URL` | A private `https` address of the resume PDF. Without it, a blank page is served when the switch is on. | Wherever the file is kept privately. | Only if wanted |
 
@@ -30,7 +30,12 @@ two share a value.
 openssl rand -hex 32 | pbcopy
 ```
 
-## 2. Deploy hook, after the new site is live
+## 2. Deploy hook
+
+Done on 2026-11-25: the hook `daily` on `main` exists and its address is saved
+as `DEPLOY_HOOK_URL` for Production. What is left is the check in step 4,
+the morning after the new site goes live. The steps, for when the hook is
+ever recreated:
 
 1. Settings → Git → Deploy Hooks. Name it `daily`, branch `main`, and create it.
 2. Copy the address it shows.
