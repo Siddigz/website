@@ -32,10 +32,14 @@ openssl rand -hex 32 | pbcopy
 
 ## 2. Deploy hook
 
-Done on 2026-11-25: the hook `daily` on `main` exists and its address is saved
-as `DEPLOY_HOOK_URL` for Production. What is left is the check in step 4,
-the morning after the new site goes live. The steps, for when the hook is
-ever recreated:
+First set up on 2026-11-25: the hook `daily` on `main`, with its address saved
+as `DEPLOY_HOOK_URL` for Production. The check in step 4 passed on 2026-11-26:
+Deployments showed a build started by the hook at about 10:00 UTC.
+
+Disconnecting the Git repository under Settings → Git deletes the project's
+deploy hooks, and the old address stops working. After reconnecting, do all
+four steps again and replace the value of `DEPLOY_HOOK_URL` with the new
+address. The steps:
 
 1. Settings → Git → Deploy Hooks. Name it `daily`, branch `main`, and create it.
 2. Copy the address it shows.
